@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ticket</title>
+  <link rel="stylesheet" href="./assets/css/style.css" />
+  <link rel="icon" type="image/png" href="./assets/icon/favicon.png">
+</head>
+
+<body>
+
+  <div class="main">
+
+    <div class="left-container">
+
+      <div class="top">
+        <a href="#" class="button-text" id="createbutton" style="height: 92px;">
+          <img class="icon" src="./assets/icon/icon thin.png" alt="">
+          <span class="text">Nouveau tickets</span>
+        </a>
+
+        <div class="button">
+          <a href="#" class="button-text" id="codebutton">
+            <img class="icon" src="./assets/icon/key.png" alt=""
+              style="height: 32px; width: 32px; object-fit: contain;">
+            <span class="text">*****</span>
+          </a>
+          <a href="#" class="button-simple" id="logout">
+            <img class="icon" src="./assets/icon/logout.png" alt=""
+              style="height: 32px; width: 32px; object-fit: contain;">
+          </a>
+          <a href="#" class="button-simple" id="setting">
+            <img class="icon" src="./assets/icon/Settings.png" alt=""
+              style="height: 32px; width: 32px; object-fit: contain;">
+          </a>
+        </div>
+      </div>
+
+      <div id="announcementContainer" class="announcement-container">
+
+        <div id="storageWidget" class="storage-widget">
+          <div class="main-card">
+            <div class="storage-progress-bar" id="storageProgressBar"></div>
+            <div class="storage-content">
+              <span id="storageText" class="storage-text">0.00 Go / 1.5 Go</span>
+              <span id="fileCountText" class="file-count-text">0 fichiers partagés</span>
+            </div>
+          </div>
+        </div>
+
+        <div id="announcementArea" class="announcement-list hidden">
+        </div>
+
+      </div>
+
+      <div class="menu-overlay" id="formOverlay" style="display: none;">
+        <div class="menu-box">
+          <div class="input" style="padding-bottom: 0;">
+
+            <h1>Nouveau ticket</h1>
+
+            <div style="margin: 15px 0;">
+              <input type="text" id="name" name="name" placeholder="Nom" style="width: 100%;" />
+            </div>
+
+            <div class="file-upload-container" id="fileUploadContainer" style="margin: 15px 0;">
+              <input type="file" id="fileInput" multiple>
+              <div class="file-drop-area" id="dropArea">
+                <div class="drop-area-content">
+                  <span class="file-placeholder">+ Ajouter un fichier</span>
+                  <div id="adminFilesList" class="admin-files-list"></div>
+                  <div id="uploadProgressContainer" class="upload-status-container"></div>
+                </div>
+              </div>
+              <p id="uploadWarning" class="upload-warning">Exportation...</p>
+            </div>
+
+            <div style="margin: 15px 0;">
+              <input type="text" id="infos" name="infos" placeholder="Description (optionnelle)" style="width: 100%;" />
+            </div>
+
+            <h2 style="text-align: left; margin-top: 30px; font-size: 1.2rem;">Couleurs</h2>
+
+            <div class="colorbox" style="margin: 15px 0;">
+              <a class='color selected' id="default" style="background-color: #cdcdcd;"></a>
+              <a class='color' style="background-color: #FFF5A6"></a>
+              <a class='color' style="background-color: #FFA6A6"></a>
+              <a class='color' style="background-color: #FFA6F8"></a>
+              <a class='color' style="background-color: #A6C5FF"></a>
+              <a class='color' style="background-color: #A6FFF0"></a>
+              <a class='color' style="background-color: #AEFFA6"></a>
+            </div>
+
+            <div class="overlay-footer" style="display: flex; justify-content: center; gap: 15px; margin-top: 30px;">
+
+              <a class="button-text" id='create' href='#'
+                style="width: auto; padding: 0 30px; margin: 0; min-width: 140px;">
+                <img class="icon" src="./assets/icon/add.png">
+                <span class="text">Créer</span>
+              </a>
+
+              <a class="button-text" id='deleteAnnonce' href='#'
+                style="width: auto; padding: 0 30px; margin: 0; background-color: #ff7070; display: none; min-width: 140px;">
+                <img class="icon" src="./assets/icon/delete.png">
+                <span class="text">Supprimer</span>
+              </a>
+
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <div class="menu-overlay" id="settingsOverlay" style="display: none;">
+        <div class="menu-box">
+          <div class="input" style="padding-bottom: 0;">
+            <h1>Paramètres</h1>
+
+            <div id="adminSettingsSection" style="display: none;">
+              <h2 style="text-align: left; margin-top: 30px; font-size: 1.2rem;">Admin</h2>
+
+              <div
+                style="display: flex; justify-content: space-between; align-items: center; margin: 15px 0; gap: 10px;">
+                <span style="text-align: left;">Nombre de Ticket par utilisateur</span>
+
+                <div class="slider-selector">
+                  <label class="slider-option">
+                    <input type="radio" name="SliderCount" value="1" checked>
+                    <span class="dot" data-val="1"></span>
+                  </label>
+                  <label class="slider-option">
+                    <input type="radio" name="SliderCount" value="2">
+                    <span class="dot" data-val="2"></span>
+                  </label>
+                  <label class="slider-option">
+                    <input type="radio" name="SliderCount" value="3">
+                    <span class="dot" data-val="3"></span>
+                  </label>
+                  <label class="slider-option">
+                    <input type="radio" name="SliderCount" value="4">
+                    <span class="dot" data-val="4"></span>
+                  </label>
+                  <label class="slider-option">
+                    <input type="radio" name="SliderCount" value="5">
+                    <span class="dot" data-val="5"></span>
+                  </label>
+                </div>
+              </div>
+
+              <div style="display: flex; justify-content: space-between; align-items: center; margin: 15px 0;">
+                <span>Nombre maximum d'utilisateur dans le groupe</span>
+                <div class="quantity-selector" style="opacity: 30%; pointer-events: none;">
+                  <button class="qty-btn">－</button>
+                  <div class="qty-val">~~</div>
+                  <button class="qty-btn">＋</button>
+                </div>
+              </div>
+
+              <div style="display: flex; justify-content: space-between; align-items: center; margin: 15px 0;">
+                <span>
+                  Verification du nom via un
+                  <span
+                    title="Un fichier CSV (Comma-Separated Values) est un fichier texte simple utilisé pour stocker des données sous forme de tableau (comme Excel)."
+                    style="text-decoration: underline wavy #9ecaff;">
+                    fichier CSV
+                  </span>
+                </span> 
+
+                <a class="button-text" id="csvButton" href="#"
+                  style="min-height: 41px; width: auto; padding: 0 20px; flex: unset; min-width: 80px;">
+                  <span class="text" style="font-size: 14px;"> Add</span>
+                </a>
+                <input type="file" id="csvInput" accept=".csv" style="display: none;">
+              </div>
+
+              <div style="display: flex; justify-content: space-between; align-items: center; margin: 15px 0;">
+                <span>Filtrage des tickets par IA</span>
+                <label>
+                  <input type="checkbox" class="toggle-checkbox" id="aiToggle">
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+
+            </div>
+
+            <h2 style="text-align: left; margin-top: 30px; font-size: 1.2rem;">Apparence</h2>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; margin: 15px 0;">
+              <span>Mode Sombre (Betâ)</span>
+              <label>
+                <input type="checkbox" class="toggle-checkbox" id="darkModeToggle">
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; margin: 15px 0;">
+              <span> Langue (Français uniquement pour l'instant)</span>
+              <a class="button-text" href="#"
+                style="min-height: 41px; width: auto; padding: 0 20px; flex: unset; min-width: 80px; opacity: 30%; pointer-events: none;">
+                <span class="text" style="font-size: 14px;">FR</span>
+              </a>
+            </div>
+
+            <h2 style="text-align: left; margin-top: 30px; font-size: 1.2rem;">Room</h2>
+
+            <div
+              style="display: flex; justify-content: space-between; align-items: center; margin: 15px 0; flex-wrap: wrap; gap: 10px;">
+              <span>Partager le lien du groupe</span>
+              <a class="button-text" id="copyLink" href="#"
+                style="min-height: 41px; padding: 0 20px; flex: unset; width: 100%; max-width: 280px; margin: 0;">
+                <img class="icon" src="./assets/icon/icon thin.png">
+                <span class="text" id="copyText" style="font-size: 14px;">Copier le lien du groupe</span>
+              </a>
+            </div>
+
+            <h2 style="text-align: left; margin-top: 30px; font-size: 1.2rem;">Github</h2>
+
+            <div
+              style="display: flex; justify-content: space-between; align-items: center; margin: 15px 0; flex-wrap: wrap; gap: 10px;">
+              <span>Projet open-source Github</span>
+              <a class="button-text" href="https://github.com/microsysteene/microsysteene.github.io" target="_blank"
+                style="min-height: 41px; padding: 0 20px; flex: unset; width: 100%; max-width: 200px; margin: 0;">
+                <img class="icon" src="./assets/icon/icon thin.png">
+                <span class="text" style="font-size: 14px;">lien Github</span>
+              </a>
+            </div>
+
+            <div
+              style="display: flex; justify-content: space-between; align-items: center; margin: 15px 0; flex-wrap: wrap; gap: 10px;">
+              <span>Veuillez signaler les problèmes ou bugs constatés.</span>
+              <a class="button-text" target="_blank"
+                style="min-height: 41px; padding: 0 20px; flex: unset; width: 100%; max-width: 200px; margin: 0; opacity: 30%; pointer-events: none;">
+                <img class="icon" src="./assets/icon/report.png">
+                <span class="text" style="font-size: 14px;">Signaler un problème</span>
+              </a>
+            </div>
+
+            <p>
+              <br>
+              <br>
+              ( RGPD ) Toutes les données échangées sont chiffrées et définitivement supprimées à la fin de la session,
+              sans aucune autre utilisation commerciale.
+            </p>
+
+            <div class="overlay-footer">
+              <a class="button-text" id="closeSettings" href="#" style="width: auto; padding: 0 40px; margin: 0;">
+                <img class="icon" src="./assets/icon/check.png" alt="">
+                <span class="text">Sauvegarder</span>
+              </a>
+
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <div class="menu-overlay" id="logoutOverlay" style="display: none;">
+        <div class="menu-box" style="max-width: 550px;">
+          <div class="input" style="padding-bottom: 0;">
+
+            <h1>Déconnexion ?</h1>
+
+            <p style="margin: 30px 0; opacity: 0.7; text-align: center;">
+              Tu devras rentrer le code de la room pour revenir.
+            </p>
+
+            <div class="overlay-footer" style="display: flex; justify-content: center; gap: 15px; margin-top: 30px;">
+
+              <a class="button-text" id="confirmLogout" href="#"
+                style="width: auto; padding: 0 30px; margin: 0; min-width: 140px;">
+                <img class="icon" src="./assets/icon/logout.png" alt="">
+                <span class="text">Oui, partir</span>
+              </a>
+
+              <a class="button-text" id="cancelLogout" href="#"
+                style="width: auto; padding: 0 30px; margin: 0; background-color: #ff7070; min-width: 140px;">
+                <img class="icon" src="./assets/icon/cross.png" alt="">
+                <span class="text">Non, rester</span>
+              </a>
+
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="menu-overlay" id="reportTicketOverlay" style="display: none;">
+        <div class="menu-box">
+          <div class="input" style="padding-bottom: 0;">
+
+            <h1>Ticket bloqué</h1>
+            
+            <h2 style="text-align: left; margin-top: 30px; font-size: 1.2rem;">Pourquoi votre ticket à été bloqué?</h2>
+            <p style="margin: 30px 0; opacity: 0.7; text-align: left;">
+               - Votre contenue est jugé inapproprié.<br><br>
+               Si votre ticket contient aucun contenue inapproprié alors veuillez le signaler
+            </p>
+
+            <div class="overlay-footer" style="display: flex; justify-content: center; gap: 15px; margin-top: 30px;">
+
+              <a class="button-text" id="confirmLogout"
+                style="width: auto; padding: 0 30px; margin: 0; background-color: #ff7070; min-width: 140px; opacity: 30%; pointer-events: none;">
+                <img class="icon" src="./assets/icon/report.png" alt="">
+                <span class="text">Signaler</span>
+              </a>
+
+              <a class="button-text" id="cancelLogout" href="#" onclick="closeReportTicketOverlay()"
+                  style="width: auto; padding: 0 30px; margin: 0; min-width: 140px;">
+                  <img class="icon" src="./assets/icon/check.png" alt="">
+                  <span class="text">Ok</span>
+              </a>
+
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="menu-overlay" id="issueNameOverlay" style="display: none;">
+        <div class="menu-box">
+          <div class="input" style="padding-bottom: 0;">
+
+            <h1>Profils multiples</h1>
+
+            <p style="margin: 30px 0; opacity: 0.7; text-align: left;">
+               Plusieurs profils ont le même prénom. Veuillez choisir.
+            </p>
+
+            <div id="nameChoicesContainer" style="display: flex; flex-direction: column; gap: 10px; margin: 20px 0;">
+                </div>
+
+            <div class="overlay-footer" style="display: flex; justify-content: center; gap: 15px; margin-top: 30px;">
+                </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="menu-overlay" id="loginOverlay" style="display: none;">
+        <div class="menu-box">
+            <div class="input" style="padding-bottom: 0;">
+                <h1>Identification</h1>
+                
+                <p style="margin: 20px 0; opacity: 0.7;">Cette salle nécessite une identification.</p>
+                
+                <div style="margin: 15px 0;">
+                    <input type="text" id="loginName" placeholder="Votre Prénom" style="width: 100%; text-align: center;" />
+                </div>
+
+                <div class="overlay-footer" style="display: flex; justify-content: center; margin-top: 30px;">
+                    <a class="button-text" id="loginEnter" href="#" style="width: auto; padding: 0 30px; margin: 0; min-width: 140px;">
+                        <span class="text">Entrer</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+      </div>
+
+      <div class="div" id="subdiv">
+        <h1>Historique</h1>
+      </div>
+    </div>
+
+    <div class="div" id="right">
+      <h1>Ticket en cours</h1>
+      <div class="during" id="ID" style="background-color: #ffb7b7;">
+        <div class="checkbox"></div>
+        <div class="info">
+          <p id="name">Charly Chartreux</p>
+          <p id="desc">Developper</p>
+        </div>
+        <div class="time">
+          <p id="created">00:00</p>
+          <p id="remaining">(0 mins)</p>
+        </div>
+      </div>
+      <div class="during" id="ID" style="background-color: #d35edd;">
+        <div class="checkbox"></div>
+        <div class="info">
+          <p id="name">Ethan Caillat</p>
+          <p id="desc">Designer</p>
+        </div>
+        <div class="time">
+          <p id="created">00:00</p>
+          <p id="remaining">(0 mins)</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="./assets/js/darkmode.js"></script>
+  <script>
+    document.getElementById("default").classList.add('selected');
+    document.querySelectorAll('.colorbox .color').forEach(a => {
+      a.addEventListener('click', e => {
+        document.querySelectorAll('.colorbox .color').forEach(el => el.classList.remove('selected'));
+        a.classList.add('selected');
+      });
+    });
+
+    function closeReportTicketOverlay() {
+        const overlay = document.getElementById('reportTicketOverlay');
+        if (overlay) {
+            overlay.style.display = 'none';
+        }
+    }
+  </script>
+
+  <script src="./assets/js/room.js"></script>
+</body>
+
+</html>

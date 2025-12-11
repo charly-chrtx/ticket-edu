@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Ticket - Mobile</title>
+    
+    <link rel="stylesheet" href="assets/css/style-mobile.css">
+    <link rel="icon" type="image/png" href="./assets/icon/favicon.png">
+    
+    <style>
+
+        * {
+        -webkit-tap-highlight-color: transparent;
+        }
+        
+        body, html {
+            overflow: hidden;
+            position: fixed; 
+        }
+
+        .mobile-landing {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            height: 100%;
+            width: 100%;
+            padding: 20px;
+            box-sizing: border-box;
+            position: relative;
+            z-index: 1;
+        }
+
+        .mobile-logo {
+            width: 60%;
+            max-width: 250px;
+            margin-top: 100px;
+            margin-bottom: auto;
+            transition: filter 0.3s ease;
+        }
+        body.dark-mode .mobile-logo { filter: invert(1); }
+
+        .mobile-actions {
+            width: 100%;
+            max-width: 350px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            margin-bottom: 100px;
+        }
+
+        .version-tag {
+            position: absolute;
+            top: 190px;
+            font-size: 0.8rem;
+            opacity: 0.4;
+            font-family: 'Inconsolata', monospace;
+        }
+
+        .info-tag {
+            position: absolute;
+            top: 210px;
+            font-size: 0.8rem;
+            font-family: 'Inconsolata', monospace;
+            color: #ff7070;
+        }
+
+        .floating-buttons {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+            z-index: 10;
+        }
+
+        .floating-buttons .button-simple {
+            width: 45px;
+            height: 45px;
+        }
+
+        #bgCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+    </style>
+</head>
+<body>
+    
+    <script>window.isMobile = true;</script>
+
+    <canvas id="bgCanvas"></canvas>
+
+    <div class="floating-buttons">
+        <a href="#" class="button-simple" id="indexThemeToggle" style="min-width: 65px; height: 65px;">
+            <img class="icon" id="themeIcon" src="./assets/icon/darkmod.png" alt="Theme" style="width: 25px; height: 25px;">
+        </a>
+        <a href="#" class="button-simple" id="settingsBtn" style="min-width: 65px; height: 65px;">
+            <img class="icon" id="settingsIcon" src="./assets/icon/Settings.png" alt="Settings" style="width: 25px; height: 25px;">
+        </a>
+    </div>
+
+    <div class="mobile-landing">
+        
+        <img src="./assets/icon/logo.png" alt="Ticket Logo" class="mobile-logo">
+
+        <div class="mobile-actions action-buttons">
+            <a href="#" class="button-text">
+                <img class="icon" src="./assets/icon/search.png" alt="Search">
+                <span class="text">Rejoindre</span>
+            </a>
+
+            <a href="#" class="button-text">
+                <img class="icon" src="./assets/icon/add.png" alt="Add">
+                <span class="text">Créer un groupe</span>
+            </a>
+        </div>
+
+        <p class="info-tag">[!] Version Developper. Signaler en cas de soucis</p>
+        <p class="version-tag">version Pre-release 0.9.1</p>
+    </div>
+
+    <div class="menu-overlay" id="joinOverlay" style="display: none;">
+        <div class="menu-box" style="margin: 0px 20px;">
+            <div class="input" style="padding-bottom: 0;">
+                
+                <h1 style="margin-top: 0;">Code d'accès</h1>
+                
+                <p style="margin: 20px 0; opacity: 0.7; text-align: center; font-size: 0.9rem;">
+                    Entrez le code pour rejoindre la salle.
+                </p>
+
+                <div style="margin: 30px 0;">
+                    <input type="text" id="joinCodeInput" placeholder="ex: 45A2F" style="text-transform: uppercase; text-align: center; font-size: 0.9rem; letter-spacing: 5px;" autocomplete="off" />
+                </div>
+                
+                <div class="overlay-footer" style="display: flex; flex-direction: column; gap: 15px; padding-bottom: 20px; margin: 0;">
+                    
+                    <a class="button-text" id="confirmJoin" href="#" style="width: 100%; padding: 0;">
+                        <img class="icon" src="./assets/icon/check.png" alt="">
+                        <span class="text">Valider</span>
+                    </a>
+
+                    <a class="button-text" id="cancelJoin" href="#" style="width: 100%; padding: 0; background-color: #ff7070;">
+                        <img class="icon" src="./assets/icon/cross.png" alt="">
+                        <span class="text">Annuler</span>
+                    </a>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="menu-overlay" id="settingsOverlay" style="display: none;">
+        <div class="menu-box" style="margin: 0px 20px;">
+            <div class="input" style="padding-bottom: 0;">
+                <h1>Paramètres</h1>
+                
+                <h2 style="text-align: left; margin-top: 30px; font-size: 1.2rem;">Apparence</h2>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; margin: 15px 0;">
+                    <span>Mode Sombre (Bêta)</span>
+                    <label>
+                        <input type="checkbox" class="toggle-checkbox" id="darkModeToggle">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+
+                <h2 style="text-align: left; margin-top: 30px; font-size: 1.2rem;">Github</h2>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; margin: 15px 0; flex-wrap: wrap; gap: 10px;">
+                    <span>Projet open-source Github</span>
+                    <a class="button-text" href="https://github.com/microsysteene/microsysteene.github.io" target="_blank" style="min-height: 41px; padding: 0 20px; flex: unset; width: 100%; margin: 0;">
+                        <img class="icon" src="./assets/icon/icon thin.png">
+                        <span class="text" style="font-size: 14px;">lien Github</span>
+                    </a>
+                </div>
+
+                <div
+                    style="display: flex; justify-content: space-between; align-items: center; margin: 15px 0; flex-wrap: wrap; gap: 10px;">
+                    <span>Veuillez nous rapporter les problèmes ou bugs constatés.</span>
+                    <a class="button-text" target="_blank"
+                        style="min-height: 41px; padding: 0 20px; flex: unset; width: 100%; max-width: 200px; margin: 0; opacity: 30%; pointer-events: none;">
+                        <img class="icon" src="./assets/icon/report.png">
+                        <span class="text" style="font-size: 14px;">Signaler un problème</span>
+                    </a>
+                </div>
+
+                <p style="font-size: 0.85rem; opacity: 0.7; text-align: center; margin-top: 20px;">
+                    <br>
+                    <br>
+                    ( RGPD ) Toutes les données échangées sont chiffrées et définitivement supprimées à la fin de la session.
+                </p>
+
+                <div class="overlay-footer">
+                    <a class="button-text" id="closeSettings" href="#" style="width: 100%; padding: 0 40px; margin: 0;">
+                        <img class="icon" src="./assets/icon/check.png" alt="">
+                        <span class="text">Sauvegarder</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="./assets/js/darkmode.js"></script>
+    
+    <script>
+        const canvas = document.getElementById('bgCanvas');
+        const ctx = canvas.getContext('2d');
+        let width, height, increment = 0;
+
+        const waves = [
+            { y: 0.60, length: 0.007, amplitude: 30, speed: -0.002, offset: 0 },
+            { y: 0.70, length: 0.005, amplitude: 25, speed: 0.006, offset: 2 },
+            { y: 0.80, length: 0.004, amplitude: 20, speed: -0.004, offset: 4 }
+        ];
+
+        function resize() {
+            width = window.innerWidth;
+            height = window.innerHeight;
+            canvas.width = width;
+            canvas.height = height;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        function animate() {
+            requestAnimationFrame(animate);
+            const isDark = document.body.classList.contains('dark-mode');
+            const gradient = ctx.createLinearGradient(0, 0, 0, height);
+
+            if (isDark) {
+                gradient.addColorStop(0, '#1a1a1a'); 
+                gradient.addColorStop(1, '#2d2d2d');
+                ctx.fillStyle = gradient;
+                ctx.fillRect(0, 0, width, height);
+                ctx.fillStyle = 'rgba(45, 45, 45, 1)';
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+            } else {
+                gradient.addColorStop(0, '#FFF8E7'); 
+                gradient.addColorStop(1, '#FFFFFF'); 
+                ctx.fillStyle = gradient;
+                ctx.fillRect(0, 0, width, height);
+                ctx.fillStyle = 'rgba(255, 255, 255, 1)';
+                ctx.strokeStyle = 'rgba(0, 0, 0, 0.8)';
+            }
+
+            waves.forEach((wave) => {
+                ctx.beginPath();
+                ctx.lineWidth = 1;
+                ctx.moveTo(0, height);
+                for (let i = 0; i < width; i++) {
+                    const y = height * wave.y + Math.sin(i * wave.length + increment * wave.speed + wave.offset) * wave.amplitude;
+                    ctx.lineTo(i, y);
+                }
+                ctx.lineTo(width, height);
+                ctx.lineTo(0, height);
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
+            });
+            increment += 1;
+        }
+        animate();
+
+        const settingsBtn = document.getElementById('settingsBtn');
+        const settingsOverlay = document.getElementById('settingsOverlay');
+        const closeSettings = document.getElementById('closeSettings');
+
+        if (settingsBtn) {
+            settingsBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                settingsOverlay.style.display = 'flex';
+            });
+        }
+
+        if (closeSettings) {
+            closeSettings.addEventListener('click', (e) => {
+                e.preventDefault();
+                settingsOverlay.style.display = 'none';
+            });
+        }
+
+        if (settingsOverlay) {
+            settingsOverlay.addEventListener('click', (e) => { 
+                if (e.target === settingsOverlay) settingsOverlay.style.display = 'none'; 
+            });
+        }
+
+    </script>
+
+    <script src="./assets/js/index.js"></script>
+</body>
+</html>

@@ -1,0 +1,1023 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <title>Ticket - Room</title>
+  <link rel="stylesheet" href="./assets/css/style.css" />
+  <link rel="icon" type="image/png" href="./assets/icon/favicon.png">
+  <style>
+    /* ==========================================================================
+       MOBILE SPECIFIC STYLES
+       ========================================================================== */
+
+    * {
+    -webkit-tap-highlight-color: transparent;
+    }
+    
+    body {
+      overflow-y: auto;
+      overflow-x: hidden;
+      height: auto;
+      min-height: 100vh;
+      overflow: hidden;
+    }
+
+    .main {
+      flex-direction: column;
+      height: auto;
+      min-height: 100vh;
+      padding: 20px;
+      gap: 0;
+    }
+
+    .left-container {
+      width: 100%;
+      gap: 0;
+      padding-bottom: 200px;
+    }
+
+    .top {
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      width: 100%;
+      opacity: 1;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      margin-top: -20px;       
+      padding-top: 20px;
+      padding-bottom: 10px;
+      margin-bottom: 10px;     
+    }
+
+    .loaded .top {
+      animation: div 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+      animation-delay: 50ms;
+    }
+
+    #codebutton {
+      flex: 1;
+      min-height: 60px;
+      height: 60px;
+      padding: 0 20px;
+      justify-content: center;
+    }
+
+    #codebutton .icon {
+      width: 24px;
+      height: 24px;
+    }
+
+    .button {
+      display: flex;
+      gap: 10px;
+    }
+
+    .button-simple {
+      min-width: 60px;
+      width: 60px;
+      height: 60px;
+    }
+
+    .button-simple .icon {
+      height: 24px;
+      width: 24px;
+    }
+
+    /* TICKETS LIST - Full width */
+    #right {
+      opacity: 1;
+      order: 2;
+      width: 100%;
+      padding: 0;
+      background: transparent;
+      border: none;
+      box-shadow: none;
+      filter: none;
+      gap: 15px;
+      margin-top: 0;
+    }
+
+    .loaded #right {
+      animation: div 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+      animation-delay: 200ms;
+    }
+
+    #right h1 {
+      display: none;
+    }
+
+    /* Ticket cards - mobile optimized */
+    .during {
+      min-height: 70px;
+      margin: 5px;
+      padding: 10px 12px;
+      gap: 12px;
+      border-radius: 50px;
+      outline: 2px solid #000000;
+      box-shadow: 0px 3px 0px rgba(0, 0, 0, 0.29);
+    }
+
+    .during .checkbox {
+      width: 50px;
+      height: 50px;
+      min-width: 50px;
+      border: 2px solid black;
+      filter: drop-shadow(0px 0px 0px rgb(0, 0, 0));
+    }
+
+    .during .info {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .during #name {
+      font-size: 17px;
+      font-weight: 600;
+      margin: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      color: #000000;
+    }
+
+    .during #desc {
+      font-size: 14px;
+      margin: 0;
+      opacity: 0.6;
+      display: -webkit-box;
+      -webkit-line-clamp: 1;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      display: none;
+    }
+
+    .during .time {
+      display: none;
+    }
+
+    /* Action buttons on ticket */
+    .during .actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .during .action-btn {
+      width: 45px;
+      height: 45px;
+      min-width: 45px;
+      border-radius: 50%;
+      border: 2px solid black;
+      background: var(--card-bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .during .action-btn:active {
+      transform: translateY(2px);
+      box-shadow: 0px 0px 0px rgba(0, 0, 0, 0.5);
+    }
+
+    .during .action-btn img {
+      width: 20px;
+      height: 20px;
+      object-fit: contain;
+    }
+
+    .during .delete {
+      width: 50px;
+      height: 50px;
+      min-width: 50px;
+      background-color: white;
+      filter: drop-shadow(0px 0px 0px rgb(0, 0, 0));
+    }
+
+    .during .delete img {
+      filter: none;
+    }
+
+    .announcement-container.open .announcement-item {
+    min-height: 30px;
+    padding: 10px 15px;
+    overflow: visible;
+    transition: opacity 0.3s 
+    ease 0.15s;
+    }
+
+    .announcement-container {
+        position: fixed;
+        bottom: 100px;
+        left: 20px;
+        right: 20px;
+        width: auto;
+        margin: 0;
+        z-index: 100;
+        transition: bottom 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+
+    .announcement-container:not(.is-empty) {
+        bottom: 140px;
+    }
+
+    .storage-widget {
+        width: 100%;
+        height: 60px;
+        padding-bottom: 0;
+    }
+
+    .main-card {
+        height: 60px;
+        border-radius: 50px;
+        box-shadow: 0px 3px 0px rgba(0, 0, 0, 0.2);
+    }
+
+    .storage-content {
+        padding: 0 20px;
+        font-size: 0.9rem;
+    }
+
+    .file-count-text {
+        font-size: 0.8rem;
+        opacity: 0.6;
+    }
+
+    /* BOTTOM NAVIGATION */
+    .bottom-nav {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: transparent;
+        border-top: none;
+        padding: 15px 20px 20px 20px;
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        z-index: 101;
+        box-shadow: none;
+        opacity: 0;
+    }
+
+    .loaded .bottom-nav {
+        animation: slide-in 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+        animation-delay: 400ms;
+    }
+
+  .dark-mode img {
+      filter: invert(1);
+  }
+
+    @keyframes slide-in {
+      from {
+        opacity: 0;
+        transform: translateY(100%);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .nav-tabs {
+        flex: 1;
+        display: flex;
+        gap: 0;
+        background: var(--card-bg);
+        border: 2px solid #000000;
+        border-radius: 50px;
+        padding: 5px;
+        box-shadow: 0px 3px 0px rgba(0, 0, 0, 0.2);
+        height: 50px;
+        align-items: center;
+    }
+
+    .nav-tab {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 0 15px;
+        border-radius: 50px;
+        border: none;
+        background: transparent;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-family: 'Inconsolata', monospace;
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--text-color);
+        text-decoration: none;
+        height: 100%;
+    }
+
+    .nav-tab img {
+        width: 18px;
+        height: 18px;
+        object-fit: contain;
+        transition: filter 0.3s ease;
+    }
+
+    body.dark-mode .nav-tab img {
+        
+    }
+
+    .nav-tab.active {
+        background: #A6C5FF;
+        border: 2px solid #000000;
+        box-shadow: none;
+    }
+
+    .nav-tab.active img {
+      filter: none;
+    }
+
+    body.dark-mode .nav-tab.active img {
+      filter: none;
+    }
+
+    /* Create button - circular bottom right */
+    .create-fab {
+        width: 60px;
+        aspect-ratio: 1/1;
+        border-radius: 50%;
+        background: var(--card-bg);
+        border: 2px solid #000000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        box-shadow: 0px 3px 0px rgba(0, 0, 0, 1);
+        transition: all 0.3s ease;
+        font-size: 24px;
+        font-weight: 300;
+        color: var(--text-color);
+        line-height: 1;
+        padding-bottom: 2px;
+    }
+
+    .create-fab img {
+        width: 25px;
+        height: 25px;
+        object-fit: contain;
+        }
+
+        body.dark-mode .create-fab img {
+        filter: invert(1);
+        }
+
+    .create-fab:active {
+        transform: translateY(2px);
+        box-shadow: 0px 1px 0px rgba(0, 0, 0, 0.3);
+    }
+
+    body.dark-mode .create-fab {
+        
+    }
+
+    #subdiv {
+        display: none;
+        flex-direction: column;
+        opacity: 1;
+        padding: 5px;
+        gap: 15px;
+        margin-bottom: 0;
+        background: transparent;
+        border: none;
+        box-shadow: none;
+        filter: none;
+    }
+
+    #subdiv.active {
+        display: flex;
+    }
+
+    #subdiv h1 {
+        text-align: center;
+        margin-bottom: 10px;
+    }
+
+    .history {
+        border-radius: 50px;
+        padding: 10px 12px;
+        min-height: 40px;
+        gap: 12px;
+    }
+
+    .history .checkbox {
+        width: 50px;
+        height: 50px;
+        min-width: 50px;
+    }
+
+    .history .info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .history #name {
+      font-size: 17px;
+      font-weight: 600;
+      margin: 0;
+      color: #000000;
+    }
+
+    .history #desc {
+      display: none;
+    }
+
+    .history .time {
+      display: none;
+    }
+
+    /* Add bottom padding to main content */
+    .left-container {
+      padding-bottom: 200px;
+    }
+
+    /* OVERLAYS - Mobile optimized */
+    .menu-box {
+      max-width: calc(100vw - 80px);
+      max-height: calc(80vh - 80px);
+      padding: 25px 20px 20px 20px;
+      border-radius: 2rem;
+    }
+
+    .input {
+      width: 100%;
+    }
+
+    .overlay-footer {
+      position: sticky;
+      bottom: -20px;
+      margin: 30px -20px -20px -20px;
+      padding: 20px 20px 20px 20px;
+      background: transparent;
+      box-shadow: inset 0 -60px 40px -15px var(--card-bg);
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .overlay-footer .button-text {
+      width: 100%;
+      max-width: none;
+      padding: 0 20px;
+      min-width: auto;
+      box-sizing: border-box;
+    }
+
+    /* File upload mobile */
+    .file-drop-area {
+      padding: 12px 15px;
+      border-radius: 25px;
+    }
+
+    .admin-file-item {
+      border-radius: 35px;
+      padding: 8px 15px;
+      height: 45px;
+    }
+
+    /* Color picker mobile */
+    .colorbox {
+      gap: 15px;
+    }
+
+    .color {
+      width: 40px;
+      height: 40px;
+    }
+
+    /* Settings adjustments */
+    #adminSettingsSection > div,
+    .input > div {
+      flex-wrap: wrap;
+    }
+
+    /* Responsive text */
+    h1 {
+      font-size: 1.5rem;
+    }
+
+    input[type="text"] {
+      height: 55px;
+      font-size: 15px;
+    }
+
+    /* Fix paragraphs in overlays */
+    .menu-box p {
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+
+    /* ==========================================================================
+       SETTINGS COMPACT STYLE & SLIM BUTTONS
+       ========================================================================== */
+    .setting-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 10px 0; /* Espacement vertical réduit */
+      gap: 15px;
+      width: 100%;
+      min-height: 32px;
+    }
+
+    /* Texte du label à gauche */
+    .setting-row > span {
+      text-align: left;
+      font-size: 0.95rem; /* Texte légèrement plus fin */
+      flex: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* Styles spécifiques pour les boutons "Slim" des paramètres */
+    .setting-row .button-text {
+        height: 32px !important;       /* Hauteur très compacte */
+        min-height: 32px !important;   /* Force l'écrasement du style global */
+        padding: 0 12px !important;    /* Marges internes réduites */
+        border-radius: 16px;           /* Arrondi adapté à la hauteur */
+        width: auto !important;        /* Largeur automatique */
+        margin: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex: 0 0 auto;
+        box-shadow: 0px 2px 0px rgba(0,0,0,0.15); /* Ombre plus discrète */
+    }
+
+    .setting-row .button-text .text {
+        font-size: 13px !important; /* Texte plus petit */
+        font-weight: 600;
+        line-height: 1;
+        padding-top: 1px;
+    }
+
+    .setting-row .button-text .icon {
+        width: 14px !important;  /* Icône plus petite */
+        height: 14px !important;
+        margin-right: 6px;
+        object-fit: contain;
+    }
+
+    /* Style spécifique pour le bouton Langue (Badge) */
+    .lang-badge {
+        height: 28px !important; /* Encore plus petit pour le badge */
+        min-height: 28px !important;
+        opacity: 0.6;
+        background: transparent !important;
+        border: 1px solid currentColor;
+        box-shadow: none !important;
+        padding: 0 10px !important;
+    }
+    
+    body.dark-mode .lang-badge {
+        border-color: #fff;
+    }
+
+    /* Ajustement des sliders pour qu'ils s'alignent bien avec les petits boutons */
+    .slider-selector,
+    .quantity-selector {
+      transform: scale(0.9); /* Légère réduction globale */
+      transform-origin: right center;
+      margin: 0;
+      flex: 0 0 auto;
+    }
+
+    /* Correction pour le slider radio sur mobile */
+    .slider-selector {
+      display: flex;
+      gap: 5px;
+    }
+    
+    .slider-option {
+      margin: 0 2px;
+    }
+    
+    /* Titres de section plus discrets */
+    #settingsOverlay h2 {
+        margin-top: 25px !important;
+        margin-bottom: 5px !important;
+        font-size: 1rem !important;
+        opacity: 0.8;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+  </style>
+</head>
+
+<body class="loaded">
+
+  <div class="main">
+
+    <div class="left-container">
+
+      <div class="top">
+        <a href="#" class="button-text" id="codebutton">
+          <img class="icon" src="./assets/icon/key.png" alt="">
+          <span class="text">*****</span>
+        </a>
+
+        <div class="button">
+          <a href="#" class="button-simple" id="setting">
+            <img class="icon" src="./assets/icon/Settings.png" alt="">
+          </a>
+          <a href="#" class="button-simple" id="logout">
+            <img class="icon" src="./assets/icon/logout.png" alt="">
+          </a>
+        </div>
+      </div>
+
+      <div id="right">
+      </div>
+
+      <div id="subdiv">
+      </div>
+    </div>
+
+    <div id="announcementContainer" class="announcement-container is-empty">
+      <div id="storageWidget" class="storage-widget">
+        <div class="main-card">
+          <div class="storage-progress-bar" id="storageProgressBar" style="width: 35%;"></div>
+          <div class="storage-content">
+            <span id="storageText" class="storage-text">0.00 Go / 1.5 Go</span>
+            <span id="fileCountText" class="file-count-text">0 fichier partagé</span>
+          </div>
+        </div>
+      </div>
+
+      <div id="announcementArea" class="announcement-list hidden">
+      </div>
+    </div>
+
+  </div>
+
+  <div class="bottom-nav">
+    <div class="nav-tabs">
+      <a href="#" class="nav-tab active" id="tabEnCours">
+        <img src="./assets/icon/icon thin.png" alt="En cours">
+        <span>En cours</span>
+      </a>
+      <a href="#" class="nav-tab" id="tabHistorique">
+        <img src="./assets/icon/history.png" alt="Historique">
+        <span>Historique</span>
+      </a>
+    </div>
+    <a href="#" class="create-fab" id="createbutton">
+      <img src="./assets/icon/add.png" alt="Créer">
+    </a>
+  </div>
+
+  <div class="menu-overlay" id="formOverlay" style="display: none;">
+    <div class="menu-box" style="margin: 0px 20px;">
+      <div class="input" style="padding-bottom: 0;">
+        <h1>Nouveau ticket</h1>
+
+        <div style="margin: 15px 0;">
+          <input type="text" id="name" name="name" placeholder="Nom" style="width: 100%;" />
+        </div>
+
+        <div class="file-upload-container" id="fileUploadContainer" style="margin: 15px 0;">
+          <input type="file" id="fileInput" multiple>
+          <div class="file-drop-area" id="dropArea">
+            <div class="drop-area-content">
+              <span class="file-placeholder">+ Ajouter un fichier</span>
+              <div id="adminFilesList" class="admin-files-list"></div>
+              <div id="uploadProgressContainer" class="upload-status-container"></div>
+            </div>
+          </div>
+          <p id="uploadWarning" class="upload-warning">Exportation...</p>
+        </div>
+
+        <div style="margin: 15px 0;">
+          <input type="text" id="infos" name="infos" placeholder="Description (optionnelle)" style="width: 100%;" />
+        </div>
+
+        <h2 style="text-align: left; margin-top: 30px; font-size: 1.2rem;">Couleurs</h2>
+
+        <div class="colorbox" style="margin: 15px 0;">
+          <a class='color selected' id="default" style="background-color: #cdcdcd;"></a>
+          <a class='color' style="background-color: #FFF5A6"></a>
+          <a class='color' style="background-color: #FFA6A6"></a>
+          <a class='color' style="background-color: #FFA6F8"></a>
+          <a class='color' style="background-color: #A6C5FF"></a>
+          <a class='color' style="background-color: #A6FFF0"></a>
+          <a class='color' style="background-color: #AEFFA6"></a>
+        </div>
+
+        <div class="overlay-footer" style="display: flex; justify-content: center; gap: 10px; margin-top: 30px;">
+          <a class="button-text" id='create' href='#' style="width: 100%; padding: 0 20px; margin: 0;">
+            <img class="icon" src="./assets/icon/add.png">
+            <span class="text">Créer</span>
+          </a>
+
+          <a class="button-text" id='deleteAnnonce' href='#'
+            style="width: 100%; padding: 0 20px; margin: 0; background-color: #ff7070; display: none;">
+            <img class="icon" src="./assets/icon/delete.png">
+            <span class="text">Supprimer</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="menu-overlay" id="settingsOverlay" style="display: none;">
+    <div class="menu-box" style="margin: 0px 20px;">
+      <div class="input" style="padding-bottom: 0;">
+        <h1 style="margin-bottom: 10px;">Paramètres</h1>
+
+        <div id="adminSettingsSection" style="display: none;">
+          <h2 style="text-align: left;">Admin</h2>
+
+          <div class="setting-row">
+            <span>Tickets max / pers.</span>
+            <div class="slider-selector">
+              <label class="slider-option"><input type="radio" name="SliderCount" value="1" checked><span class="dot" data-val="1"></span></label>
+              <label class="slider-option"><input type="radio" name="SliderCount" value="2"><span class="dot" data-val="2"></span></label>
+              <label class="slider-option"><input type="radio" name="SliderCount" value="3"><span class="dot" data-val="3"></span></label>
+              <label class="slider-option"><input type="radio" name="SliderCount" value="4"><span class="dot" data-val="4"></span></label>
+              <label class="slider-option"><input type="radio" name="SliderCount" value="5"><span class="dot" data-val="5"></span></label>
+            </div>
+          </div>
+
+          <div class="setting-row">
+            <span>Max utilisateurs</span>
+            <div class="quantity-selector" style="opacity: 30%; pointer-events: none;">
+              <button class="qty-btn">－</button>
+              <div class="qty-val">~~</div>
+              <button class="qty-btn">＋</button>
+            </div>
+          </div>
+
+          <div class="setting-row">
+            <span>Vérification CSV</span>
+            <a class="button-text" id="csvButton" href="#">
+              <span class="text">Ajouter</span>
+            </a>
+            <input type="file" id="csvInput" accept=".csv" style="display: none;">
+          </div>
+
+          <div class="setting-row">
+            <span>Filtrage IA</span>
+            <label>
+              <input type="checkbox" class="toggle-checkbox" id="aiToggle">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+
+        <h2 style="text-align: left;">Apparence</h2>
+
+        <div class="setting-row">
+          <span>Mode Sombre (Bêta)</span>
+          <label>
+            <input type="checkbox" class="toggle-checkbox" id="darkModeToggle">
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+
+        <div class="setting-row">
+          <span>Langue</span>
+          <a class="button-text lang-badge" href="#" style="pointer-events: none;">
+            <span class="text">FR</span>
+          </a>
+        </div>
+
+        <h2 style="text-align: left;">Partage</h2>
+
+        <div class="setting-row">
+          <span>Inviter dans la room</span>
+          <a class="button-text" id="copyLink" href="#">
+            <img class="icon" src="./assets/icon/icon thin.png">
+            <span class="text" id="copyText">Copier</span>
+          </a>
+        </div>
+
+        <h2 style="text-align: left;">Infos</h2>
+
+        <div class="setting-row">
+          <span>Code source</span>
+          <a class="button-text" href="https://github.com/microsysteene/microsysteene.github.io" target="_blank">
+            <img class="icon" src="./assets/icon/icon thin.png">
+            <span class="text">GitHub</span>
+          </a>
+        </div>
+
+        <div class="setting-row">
+          <span>Signaler un bug</span>
+          <a class="button-text" target="_blank" style="opacity: 0.5; pointer-events: none;">
+            <img class="icon" src="./assets/icon/report.png">
+            <span class="text">Signaler</span>
+          </a>
+        </div>
+
+        <p style="font-size: 0.7rem; opacity: 0.5; text-align: center; margin-top: 30px; line-height: 1.4;">
+          ( RGPD ) Données chiffrées et supprimées<br>définitivement à la fin de la session.
+        </p>
+
+        <div class="overlay-footer">
+          <a class="button-text" id="closeSettings" href="#" style="width: 100%; padding: 0 40px; margin: 0;">
+            <img class="icon" src="./assets/icon/check.png" alt="">
+            <span class="text">Sauvegarder</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="menu-overlay" id="logoutOverlay" style="display: none;">
+    <div class="menu-box" style="max-width: 550px; margin: 0px 20px;">
+      <div class="input" style="padding-bottom: 0;">
+        <h1>Déconnexion ?</h1>
+        <p style="margin: 30px 0; opacity: 0.7; text-align: center;">
+          Tu devras rentrer le code de la room pour revenir.
+        </p>
+        <div class="overlay-footer" style="display: flex; justify-content: center; gap: 15px; margin-top: 30px;">
+          <a class="button-text" id="confirmLogout" href="#" style="width: 100%; padding: 0 30px; margin: 0;">
+            <img class="icon" src="./assets/icon/logout.png" alt="">
+            <span class="text">Oui, partir</span>
+          </a>
+          <a class="button-text" id="cancelLogout" href="#"
+            style="width: 100%; padding: 0 30px; margin: 0; background-color: #ff7070;">
+            <img class="icon" src="./assets/icon/cross.png" alt="">
+            <span class="text">Non, rester</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="menu-overlay" id="reportTicketOverlay" style="display: none;">
+    <div class="menu-box" style="margin: 0px 20px;">
+      <div class="input" style="padding-bottom: 0;">
+
+        <h1>Ticket bloqué</h1>
+
+        <h2 style="text-align: left; margin-top: 30px; font-size: 1.2rem;">Pourquoi votre ticket à été bloqué?</h2>
+        <p style="margin: 30px 0; opacity: 0.7; text-align: left;">
+          - Votre contenue est jugé inapproprié.<br><br>
+          Si votre ticket contient aucun contenue inapproprié alors veuillez le signaler
+        </p>
+
+        <div class="overlay-footer" style="display: flex; justify-content: center; gap: 15px; margin-top: 30px;">
+
+          <a class="button-text" id="confirmLogout" href="#"
+            style="width: 100%; padding: 0 30px; margin: 0; background-color: #ff7070; min-width: 140px; opacity: 30%; pointer-events: none;">
+            <img class="icon" src="./assets/icon/report.png" alt="">
+            <span class="text">Signaler</span>
+          </a>
+
+          <a class="button-text" id="cancelLogout" href="#" onclick="closeReportTicketOverlay()"
+            style="width: 100%; padding: 0 30px; margin: 0; min-width: 140px;">
+            <img class="icon" src="./assets/icon/check.png" alt="">
+            <span class="text">Ok</span>
+          </a>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="menu-overlay" id="issueNameOverlay" style="display: none;">
+    <div class="menu-box" style="margin: 0px 20px;">
+      <div class="input" style="padding-bottom: 0;">
+
+        <h1>Profils multiples</h1>
+
+        <p style="margin: 30px 0; opacity: 0.7; text-align: left;">
+          Plusieurs profils ont le même prénom. Veuillez choisir.
+        </p>
+
+        <div id="nameChoicesContainer" style="display: flex; flex-direction: column; gap: 10px; margin: 20px 0;">
+        </div>
+
+        <div class="overlay-footer" style="display: flex; justify-content: center; gap: 15px; margin-top: 30px;">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="menu-overlay" id="loginOverlay" style="display: none;">
+    <div class="menu-box" style="margin: 0px 20px;">
+      <div class="input" style="padding-bottom: 0;">
+        <h1>Identification</h1>
+
+        <p style="margin: 20px 0; opacity: 0.7;">Cette salle nécessite une identification.</p>
+
+        <div style="margin: 15px 0;">
+          <input type="text" id="loginName" placeholder="Votre Prénom" style="width: 100%; text-align: center;" />
+        </div>
+
+        <div class="overlay-footer" style="display: flex; justify-content: center; margin-top: 30px;">
+          <a class="button-text" id="loginEnter" href="#"
+            style="width: 100%; padding: 0 30px; margin: 0; min-width: 140px;">
+            <span class="text">Entrer</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="./assets/js/darkmode.js"></script>
+  <script>
+    // Color selection
+    document.getElementById("default").classList.add('selected');
+    document.querySelectorAll('.colorbox .color').forEach(a => {
+      a.addEventListener('click', e => {
+        document.querySelectorAll('.colorbox .color').forEach(el => el.classList.remove('selected'));
+        a.classList.add('selected');
+      });
+    });
+
+    // Tab navigation
+    const tabEnCours = document.getElementById('tabEnCours');
+    const tabHistorique = document.getElementById('tabHistorique');
+    const rightDiv = document.getElementById('right');
+    const subdiv = document.getElementById('subdiv');
+
+    tabEnCours.addEventListener('click', (e) => {
+      e.preventDefault();
+      tabEnCours.classList.add('active');
+      tabHistorique.classList.remove('active');
+      rightDiv.style.display = 'flex';
+      subdiv.classList.remove('active');
+    });
+
+    tabHistorique.addEventListener('click', (e) => {
+      e.preventDefault();
+      tabHistorique.classList.add('active');
+      tabEnCours.classList.remove('active');
+      rightDiv.style.display = 'none';
+      subdiv.classList.add('active');
+    });
+
+    // Modal handlers
+    document.getElementById('createbutton').addEventListener('click', (e) => {
+      e.preventDefault();
+      document.getElementById('formOverlay').style.display = 'flex';
+    });
+
+    document.getElementById('setting').addEventListener('click', (e) => {
+      e.preventDefault();
+      document.getElementById('settingsOverlay').style.display = 'flex';
+    });
+
+    document.getElementById('logout').addEventListener('click', (e) => {
+      e.preventDefault();
+      document.getElementById('logoutOverlay').style.display = 'flex';
+    });
+
+    document.getElementById('closeSettings').addEventListener('click', (e) => {
+      e.preventDefault();
+      document.getElementById('settingsOverlay').style.display = 'none';
+    });
+
+    document.getElementById('cancelLogout').addEventListener('click', (e) => {
+      e.preventDefault();
+      document.getElementById('logoutOverlay').style.display = 'none';
+    });
+
+    function closeReportTicketOverlay() {
+      const overlay = document.getElementById('reportTicketOverlay');
+      if (overlay) {
+        overlay.style.display = 'none';
+      }
+    }
+
+    // Close overlays on background click
+    document.querySelectorAll('.menu-overlay').forEach(overlay => {
+      overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) {
+          overlay.style.display = 'none';
+        }
+      });
+    });
+
+    // File upload display toggle
+    const fileUploadContainer = document.getElementById('fileUploadContainer');
+    if (fileUploadContainer) {
+      fileUploadContainer.style.display = 'flex';
+    }
+  </script>
+
+  <script src="./assets/js/room.js"></script>
+</body>
+
+</html>
