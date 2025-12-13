@@ -850,7 +850,7 @@ function setup_csv_settings() {
     // AFFICHAGE
     if (csv_mode) {
         text_span.style.cssText = "display:flex; justify-content:space-between; align-items:center; width:100%; font-size: 14px;";
-        text_span.innerHTML = `<span>${current_csv_name}</span><img class="icon" src="assets/icon/delete.png" style="width:24px;">`;
+        text_span.innerHTML = `<img class="icon" src="assets/icon/delete.png" style="width:24px;"><span> ${current_csv_name}</span>`;
     } else {
         new_btn.style.backgroundColor = '';
         text_span.style.cssText = "display:flex; justify-content:space-between; align-items:center; width:100%; font-size: 14px;";
