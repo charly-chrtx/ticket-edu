@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🎫 TICKET
+# TICKET
 ### *Le système de support collaboratif moderne, sécurisé et sans friction*
 
 ![Version](https://img.shields.io/badge/Version-v0.9.1-blue?style=for-the-badge&logo=appveyor)
@@ -9,7 +9,7 @@
 
 <br/>
 
-![Interface Principal](assetes/misc/0.png)
+![Interface Principal](assets/misc/0.png)
 
 </div>
 
@@ -45,8 +45,31 @@ Notre interface n'est pas qu'une simple vitrine, c'est une expérience soigneuse
 | **🌗 Mode Sombre** | Intégral et automatique pour le confort visuel. |
 
 <div align="center">
-  <img src="assetes/misc/13.png" alt="Dark Mode" width="80%">
+  <img src="assets/misc/4.png" alt="Dark Mode" width="80%">
   <p><i>Mode sombre natif pour un confort optimal</i></p>
+</div>
+
+Ticket s'adapte à differents formats et supports pour vous suivre partout
+
+<div align="center">
+<table>
+  <tr>
+    <td align="center" width="50%">
+      <strong>Support ordinateur</strong>
+    </td>
+    <td align="center" width="50%">
+      <strong>Support smartphone</strong>
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <img src="assets/misc/5.png" alt="Dark Mode Interface" width="100%">
+    </td>
+    <td align="center">
+      <img src="assets/misc/6.png" alt="Mobile and Desktop View" width="100%">
+    </td>
+  </tr>
+</table>
 </div>
 
 ---
@@ -56,8 +79,6 @@ Notre interface n'est pas qu'une simple vitrine, c'est une expérience soigneuse
 <div align="center">
 
 ### 🛡️ Conformité RGPD & Chiffrement
-
-![Sécurité Shield](assetes/misc/5.png)
 
 </div>
 
@@ -76,37 +97,22 @@ Votre vie privée n'est pas négociable. Ticket intègre les plus hauts standard
 
 ### 🧠 L'intelligence dans les détails
 
-* **Filtrage IA des tickets
+* **Filtrage IA des tickets**
 * **Tickets colorés** : Attribuez des couleurs pour une identification instantanée.
 
-</details>
-
-<details>
-<summary><b>🛡️ Modération par IA (Ollama)</b></summary>
+### 🛡️ Modération par IA (Ollama)</b></summary>
 
 * **Filtrage automatique** : Détection via *Granite3-guardian 2b*.
-* **Blacklist** : Le Owner définit les termes interdits.
+  **Blacklist** : Le Owner définit les termes interdits.
 * **Précision** : Taux de détection éprouvé jusqu'à **91.03%**.
 
-</details>
-
-<details>
-<summary><b>📁 Partage & Administration</b></summary>
+### 📁 Partage & Administration</b></summary>
 
 * **1.5 Go de stockage** : Documents, images, logs.
 * **Transfert sécurisé** : Chiffrement durant le transit.
 * **Contrôle total** : Limitation de tickets, bannissement, liens d'invitation.
 
-</details>
-
 <br>
-
-<div align="center">
-  <img src="assetes/misc/14.png" alt="Responsive Design" width="100%">
-  <br>
-  <i>Experience unifiée Desktop & Mobile</i>
-</div>
-
 ---
 
 ## 🔧 Architecture Technique
@@ -155,6 +161,6 @@ Notre infrastructure repose sur la robustesse et la modernité.
 ### 🔄 Flux de données
 
 <div align="center">
-  <img src="assetes/misc/15.png" alt="Responsive Design" width="100%">
+  <img src="assets/misc/15.png" alt="Responsive Design" width="80%">
   <br>
 </div>
