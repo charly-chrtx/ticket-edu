@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Authentification</title>
+    <link rel="icon" type="image/png" href="./assets/icon/favicon.png">
+
+    <style>
+    :root {
+            --bg-color: #FFF9ED;
+            --text-color: #000000;
+            --card-bg: #ffffff;
+        }
+
+
+
+        @font-face {
+            font-family: 'Inconsolata';
+            src: url('../fonts/Inconsolata-Medium.ttf') format('truetype');
+            font-weight: 500;
+        }
+
+        @font-face {
+            font-family: 'Inconsolata';
+            src: url('../fonts/Inconsolata-SemiBold.ttf') format('truetype');
+            font-weight: 600;
+        }
+
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            font-family: "Inconsolata", monospace;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            transition: background-color 0.3s ease;
+        }
+
+        h1 {
+            font-weight: 600;
+            font-size: clamp(1.2rem, 1.5vw, 2rem);
+            margin-top: 0;
+        }
+
+        a { text-decoration: none; }
+
+        #bgCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+
+
+        .menu-overlay {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            height: 100%;
+            position: relative;
+            z-index: 1;
+        }
+
+        .menu-box {
+            background: var(--card-bg);
+            color: var(--text-color);
+            padding: clamp(30px, 3vw, 40px);
+            border-radius: 2.5rem;
+            border: 2px solid black;
+            box-shadow: 0 3px 0px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            width: 100%;
+            transition: all 0.3s ease;
+        }
+
+        .input {
+            width: 80%;
+            margin: 0 auto;
+        }
+
+        input[type="password"] {
+            width: 100%;
+            height: 60px;
+            background: var(--card-bg);
+            color: var(--text-color);
+            padding: clamp(8px, 1vw, 14px);
+            margin: 20px 0;
+            font-size: 14px;
+            border: 2px solid black;
+            border-radius: 50px;
+            box-sizing: border-box;
+            box-shadow: 0 3px 0px rgba(0, 0, 0, 0.2);
+            transition: outline 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+            text-align: center;
+        }
+
+        input[type="password"]:focus {
+            outline: 3px solid black;
+            outline-offset: -2px;
+        }
+
+        input[type="password"]::placeholder {
+            color: var(--text-color);
+            opacity: 0.5;
+        }
+
+
+        .button-text {
+            align-items: center;
+            background-color: var(--card-bg);
+            border: 2px solid #000000;
+            border-radius: 100px;
+            box-shadow: 0px 2px 0px #000000;
+            display: flex;
+            justify-content: center;
+            min-height: 60px;
+            cursor: pointer;
+            padding: 0 35px;
+            gap: 20px;
+            transition: all 0.3s ease;
+
+            font-family: inherit;
+            font-size: 18px;
+            margin: 0 auto;
+        }
+
+        .button-text:hover {
+            transform: translateY(-3px);
+            box-shadow: 0px 5px 0px #000000;
+        }
+
+        .button-text:active {
+            transform: translateY(0px);
+            box-shadow: 0px 0px 0px #000000;
+        }
+
+        .button-text .text {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-color);
+        }
+
+        .button-text .icon {
+            height: 28px;
+            width: 28px;
+            object-fit: contain;
+            transition: filter 0.3s ease;
+        }
+
+    
+        .overlay-footer {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            margin-top: 30px;
+        }
+        
+    </style>
+</head>
+
+<body>
+
+    <canvas id="bgCanvas"></canvas>
+
+    <div class="menu-overlay">
+        <div class="menu-box" style="max-width: 550px;">
+            <div class="input" style="padding-bottom: 0;">
+                
+                <h1>Connexion</h1>
+                
+                <p style="margin: 20px 0; opacity: 0.7; text-align: center;">
+                    Admin Dashboard
+                </p>
+
+                <form action="/access" method="POST">
+                    <div style="margin: 30px 0;">
+                        <input type="password" name="password" placeholder="Mot de passe" required autofocus autocomplete="current-password" />
+                    </div>
+                    
+                    <div class="overlay-footer">
+                        <button type="submit" class="button-text">
+                            <img class="icon" src="./assets/icon/check.png" alt="" onerror="this.style.display='none'">
+                            <span class="text">Entrer</span>
+                        </button>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        // background animation 
+        const canvas = document.getElementById('bgCanvas');
+        const ctx = canvas.getContext('2d');
+
+        let width, height;
+        let increment = 0;
+
+        // wave settings
+        const waves = [
+            { y: 0.65, length: 0.007, amplitude: 40, speed: -0.0007, offset: 0 }, 
+            { y: 0.75, length: 0.005, amplitude: 35, speed: 0.0009, offset: 2 },
+            { y: 0.85, length: 0.004, amplitude: 30, speed: -0.0011, offset: 4 }
+        ];
+
+        // resize handler
+        function resize() {
+            width = window.innerWidth;
+            height = window.innerHeight;
+            canvas.width = width;
+            canvas.height = height;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        // animation loop
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            // check dark mode
+            const isDark = document.body.classList.contains('dark-mode');
+            const gradient = ctx.createLinearGradient(0, 0, 0, height);
+
+            if (isDark) {
+                // dark colors
+                gradient.addColorStop(0, '#1a1a1a'); 
+                gradient.addColorStop(1, '#2d2d2d');
+                ctx.fillStyle = gradient;
+                ctx.fillRect(0, 0, width, height);
+                
+                ctx.fillStyle = 'rgba(45, 45, 45, 1)';
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+            } else {
+                // light colors
+                gradient.addColorStop(0, '#FFF8E7'); 
+                gradient.addColorStop(1, '#FFFFFF'); 
+                ctx.fillStyle = gradient;
+                ctx.fillRect(0, 0, width, height);
+
+                ctx.fillStyle = 'rgba(255, 255, 255, 1)';
+                ctx.strokeStyle = 'rgba(0, 0, 0, 0.8)';
+            }
+
+            // draw waves
+            waves.forEach((wave) => {
+                ctx.beginPath();
+                ctx.lineWidth = 1;
+
+                ctx.moveTo(0, height);
+                for (let i = 0; i < width; i++) {
+                    const y = height * wave.y + Math.sin(i * wave.length + increment * wave.speed + wave.offset) * wave.amplitude;
+                    ctx.lineTo(i, y);
+                }
+                ctx.lineTo(width, height);
+                ctx.lineTo(0, height);
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
+            });
+            increment += 1;
+        }
+        animate();
+    </script>
+
+</body>
+</html>

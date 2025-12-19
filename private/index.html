@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="./style.css">
+    <link rel="icon" type="image/png" href="./assets/icon/favicon.png">
+</head>
+<body>
+
+    <div class="header-admin">
+        <div class="stat-pill">
+            <img class="icon-sm" src="./assets/icon/icon thin.png" alt="user">
+            <span id="total-users">0 personnes</span>
+        </div>
+        <div class="stat-pill">
+            <img class="icon-sm" src="./assets/icon/folder.png" alt="folder"> <span id="total-groups">0 / 50 groupes</span>
+        </div>
+        <a href="#" class="circle-btn">
+            <img class="icon-sm" src="./assets/icon/logout.png" alt="exit">
+        </a>
+    </div>
+
+    <div class="main-layout">
+        
+        <div class="panel settings-panel">
+            <h2>Paramètres</h2>
+
+            <div class="setting-row">
+                <label>Nombre de groupes maximum</label>
+                <div class="counter-control">
+                    <button onclick="updateCounter('maxRooms', -1)">-</button>
+                    <input type="number" id="maxRooms" value="30" readonly>
+                    <button onclick="updateCounter('maxRooms', 1)">+</button>
+                </div>
+            </div>
+
+            <div class="setting-row">
+                <label>Nombre de personnes max</label>
+                <div class="counter-control">
+                    <button onclick="updateCounter('maxPeople', -1)">-</button>
+                    <input type="number" id="maxPeople" value="50" readonly>
+                    <button onclick="updateCounter('maxPeople', 1)">+</button>
+                </div>
+            </div>
+
+            <div class="setting-row slider-row">
+                <label>Stockage par groupe (flemme sah) </label>
+                
+            </div>
+        </div>
+
+        <div class="panel list-panel">
+            <div class="list-header">
+                <h2>Groupes en cours</h2>
+                <div class="list-actions">
+                    <span style="font-size: 1.2rem;">⇅</span>
+                    <span style="font-size: 1.2rem;">↺</span>
+                </div>
+            </div>
+
+            <div id="groups-container">
+                </div>
+        </div>
+    </div>
+
+    <script>
+        // simple state management
+        const storageOptions = [0.25, 0.50, 1.0, 1.25, 2.0]; // GB
+        let currentSettings = {};
+
+        async function fetchData() {
+            try {
+                const response = await fetch('/api/admin/dashboard');
+                const data = await response.json();
+                
+                renderStats(data.stats, data.settings);
+                renderRooms(data.rooms, data.settings.maxRoomSize);
+                currentSettings = data.settings;
+                
+                // update inputs if not focused (to avoid glitching while editing)
+                if(document.activeElement.tagName !== 'INPUT') {
+                    document.getElementById('maxRooms').value = data.settings.maxRooms;
+                    document.getElementById('maxPeople').value = data.settings.maxPeoplePerRoom;
+                    
+                    // find closest storage option index
+                    const gb = data.settings.maxRoomSize / (1024*1024*1024);
+                    let closestIdx = 0;
+                    let minDiff = Infinity;
+                    storageOptions.forEach((opt, i) => {
+                        if(Math.abs(opt - gb) < minDiff) { minDiff = Math.abs(opt - gb); closestIdx = i; }
+                    });
+                    document.getElementById('storageSlider').value = closestIdx;
+                    updateStorageLabel();
+                }
+
+            } catch (e) {
+                console.error("Error fetching admin data", e);
+            }
+        }
+
+        function renderStats(stats, settings) {
+            document.getElementById('total-users').innerText = `${stats.totalPeople} personnes`;
+            document.getElementById('total-groups').innerText = `${stats.totalGroups} / ${settings.maxRooms} groupes`;
+        }
+
+        function renderRooms(rooms, maxSizeBytes) {
+            const container = document.getElementById('groups-container');
+            container.innerHTML = '';
+
+            rooms.forEach(room => {
+                const usageGb = (room.storageUsed / (1024*1024*1024)).toFixed(2);
+                const isFull = room.storageUsed > (maxSizeBytes * 0.9);
+                const colorClass = isFull ? 'text-red' : '';
+                
+                // calculate duration
+                const duration = getTimeDifference(new Date(room.createdAt));
+
+                const card = document.createElement('div');
+                card.className = 'room-card';
+                card.innerHTML = `
+                    <span class="room-code">${room.code}</span>
+                    
+                    <div class="stat-badge white">
+                        <img src="./assets/icon/folder.png" class="icon-xs">
+                        <span class="${colorClass}">${usageGb} Go</span>
+                    </div>
+
+                    <div class="stat-badge white">
+                        <img src="./assets/icon/timer.png" class="icon-xs"> <span>${duration}</span>
+                    </div>
+
+                    <div class="stat-badge white user-badge">
+                        <img src="./assets/icon/person.png" class="icon-xs">
+                        <span>${room.usersOnline}</span>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function getTimeDifference(startDate) {
+            const now = new Date();
+            const diff = now - startDate;
+            
+            const hh = Math.floor(diff / (1000 * 60 * 60)).toString().padStart(2, '0');
+            const mm = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60)).toString().padStart(2, '0');
+            const ss = Math.floor((diff % (1000 * 60)) / 1000).toString().padStart(2, '0');
+            
+            return `${hh}:${mm}:${ss}`;
+        }
+
+        // update functions
+        function updateCounter(id, delta) {
+            const el = document.getElementById(id);
+            let val = parseInt(el.value) + delta;
+            if(val < 1) val = 1;
+            el.value = val;
+            saveSettings();
+        }
+
+        function updateStorageLabel() {
+            const idx = document.getElementById('storageSlider').value;
+            const val = storageOptions[idx];
+            document.getElementById('storageValue').innerText = val + " Go";
+            saveSettings(); // triggers save on slider change
+        }
+
+        async function saveSettings() {
+            const idx = document.getElementById('storageSlider').value;
+            const payload = {
+                maxRooms: document.getElementById('maxRooms').value,
+                maxPeoplePerRoom: document.getElementById('maxPeople').value,
+                maxStorageGB: storageOptions[idx]
+            };
+
+            await fetch('/api/admin/settings', {
+                method: 'PUT',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(payload)
+            });
+            fetchData(); // refresh UI
+        }
+
+        // loop
+        fetchData();
+        setInterval(fetchData, 5000); // refresh every 5s
+
+    </script>
+</body>
+</html>
