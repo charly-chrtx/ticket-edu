@@ -1324,5 +1324,12 @@ body .theme-toggle-container {
 #qrcode-container {
     display: flex;
     justify-content: center;
-    padding: 20px;
+    padding: 20px; 
+    width: 45%;
+    max-width: 150px;
+    aspect-ratio: 1/1 !important;
+}
+
+body.dark-mode #qrcode-container {
+    filter: invert(100%);
 }
