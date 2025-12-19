@@ -1370,3 +1370,7 @@ body.dark-mode .qr-card::before {
 body.dark-mode #qrcode-container {
     filter: invert(100%);
 }
+
+#copyText:hover {
+    cursor: pointer;
+}

@@ -172,6 +172,19 @@ function render_room_qr() {
     const container = ui_elements['qrcode-container'];
     if (!container || qr_instance) return;
 
+    const roomcode_text = document.querySelector('#copyText');
+    if (roomcode_text) roomcode_text.textContent = room_code;
+
+    roomcode_text.addEventListener('click', () => {
+        //copy and modify text to "copié" for 2 seconds
+        navigator.clipboard.writeText(window.location.href);
+        const original_text = roomcode_text.textContent;
+        roomcode_text.textContent = "Copié !";
+        setTimeout(() => {
+            roomcode_text.textContent = original_text;
+        }, 2000);
+    });
+
     // init qr styler
     qr_instance = new QRCodeStyling({
         width: 250,
