@@ -15,7 +15,6 @@
     "express": "^5.1.0",
     "multer": "^2.0.2",
     "ollama": "^0.6.3",
-    "qr-code-styling": "^1.9.2",
     "sqlite3": "^5.1.7",
     "ws": "^8.18.3"
   },

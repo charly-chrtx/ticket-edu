@@ -1,8 +1,10 @@
 const sqlite3 = require('sqlite3').verbose();
-const db = new sqlite3.Database('./tickets.db');
+// get db path from env
+const dbPath = process.env.DB_PATH || './tickets.db';
+const db = new sqlite3.Database(dbPath);
 
 db.serialize(() => {
-  // create tickets table
+  // tickets table
   db.run(`CREATE TABLE IF NOT EXISTS tickets (
     id TEXT PRIMARY KEY,
     nom TEXT,
@@ -14,12 +16,10 @@ db.serialize(() => {
     roomCode TEXT
   )`);
 
-  // create rooms table
+  // rooms table
   db.run(`CREATE TABLE IF NOT EXISTS rooms (
     code TEXT PRIMARY KEY,
     adminId TEXT,
-    announcementMessage TEXT,
-    announcementColor TEXT,
     lastActivity TEXT,
     createdAt TEXT,
     maxTickets INTEGER DEFAULT 1,
@@ -29,11 +29,11 @@ db.serialize(() => {
     if (!err) {
       db.run("ALTER TABLE rooms ADD COLUMN maxTickets INTEGER DEFAULT 1", () => {});
       db.run("ALTER TABLE rooms ADD COLUMN aiEnabled INTEGER DEFAULT 0", () => {}); 
-      db.run("ALTER TABLE rooms ADD COLUMN csvFilePath TEXT", () => {}); // <--- new column
+      db.run("ALTER TABLE rooms ADD COLUMN csvFilePath TEXT", () => {});
     }
   });
 
-  // create announcements table
+  // announcements table
   db.run(`CREATE TABLE IF NOT EXISTS announcements (
     id TEXT PRIMARY KEY,
     roomCode TEXT,
@@ -43,7 +43,7 @@ db.serialize(() => {
     createdAt TEXT
   )`);
 
-  // create files table
+  // files table
   db.run(`CREATE TABLE IF NOT EXISTS files (
     id TEXT PRIMARY KEY,
     originalName TEXT,

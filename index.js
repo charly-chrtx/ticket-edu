@@ -23,13 +23,16 @@ app.use(express.urlencoded({ extended: true }));
 // public assets
 app.use(express.static('public'));
 
+// env config
+const MAX_GLOBAL_STORAGE = (parseInt(process.env.MAX_STORAGE_MO) || 10000) * 1024 * 1024;
+
 // settings
 let globalSettings = {
   maxRooms: 50,
-  maxRoomSize: 1.25 * 1024 * 1024 * 1024
+  maxStoragePerRoom: 1.25 * 1024 * 1024 * 1024 // default 1.25gb per room
 };
 
-const UPLOAD_DIR = './uploads';
+const UPLOAD_DIR = process.env.UPLOAD_DIR || './uploads';
 
 // ensure dir
 if (!fs.existsSync(UPLOAD_DIR)) {
@@ -80,7 +83,23 @@ const storage = multer.diskStorage({
   }
 });
 
-const upload = multer({ storage: storage });
+const upload = multer({
+  storage: storage,
+  limits: {
+    fileSize: MAX_GLOBAL_STORAGE
+  }
+});
+
+// upload errors
+app.use((err, req, res, next) => {
+  if (err instanceof multer.MulterError) {
+    if (err.code === 'LIMIT_FILE_SIZE') {
+      return res.status(413).json({ error: 'file too large for server storage' });
+    }
+  }
+  next(err);
+});
+
 
 // generate code
 function generateRoomCode() {
@@ -159,8 +178,7 @@ wss.on('connection', async (ws, req) => {
       // check if name exists in csv
       try {
         const content = fs.readFileSync(path.join(UPLOAD_DIR, room.csvFilePath), 'utf8');
-        const matches = parseAndSearchCsv(content, requestedName, []); // empty used names for raw check
-        // exact match check (simplified)
+        const matches = parseAndSearchCsv(content, requestedName, []);
         const exists = matches.some(n => n === requestedName);
 
         if (!exists) {
@@ -223,7 +241,6 @@ function notifierClients(roomCode, type = 'update', payload = {}) {
   const message = JSON.stringify({ type, timestamp: Date.now(), ...payload });
 
   wss.clients.forEach(client => {
-    // client.roomCode is attached to ws object
     if (client.readyState === WebSocket.OPEN && client.roomCode === roomCode) {
       client.send(message);
     }
@@ -233,7 +250,6 @@ function notifierClients(roomCode, type = 'update', payload = {}) {
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'login.html'));
 });
-
 
 app.post('/access', (req, res) => {
   const password = req.body.password;
@@ -273,13 +289,20 @@ app.get('/api/admin/dashboard', (req, res) => {
         usersOnline: onlineMap[room.code] || 0
       }));
 
-      res.json({
-        settings: globalSettings,
-        stats: {
-          totalPeople: totalOnline,
-          totalGroups: rooms.length
-        },
-        rooms: enrichedRooms
+      // get global storage usage
+      db.get("SELECT SUM(size) as totalGlobal FROM files", [], (err, row) => {
+        const globalUsed = row ? row.totalGlobal || 0 : 0;
+
+        res.json({
+          settings: globalSettings,
+          stats: {
+            totalPeople: totalOnline,
+            totalGroups: rooms.length,
+            storageUsed: globalUsed,
+            storageLimit: MAX_GLOBAL_STORAGE
+          },
+          rooms: enrichedRooms
+        });
       });
     });
   });
@@ -289,11 +312,13 @@ app.put('/api/admin/settings', (req, res) => {
   const { maxRooms, maxStorageGB } = req.body;
 
   if (maxRooms) globalSettings.maxRooms = parseInt(maxRooms);
-  if (maxStorageGB) globalSettings.maxRoomSize = parseFloat(maxStorageGB) * 1024 * 1024 * 1024;
+  // updating per room limit
+  if (maxStorageGB) globalSettings.maxStoragePerRoom = parseFloat(maxStorageGB) * 1024 * 1024 * 1024;
 
   res.json(globalSettings);
 });
 
+// create room
 app.post('/api/rooms', (req, res) => {
   const { userId } = req.body;
   if (!userId) return res.status(400).json({ error: 'user id required' });
@@ -309,9 +334,9 @@ app.post('/api/rooms', (req, res) => {
     const now = new Date().toISOString();
     const defaultAiState = getAiStatus() ? 1 : 0;
 
-    db.run(`INSERT INTO rooms (code, adminId, announcementMessage, announcementColor, lastActivity, createdAt, maxTickets, aiEnabled, csvFilePath) 
-              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [code, userId, "", "#cdcdcd", now, now, 1, defaultAiState, null],
+    db.run(`INSERT INTO rooms (code, adminId, lastActivity, createdAt, maxTickets, aiEnabled, csvFilePath) 
+              VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      [code, userId, now, now, 1, defaultAiState, null],
       (err) => {
         if (err) return res.status(500).json({ error: err.message });
         res.status(201).json({ code, adminId: userId });
@@ -320,32 +345,53 @@ app.post('/api/rooms', (req, res) => {
   });
 });
 
+// get room data
 app.get('/api/rooms/:code', (req, res) => {
-  // get user id from query
   const userId = req.query.userId;
-  
-  db.get("SELECT code, adminId, announcementMessage, announcementColor, maxTickets, aiEnabled, csvFilePath FROM rooms WHERE code = ?",
-    [req.params.code],
+  const roomCode = req.params.code;
+
+  db.get(
+    "SELECT code, adminId, maxTickets, aiEnabled, csvFilePath FROM rooms WHERE code = ?",
+    [roomCode],
     (err, room) => {
       if (err) return res.status(500).json({ error: err.message });
       if (!room) return res.status(404).json({ error: "room not found" });
 
       if (!room.maxTickets) room.maxTickets = 1;
 
-      // check ai status
+      // ai global status
       const isGlobalOnline = getAiStatus();
       room.aiEnabled = (room.aiEnabled === 1) && isGlobalOnline;
 
-      // add flag for client
       room.hasCsv = !!room.csvFilePath;
-      delete room.csvFilePath; // hide path
-      const isAdmin = userId && (room.adminId === userId);
-      room.isAdmin = isAdmin;
+      delete room.csvFilePath;
 
-  
+      const isAdmin = userId && room.adminId === userId;
+      room.isAdmin = isAdmin;
       delete room.adminId;
 
-      res.json(room);
+      // users online
+      const usersOnline = [...clientRooms.values()]
+        .filter(c => c.code === roomCode).length;
+
+      // storage used
+      db.get(
+        "SELECT SUM(size) as total FROM files WHERE roomCode = ?",
+        [roomCode],
+        (err, row) => {
+          if (err) return res.status(500).json({ error: err.message });
+
+          const storageUsed = row?.total || 0;
+
+          room.usersOnline = usersOnline;
+          room.storage = {
+            used: storageUsed,
+            max: globalSettings.maxStoragePerRoom
+          };
+
+          res.json(room);
+        }
+      );
     }
   );
 });
@@ -358,9 +404,7 @@ app.post('/api/rooms/:code/csv', upload.single('file'), (req, res) => {
 
   if (!file) return res.status(400).json({ error: "missing file" });
 
-  // validate csv format
   try {
-    // check extension
     if (!file.originalname.toLowerCase().endsWith('.csv')) {
       throw new Error("invalid extension");
     }
@@ -368,19 +412,16 @@ app.post('/api/rooms/:code/csv', upload.single('file'), (req, res) => {
     const content = fs.readFileSync(file.path, 'utf8');
     const lines = content.split(/\r?\n/).filter(line => line.trim() !== '');
 
-    // check not empty
     if (lines.length === 0) {
       throw new Error("empty file");
     }
 
-    // check delimiter
     const hasDelimiter = lines.some(line => line.includes(';'));
     if (!hasDelimiter) {
       throw new Error("missing semicolon delimiter");
     }
 
   } catch (e) {
-    // cleanup invalid file
     if (fs.existsSync(file.path)) fs.unlinkSync(file.path);
     return res.status(400).json({ error: "invalid csv format or extension" });
   }
@@ -425,7 +466,6 @@ app.post('/api/rooms/:code/check-name', (req, res) => {
 
     const content = fs.readFileSync(p, 'utf8');
 
-    // get active names in room
     const activeNames = [];
     for (let [ws, data] of clientRooms) {
       if (data.code === roomCode && data.studentName) {
@@ -441,6 +481,7 @@ app.post('/api/rooms/:code/check-name', (req, res) => {
   });
 });
 
+// update settings
 app.put('/api/rooms/:code', (req, res) => {
   const roomCode = req.params.code;
   const { maxTickets, aiEnabled } = req.body;
@@ -455,7 +496,6 @@ app.put('/api/rooms/:code', (req, res) => {
     updatePayload.refreshSettings = true;
   }
 
-  // toggle ai
   if (aiEnabled !== undefined) {
     fields.push("aiEnabled = ?");
     values.push(aiEnabled ? 1 : 0);
@@ -476,48 +516,7 @@ app.put('/api/rooms/:code', (req, res) => {
   });
 });
 
-app.get('/api/announcement/:roomCode', (req, res) => {
-  db.get("SELECT announcementMessage as texte, announcementColor as couleur FROM rooms WHERE code = ?",
-    [req.params.roomCode],
-    (err, row) => {
-      if (err) return res.status(500).json({ error: err.message });
-      if (!row) return res.json({ texte: "", couleur: "#cdcdcd" });
-      res.json(row);
-    }
-  );
-});
-
-// banner update
-app.put('/api/announcement/:roomCode', async (req, res) => {
-  const { texte, couleur, userId } = req.body;
-  const roomCode = req.params.roomCode;
-
-  db.get("SELECT adminId, aiEnabled FROM rooms WHERE code = ?", [roomCode], async (err, room) => {
-    if (err) return res.status(500).json({ error: err.message });
-    if (!room) return res.status(404).json({ error: "room not found" });
-    if (room.adminId !== userId) return res.status(403).json({ error: "unauthorized" });
-
-    // ai check
-    if (room.aiEnabled === 1) {
-      const isSafe = await validateContent(texte);
-      if (!isSafe) return res.status(400).json({ error: "blocked by ai" });
-    }
-
-    db.run("UPDATE rooms SET announcementMessage = ?, announcementColor = ?, lastActivity = ? WHERE code = ?",
-      [texte, couleur || "#cdcdcd", new Date().toISOString(), roomCode],
-      (err) => {
-        if (err) return res.status(500).json({ error: err.message });
-
-        notifierClients(roomCode, 'updateAnnonce', {
-          message: { texte, couleur: couleur || "#cdcdcd" }
-        });
-
-        res.json({ texte, couleur });
-      }
-    );
-  });
-});
-
+// get tickets
 app.get('/api/tickets/:roomCode', (req, res) => {
   const roomCode = req.params.roomCode;
   db.all("SELECT * FROM tickets WHERE roomCode = ? ORDER BY dateCreation DESC", [roomCode], (err, rows) => {
@@ -531,28 +530,21 @@ app.post('/api/tickets', (req, res) => {
   let { nom, description, couleur, etat, userId, roomCode } = req.body;
   if (!nom || !userId || !roomCode) return res.status(400).json({ error: 'missing fields' });
 
-  // get room config
   db.get("SELECT maxTickets, aiEnabled, csvFilePath FROM rooms WHERE code = ?", [roomCode], async (err, room) => {
     if (err) return res.status(500).json({ error: err.message });
     if (!room) return res.status(404).json({ error: "room not found" });
 
-    // force name if csv active
     if (room.csvFilePath) {
-      // find session for this userId
       const sessions = [...clientRooms.values()].filter(c =>
         c.code === roomCode && c.userId === userId
       );
-
-      // prioritize session with name
       const session = sessions.find(s => s.studentName) || sessions[0];
-
       if (!session || !session.studentName) {
-        return res.status(403).json({ error: "session invalid or name not locked" });
+        return res.status(403).json({ error: "session invalid" });
       }
       nom = session.studentName;
     }
 
-    // ai check
     if (room.aiEnabled === 1) {
       const combinedText = `${nom} ${description || ''}`;
       const isSafe = await validateContent(combinedText);
@@ -594,7 +586,6 @@ app.put('/api/tickets/:id', (req, res) => {
   const { nom, description, couleur, etat, roomCode } = req.body;
   const id = req.params.id;
 
-  // get ticket room
   db.get("SELECT roomCode FROM tickets WHERE id = ?", [id], (err, ticket) => {
     if (err || !ticket) return res.status(404).json({ error: "ticket not found" });
 
@@ -603,7 +594,6 @@ app.put('/api/tickets/:id', (req, res) => {
     db.get("SELECT aiEnabled FROM rooms WHERE code = ?", [realRoomCode], async (err, room) => {
       if (err) return res.status(500).json({ error: err.message });
 
-      // ai check
       if (room && room.aiEnabled === 1 && (nom || description)) {
         const combinedText = `${nom || ''} ${description || ''}`;
         const isSafe = await validateContent(combinedText);
@@ -621,16 +611,15 @@ app.put('/api/tickets/:id', (req, res) => {
         [nom, description, couleur, etat, id],
         (err) => {
           if (err) return res.status(500).json({ error: err.message });
-          if (roomCode || realRoomCode) {
-            updateRoomActivity(roomCode || realRoomCode);
-            notifierClients(roomCode || realRoomCode);
-          }
+          updateRoomActivity(roomCode || realRoomCode);
+          notifierClients(roomCode || realRoomCode);
           res.json({ id, nom, description, couleur, etat });
         });
     });
   });
 });
 
+// delete ticket
 app.delete('/api/tickets/:id', (req, res) => {
   const { userId } = req.query;
   const id = req.params.id;
@@ -654,6 +643,7 @@ app.delete('/api/tickets/:id', (req, res) => {
   });
 });
 
+// get files
 app.get('/api/files/:roomCode', (req, res) => {
   const roomCode = req.params.roomCode;
   db.all("SELECT * FROM files WHERE roomCode = ?", [roomCode], (err, rows) => {
@@ -662,55 +652,72 @@ app.get('/api/files/:roomCode', (req, res) => {
     res.json({
       files: rows,
       usage: usage,
-      limit: globalSettings.maxRoomSize
+      limit: globalSettings.maxStoragePerRoom
     });
   });
 });
 
+// upload file
 app.post('/api/files', upload.single('file'), (req, res) => {
   const { roomCode, userId } = req.body;
   const file = req.file;
 
   if (!file || !roomCode || !userId) {
     if (file) fs.unlinkSync(file.path);
-    return res.status(400).json({ error: 'missing file or data' });
+    return res.status(400).json({ error: 'missing data' });
   }
 
-  db.get("SELECT SUM(size) as total FROM files WHERE roomCode = ?", [roomCode], (err, row) => {
+  // check total server storage first
+  db.get("SELECT SUM(size) as totalGlobal FROM files", [], (err, globalRow) => {
     if (err) {
       fs.unlinkSync(file.path);
       return res.status(500).json({ error: err.message });
     }
 
-    const currentUsage = row ? row.total || 0 : 0;
-
-    if (currentUsage + file.size > globalSettings.maxRoomSize) {
+    const currentGlobal = globalRow ? globalRow.totalGlobal || 0 : 0;
+    if (currentGlobal + file.size > MAX_GLOBAL_STORAGE) {
       fs.unlinkSync(file.path);
-      return res.status(413).json({ error: 'quota exceeded' });
+      return res.status(413).json({ error: 'server storage full' });
     }
 
-    const id = Date.now().toString();
-
-    db.run(`INSERT INTO files (id, originalName, encryptedName, mimeType, size, roomCode, userId)
-            VALUES (?, ?, ?, ?, ?, ?, ?)`,
-      [id, file.originalname, file.filename, file.mimetype, file.size, roomCode, userId],
-      (err) => {
-        if (err) {
-          fs.unlinkSync(file.path);
-          return res.status(500).json({ error: err.message });
-        }
-
-        updateRoomActivity(roomCode);
-        notifierClients(roomCode, 'newFile', {
-          file: { id, originalName: file.originalname, size: file.size, userId }
-        });
-
-        res.status(201).json({ message: 'file uploaded' });
+    // check room storage
+    db.get("SELECT SUM(size) as totalRoom FROM files WHERE roomCode = ?", [roomCode], (err, row) => {
+      if (err) {
+        fs.unlinkSync(file.path);
+        return res.status(500).json({ error: err.message });
       }
-    );
+
+      const currentRoomUsage = row ? row.totalRoom || 0 : 0;
+
+      if (currentRoomUsage + file.size > globalSettings.maxStoragePerRoom) {
+        fs.unlinkSync(file.path);
+        return res.status(413).json({ error: 'room quota exceeded' });
+      }
+
+      const id = Date.now().toString();
+
+      db.run(`INSERT INTO files (id, originalName, encryptedName, mimeType, size, roomCode, userId)
+              VALUES (?, ?, ?, ?, ?, ?, ?)`,
+        [id, file.originalname, file.filename, file.mimetype, file.size, roomCode, userId],
+        (err) => {
+          if (err) {
+            fs.unlinkSync(file.path);
+            return res.status(500).json({ error: err.message });
+          }
+
+          updateRoomActivity(roomCode);
+          notifierClients(roomCode, 'newFile', {
+            file: { id, originalName: file.originalname, size: file.size, userId }
+          });
+
+          res.status(201).json({ message: 'file uploaded' });
+        }
+      );
+    });
   });
 });
 
+// download file
 app.get('/api/files/download/:fileId', (req, res) => {
   db.get("SELECT * FROM files WHERE id = ?", [req.params.fileId], (err, file) => {
     if (err || !file) return res.status(404).json({ error: 'file not found' });
@@ -723,6 +730,7 @@ app.get('/api/files/download/:fileId', (req, res) => {
   });
 });
 
+// delete file
 app.delete('/api/files/:fileId', (req, res) => {
   const { userId } = req.query;
   const fileId = req.params.fileId;
@@ -753,6 +761,7 @@ app.delete('/api/files/:fileId', (req, res) => {
     });
 });
 
+// get announcement history
 app.get('/api/announcements/:roomCode', (req, res) => {
   const roomCode = req.params.roomCode;
 
@@ -774,90 +783,175 @@ app.get('/api/announcements/:roomCode', (req, res) => {
   });
 });
 
-// announcement history (no ai check)
-app.post('/api/announcements', upload.array('files'), (req, res) => {
+// create announcement
+app.post('/api/announcements', upload.array('files'), async (req, res) => {
   const { roomCode, userId, content, color } = req.body;
   const files = req.files || [];
 
   if ((!content || content.trim() === "") && files.length === 0) {
     files.forEach(f => fs.unlinkSync(f.path));
-    return res.status(400).json({ error: "empty announcement" });
+    return res.status(400).json({ error: "empty" });
   }
 
-  db.get("SELECT adminId FROM rooms WHERE code = ?", [roomCode], (err, room) => {
-    if (!room) {
-      files.forEach(f => fs.unlinkSync(f.path));
-      return res.status(404).json({ error: "room not found" });
-    }
-    if (room.adminId !== userId) {
-      files.forEach(f => fs.unlinkSync(f.path));
-      return res.status(403).json({ error: "unauthorized" });
-    }
+  // check room storage quota (announcements included)
+  const incomingSize = files.reduce((acc, f) => acc + f.size, 0);
 
-    const id = Date.now().toString();
-    const now = new Date().toISOString();
+  db.get(
+    "SELECT SUM(size) as total FROM files WHERE roomCode = ?",
+    [roomCode],
+    (err, row) => {
+      if (err) {
+        files.forEach(f => fs.unlinkSync(f.path));
+        return res.status(500).json({ error: err.message });
+      }
 
-    db.run(`INSERT INTO announcements (id, roomCode, userId, content, color, createdAt) VALUES (?, ?, ?, ?, ?, ?)`,
-      [id, roomCode, userId, content || "", color || "#cdcdcd", now],
-      (err) => {
-        if (err) {
+      const currentUsage = row?.total || 0;
+
+      if (currentUsage >= globalSettings.maxStoragePerRoom ||
+        currentUsage + incomingSize > globalSettings.maxStoragePerRoom) {
+        files.forEach(f => fs.unlinkSync(f.path));
+        return res.status(413).json({ error: "room quota exceeded" });
+      }
+
+      createAnnouncement();
+    }
+  );
+
+  function createAnnouncement() {
+    db.get(
+      "SELECT adminId, aiEnabled FROM rooms WHERE code = ?",
+      [roomCode],
+      async (err, room) => {
+        if (!room) {
           files.forEach(f => fs.unlinkSync(f.path));
-          return res.status(500).json({ error: err.message });
+          return res.status(404).json({ error: "room not found" });
         }
 
-        if (files.length > 0) {
-          const stmt = db.prepare(`INSERT INTO files (id, originalName, encryptedName, mimeType, size, roomCode, userId, announcementId) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`);
-
-          files.forEach(f => {
-            const fileId = Date.now().toString() + Math.round(Math.random() * 1000);
-            stmt.run(fileId, f.originalname, f.filename, f.mimetype, f.size, roomCode, userId, id);
-          });
-          stmt.finalize();
+        if (room.adminId !== userId) {
+          files.forEach(f => fs.unlinkSync(f.path));
+          return res.status(403).json({ error: "unauthorized" });
         }
 
-        updateRoomActivity(roomCode);
-        notifierClients(roomCode, 'updateAnnonce');
-        res.status(201).json({ message: "announcement created" });
+        // ai check
+        if (room.aiEnabled === 1 && content) {
+          const isSafe = await validateContent(content);
+          if (!isSafe) {
+            files.forEach(f => fs.unlinkSync(f.path));
+            return res.status(400).json({ error: "blocked by ai" });
+          }
+        }
+
+        const id = Date.now().toString();
+        const now = new Date().toISOString();
+
+        db.run(
+          `INSERT INTO announcements (id, roomCode, userId, content, color, createdAt)
+           VALUES (?, ?, ?, ?, ?, ?)`,
+          [id, roomCode, userId, content || "", color || "#cdcdcd", now],
+          (err) => {
+            if (err) {
+              files.forEach(f => fs.unlinkSync(f.path));
+              return res.status(500).json({ error: err.message });
+            }
+
+            if (files.length > 0) {
+              const stmt = db.prepare(
+                `INSERT INTO files
+                 (id, originalName, encryptedName, mimeType, size, roomCode, userId, announcementId)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
+              );
+
+              files.forEach(f => {
+                const fileId = Date.now().toString() + Math.round(Math.random() * 1000);
+                stmt.run(
+                  fileId,
+                  f.originalname,
+                  f.filename,
+                  f.mimetype,
+                  f.size,
+                  roomCode,
+                  userId,
+                  id
+                );
+              });
+
+              stmt.finalize();
+            }
+
+            updateRoomActivity(roomCode);
+            notifierClients(roomCode, 'updateAnnonce');
+            res.status(201).json({ message: "created" });
+          }
+        );
       }
     );
-  });
+  }
 });
 
+
+// delete announcement file
 app.delete('/api/announcements/:id/files/:fileId', (req, res) => {
-  const { userId } = req.query;
-  const { id, fileId } = req.params;
+  const { userId } = req.query
+  const { id, fileId } = req.params
 
   const query = `
-    SELECT f.*, r.adminId, r.code as roomCode 
-    FROM files f 
-    JOIN announcements a ON f.announcementId = a.id 
-    JOIN rooms r ON a.roomCode = r.code 
-    WHERE f.id = ? AND a.id = ?
-  `;
+    select f.*, a.content, r.adminId, r.code as roomCode
+    from files f
+    join announcements a on f.announcementId = a.id
+    join rooms r on a.roomCode = r.code
+    where f.id = ? and a.id = ?
+  `
 
   db.get(query, [fileId, id], (err, data) => {
-    if (err) return res.status(500).json({ error: err.message });
-    if (!data) return res.status(404).json({ error: "not found" });
+    if (err) return res.status(500).json({ error: err.message })
+    if (!data) return res.status(404).json({ error: "not found" })
 
     if (data.adminId !== userId) {
-      return res.status(403).json({ error: "unauthorized" });
+      return res.status(403).json({ error: "unauthorized" })
     }
 
-    const filePath = path.join(UPLOAD_DIR, data.encryptedName);
+    const filePath = path.join(UPLOAD_DIR, data.encryptedName)
     if (fs.existsSync(filePath)) {
-      fs.unlinkSync(filePath);
+      fs.unlinkSync(filePath)
     }
 
-    db.run("DELETE FROM files WHERE id = ?", [fileId], (err) => {
-      if (err) return res.status(500).json({ error: err.message });
+    db.run("delete from files where id = ?", [fileId], (err) => {
+      if (err) return res.status(500).json({ error: err.message })
 
-      updateRoomActivity(data.roomCode);
-      notifierClients(data.roomCode, 'updateAnnonce');
-      res.json({ message: "file deleted" });
-    });
-  });
-});
+      // check if announcement is now empty
+      db.get(
+        "select count(*) as count from files where announcementId = ?",
+        [id],
+        (err, row) => {
+          if (err) {
+            updateRoomActivity(data.roomCode)
+            notifierClients(data.roomCode, 'updateAnnonce')
+            return res.json({ message: "file deleted" })
+          }
 
+          if (row.count === 0 && (!data.content || data.content.trim() === "")) {
+            db.run(
+              "delete from announcements where id = ?",
+              [id],
+              () => {
+                updateRoomActivity(data.roomCode)
+                notifierClients(data.roomCode, 'updateAnnonce')
+                return res.json({ message: "file deleted", announcementDeleted: true })
+              }
+            )
+            return
+          }
+
+          updateRoomActivity(data.roomCode)
+          notifierClients(data.roomCode, 'updateAnnonce')
+          res.json({ message: "file deleted" })
+        }
+      )
+    })
+  })
+})
+
+// delete announcement
 app.delete('/api/announcements/:id', (req, res) => {
   const { userId } = req.query;
   const id = req.params.id;
@@ -877,7 +971,6 @@ app.delete('/api/announcements/:id', (req, res) => {
       db.run("DELETE FROM files WHERE announcementId = ?", [id], (err) => {
         db.run("DELETE FROM announcements WHERE id = ?", [id], (err) => {
           if (err) return res.status(500).json({ error: err.message });
-
           updateRoomActivity(item.roomCode);
           notifierClients(item.roomCode, 'updateAnnonce');
           res.json({ message: "deleted" });
@@ -887,6 +980,7 @@ app.delete('/api/announcements/:id', (req, res) => {
   });
 });
 
+// auto cleanup tickets
 function supprimerTicketsExpires() {
   const now = Date.now();
   const limitEnCours = 3 * 60 * 60 * 1000 + 10 * 60 * 1000;
@@ -906,6 +1000,7 @@ function supprimerTicketsExpires() {
   });
 }
 
+// auto cleanup rooms
 function supprimerRoomsInactives() {
   const now = Date.now();
   const inactiveLimit = 30 * 60 * 1000;
@@ -947,6 +1042,7 @@ function supprimerRoomsInactives() {
   });
 }
 
+// intervals
 setInterval(() => {
   supprimerTicketsExpires();
   supprimerRoomsInactives();
