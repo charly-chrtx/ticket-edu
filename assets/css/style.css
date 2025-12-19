@@ -883,7 +883,7 @@ input[type="text"]:focus {
     z-index: 90;
     margin-top: 6px;
     animation: bounce-in 0.4s ease forwards;
-    
+
     /* new scroll properties */
     max-height: 300px;
     overflow-y: auto;
@@ -1271,7 +1271,7 @@ body .theme-toggle-container {
 /*Media Querry*/
 
 @media (max-aspect-ratio: 3/2) {
-    
+
     body {
         height: auto;
         overflow-y: auto;
@@ -1293,7 +1293,7 @@ body .theme-toggle-container {
         order: 2;
         width: 100%;
     }
-    
+
     #right {
         order: 3;
         width: 100%;
@@ -1314,9 +1314,15 @@ body .theme-toggle-container {
     .menu-overlay {
         order: 0;
     }
-    
+
     #subdiv::-webkit-scrollbar,
     #right::-webkit-scrollbar {
         display: none;
     }
+}
+
+#qrcode-container {
+    display: flex;
+    justify-content: center;
+    padding: 20px;
 }

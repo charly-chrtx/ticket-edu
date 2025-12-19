@@ -883,7 +883,7 @@ input[type="text"]:focus {
     z-index: 90;
     margin-top: 6px;
     animation: bounce-in 0.4s ease forwards;
-    
+
     /* new scroll properties */
     max-height: 300px;
     overflow-y: auto;
@@ -1266,4 +1266,10 @@ body .theme-toggle-container {
 .announcement-list.hidden {
     display: flex !important;
     visibility: visible;
+}
+
+#qrcode-container {
+    display: flex;
+    justify-content: center;
+    padding: 20px;
 }

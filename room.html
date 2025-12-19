@@ -118,6 +118,10 @@
           <div class="input" style="padding-bottom: 0;">
             <h1>Paramètres</h1>
 
+            <div id="qrcode-container">
+              <h2 style="text-align: left; margin-top: 30px; font-size: 1.2rem;">QR Code</h2>
+            </div>
+
             <div id="adminSettingsSection" style="display: none;">
               <h2 style="text-align: left; margin-top: 30px; font-size: 1.2rem;">Admin</h2>
 
@@ -166,7 +170,7 @@
                     style="text-decoration: underline wavy #9ecaff;">
                     fichier CSV
                   </span>
-                </span> 
+                </span>
 
                 <a class="button-text" id="csvButton" href="#"
                   style="min-height: 41px; width: auto; padding: 0 20px; flex: unset; min-width: 80px;">
@@ -290,11 +294,11 @@
           <div class="input" style="padding-bottom: 0;">
 
             <h1>Ticket bloqué</h1>
-            
+
             <h2 style="text-align: left; margin-top: 30px; font-size: 1.2rem;">Pourquoi votre ticket à été bloqué?</h2>
             <p style="margin: 30px 0; opacity: 0.7; text-align: left;">
-               - Votre contenue est jugé inapproprié.<br><br>
-               Si votre ticket contient aucun contenue inapproprié alors veuillez le signaler
+              - Votre contenue est jugé inapproprié.<br><br>
+              Si votre ticket contient aucun contenue inapproprié alors veuillez le signaler
             </p>
 
             <div class="overlay-footer" style="display: flex; justify-content: center; gap: 15px; margin-top: 30px;">
@@ -306,9 +310,9 @@
               </a>
 
               <a class="button-text" id="cancelLogout" href="#" onclick="closeReportTicketOverlay()"
-                  style="width: auto; padding: 0 30px; margin: 0; min-width: 140px;">
-                  <img class="icon" src="./assets/icon/check.png" alt="">
-                  <span class="text">Ok</span>
+                style="width: auto; padding: 0 30px; margin: 0; min-width: 140px;">
+                <img class="icon" src="./assets/icon/check.png" alt="">
+                <span class="text">Ok</span>
               </a>
 
             </div>
@@ -323,35 +327,36 @@
             <h1>Profils multiples</h1>
 
             <p style="margin: 30px 0; opacity: 0.7; text-align: left;">
-               Plusieurs profils ont le même prénom. Veuillez choisir.
+              Plusieurs profils ont le même prénom. Veuillez choisir.
             </p>
 
             <div id="nameChoicesContainer" style="display: flex; flex-direction: column; gap: 10px; margin: 20px 0;">
-                </div>
+            </div>
 
             <div class="overlay-footer" style="display: flex; justify-content: center; gap: 15px; margin-top: 30px;">
-                </div>
+            </div>
           </div>
         </div>
       </div>
 
       <div class="menu-overlay" id="loginOverlay" style="display: none;">
         <div class="menu-box">
-            <div class="input" style="padding-bottom: 0;">
-                <h1>Identification</h1>
-                
-                <p style="margin: 20px 0; opacity: 0.7;">Cette salle nécessite une identification.</p>
-                
-                <div style="margin: 15px 0;">
-                    <input type="text" id="loginName" placeholder="Votre Prénom" style="width: 100%; text-align: center;" />
-                </div>
+          <div class="input" style="padding-bottom: 0;">
+            <h1>Identification</h1>
 
-                <div class="overlay-footer" style="display: flex; justify-content: center; margin-top: 30px;">
-                    <a class="button-text" id="loginEnter" href="#" style="width: auto; padding: 0 30px; margin: 0; min-width: 140px;">
-                        <span class="text">Entrer</span>
-                    </a>
-                </div>
+            <p style="margin: 20px 0; opacity: 0.7;">Cette salle nécessite une identification.</p>
+
+            <div style="margin: 15px 0;">
+              <input type="text" id="loginName" placeholder="Votre Prénom" style="width: 100%; text-align: center;" />
             </div>
+
+            <div class="overlay-footer" style="display: flex; justify-content: center; margin-top: 30px;">
+              <a class="button-text" id="loginEnter" href="#"
+                style="width: auto; padding: 0 30px; margin: 0; min-width: 140px;">
+                <span class="text">Entrer</span>
+              </a>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -398,12 +403,13 @@
     });
 
     function closeReportTicketOverlay() {
-        const overlay = document.getElementById('reportTicketOverlay');
-        if (overlay) {
-            overlay.style.display = 'none';
-        }
+      const overlay = document.getElementById('reportTicketOverlay');
+      if (overlay) {
+        overlay.style.display = 'none';
+      }
     }
   </script>
+  <script type="text/javascript" src="https://unpkg.com/qr-code-styling@1.5.0/lib/qr-code-styling.js"></script>
   <script src="./assets/js/room.js"></script>+
 </body>
 
