@@ -156,7 +156,7 @@ function init_ui() {
         'storageProgressBar', 'announcementContainer', 'announcementArea',
         'adminFilesList', 'right', 'subdiv', 'create', 'createbutton',
         'formOverlay', 'settingsOverlay', 'logoutOverlay', 'name', 'infos',
-        'fileUploadContainer', 'adminSettingsSection', 'dropArea', 'fileInput',
+        'fileUploadContainer', 'adminSettingsSection', 'adminTypeSelector','dropArea', 'fileInput',
         'aiToggle', 'aiStatus', 'reportTicketOverlay',
         'loginOverlay', 'loginName', 'loginEnter', 'issueNameOverlay',
         'nameChoicesContainer', 'csvButton', 'csvInput', 'qrcode-container'
@@ -354,9 +354,10 @@ function update_ai_status(enabled) {
 function set_admin_mode(status) {
     // update state
     is_admin = status;
-    const { createbutton, name, infos, formOverlay, fileUploadContainer, adminSettingsSection } = ui_elements;
+    const { createbutton, name, infos, formOverlay, fileUploadContainer, adminSettingsSection, adminTypeSelector } = ui_elements;
 
     // hide or show admin sections
+    if (adminTypeSelector) adminTypeSelector.style.display = is_admin ? 'flex' : 'none';
     if (adminSettingsSection) adminSettingsSection.style.display = is_admin ? 'block' : 'none';
     if (fileUploadContainer) fileUploadContainer.style.display = is_admin ? 'flex' : 'none';
 
@@ -367,10 +368,12 @@ function set_admin_mode(status) {
     const btn_text = createbutton.querySelector('.text');
 
     if (is_admin) {
+        const currentType = document.querySelector('input[name="AdminType"]:checked')?.value;
+
         if (btn_text) btn_text.textContent = "Nouveau message";
         if (name) { name.placeholder = "Message"; name.value = ""; }
         if (infos) infos.style.display = 'none';
-        if (title) title.textContent = "Nouveau message";
+        if (title) title.textContent = currentType === 'depot' ? "Nouveau dépot" : "Nouveau message";
         pending_files = [];
         render_pending_files();
     } else {
@@ -390,7 +393,20 @@ function set_admin_mode(status) {
     }
 }
 
+function setup_admin_type_listener() {
+    document.querySelectorAll('input[name="AdminType"]').forEach(radio => {
+        radio.addEventListener('change', (e) => {
+            const title = ui_elements.formOverlay.querySelector('h1');
+            const type = e.target.value;
 
+            if (type === 'depot') {
+                title.textContent = "Nouveau dépot";
+            } else {
+                title.textContent = "Nouveau message";
+            }
+        });
+    });
+}
 
 // login flow
 
@@ -1029,6 +1045,8 @@ function setup_event_listeners() {
             if (is_admin) await api_call(`/api/rooms/${room_code}`, "PUT", { maxTickets: max_tickets });
         });
     });
+
+    setup_admin_type_listener()
 
     if (els.aiToggle) els.aiToggle.addEventListener('change', async (e) => {
         if (!is_admin) { e.preventDefault(); e.target.checked = ai_enabled; return alert("Vous n'avez pas la permission."); }

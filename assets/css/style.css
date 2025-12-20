@@ -448,15 +448,14 @@ input[type="text"]:focus {
 .slider-selector {
     display: flex;
     align-items: center;
-    justify-content: space-between;
     border: 2px solid black;
     border-radius: 50px;
-    width: auto;
-    padding: 0 8px;
+    width: 100%; /* fill container */
     height: 41px;
     background: var(--card-bg);
     box-shadow: 0px 2px 0px #000000;
     transition: all 0.3s ease;
+    overflow: hidden;
 }
 
 .slider-selector:hover {
@@ -466,7 +465,7 @@ input[type="text"]:focus {
 
 .slider-option {
     position: relative;
-    width: 30px;
+    flex: 1; 
     height: 100%;
     display: flex;
     justify-content: center;
@@ -476,6 +475,22 @@ input[type="text"]:focus {
 
 .slider-option input {
     display: none;
+}
+
+
+.label-text {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: 'Inconsolata', monospace;
+    font-weight: 600;
+    font-size: 14px;
+    color: black;
+    transition: all 0.3s ease;
+    border-radius: 40px;
+    margin: 2px;
 }
 
 .slider-option .dot {
@@ -493,6 +508,13 @@ input[type="text"]:focus {
     display: flex;
     justify-content: center;
     align-items: center;
+}
+
+.slider-option input:checked + .label-text {
+    background-color: #A6C5FF;
+    border: 2px solid black;
+    height: calc(100% - 8px);
+    margin: 0 4px;
 }
 
 .slider-option input:checked~.dot::after {
@@ -1373,4 +1395,11 @@ body.dark-mode #qrcode-container {
 
 #copyText:hover {
     cursor: pointer;
+}
+
+.admin-selector {
+    display: flex;
+    justify-content: center;
+    padding-bottom: 20px;
+    
 }

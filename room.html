@@ -57,6 +57,20 @@
 
       <div class="menu-overlay" id="formOverlay" style="display: none;">
         <div class="menu-box">
+
+          <div class="admin-selector" id="adminTypeSelector" style="display: none;">
+            <div class="slider-selector">
+              <label class="slider-option">
+                <input type="radio" name="AdminType" value="message" checked>
+                <span class="label-text">Message</span>
+              </label>
+              <label class="slider-option">
+                <input type="radio" name="AdminType" value="depot">
+                <span class="label-text">Dépot</span>
+              </label>
+            </div>
+          </div>
+
           <div class="input" style="padding-bottom: 0;">
 
             <h1>Nouveau ticket</h1>
@@ -117,22 +131,23 @@
         <div class="menu-box">
           <div class="input" style="padding-bottom: 0;">
             <h1>Paramètres</h1>
-            
-            <div class="qr-card" style="height: auto; width: 100%; opacity: 1; animation: none; padding: 20px 15px; gap: 15px; justify-content: center;">
-                          
-                <div id="qrcode-container" style="transition: all 0.2s;"></div>
 
-                <div style="display: flex; flex-direction: column; gap: 25px; text-align: center;">
-                  
-                  <div id="codebutton" style="font-size: 1.1rem; font-weight: 600; line-height: 1.4;">
-                    Scannez pour nous rejoindre.
-                  </div>
+            <div class="qr-card"
+              style="height: auto; width: 100%; opacity: 1; animation: none; padding: 20px 15px; gap: 15px; justify-content: center;">
 
-                  <div id="copyText" style="font-size: 1.8rem; font-weight: 600; line-height: 1.4;">
-                    *****
-                  </div>
+              <div id="qrcode-container" style="transition: all 0.2s;"></div>
 
+              <div style="display: flex; flex-direction: column; gap: 25px; text-align: center;">
+
+                <div id="codebutton" style="font-size: 1.1rem; font-weight: 600; line-height: 1.4;">
+                  Scannez pour nous rejoindre.
                 </div>
+
+                <div id="copyText" style="font-size: 1.8rem; font-weight: 600; line-height: 1.4;">
+                  *****
+                </div>
+
+              </div>
 
             </div>
 
