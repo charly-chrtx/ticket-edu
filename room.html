@@ -118,22 +118,18 @@
           <div class="input" style="padding-bottom: 0;">
             <h1>Paramètres</h1>
             
-            <div class="qr-card" style="height: auto; width: 100%; opacity: 1; animation: none; padding: 20px 15px; gap: 15px; justify-content: center;">
-                          
-                <div id="qrcode-container" style="transition: all 0.2s;"></div>
+            <div class="qr-card" style="height: auto; padding: 20px 15px; gap: 15px; justify-content: center; opacity: 1; animation: none;">
+    
+                <div id="qrcode-container"></div>
 
-                <div style="display: flex; flex-direction: column; gap: 25px; text-align: center;">
-                  
-                  <div id="codebutton" style="font-size: 1.1rem; font-weight: 600; line-height: 1.4;">
-                    Scannez pour nous rejoindre.
-                  </div>
-
-                  <div id="copyText" style="font-size: 1.8rem; font-weight: 600; line-height: 1.4;">
-                    *****
-                  </div>
-
+                <div style="display: flex; flex-direction: column; gap: 10px; text-align: center; flex: 1;">
+                    <div id="codebutton" style="font-size: 1.1rem; font-weight: 600; line-height: 1.2;">
+                        Scannez pour nous rejoindre.
+                    </div>
+                    <div id="copyText" style="font-size: 1.5rem; font-weight: 800;">
+                        *****
+                    </div>
                 </div>
-
             </div>
 
             <div id="adminSettingsSection" style="display: none;">
@@ -168,12 +164,21 @@
               </div>
 
               <div style="display: flex; justify-content: space-between; align-items: center; margin: 15px 0;">
-                <span>Nombre maximum d'utilisateur dans le groupe</span>
-                <div class="quantity-selector" style="opacity: 30%; pointer-events: none;">
-                  <button class="qty-btn">－</button>
-                  <div class="qty-val">~~</div>
-                  <button class="qty-btn">＋</button>
-                </div>
+                  <span>Nombre maximum d'utilisateur dans le groupe</span>
+                  
+                  <div class="quantity-selector" style="opacity: 30%; pointer-events: none;">
+                      
+                      <button class="qty-btn">
+                          <img src="assets/icon/add.png" alt="Moins">
+                      </button>
+
+                      <div class="qty-val">~~</div>
+
+                      <button class="qty-btn">
+                          <img src="assets/icon/remove.png" alt="Plus">
+                      </button>
+                      
+                  </div>
               </div>
 
               <div style="display: flex; justify-content: space-between; align-items: center; margin: 15px 0;">
