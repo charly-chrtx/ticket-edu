@@ -27,9 +27,9 @@ db.serialize(() => {
     csvFilePath TEXT
   )`, (err) => {
     if (!err) {
-      db.run("ALTER TABLE rooms ADD COLUMN maxTickets INTEGER DEFAULT 1", () => {});
-      db.run("ALTER TABLE rooms ADD COLUMN aiEnabled INTEGER DEFAULT 0", () => {}); 
-      db.run("ALTER TABLE rooms ADD COLUMN csvFilePath TEXT", () => {});
+      db.run("ALTER TABLE rooms ADD COLUMN maxTickets INTEGER DEFAULT 1", () => { });
+      db.run("ALTER TABLE rooms ADD COLUMN aiEnabled INTEGER DEFAULT 0", () => { });
+      db.run("ALTER TABLE rooms ADD COLUMN csvFilePath TEXT", () => { });
     }
   });
 
@@ -55,9 +55,25 @@ db.serialize(() => {
     announcementId TEXT
   )`, (err) => {
     if (!err) {
-      db.run("ALTER TABLE files ADD COLUMN announcementId TEXT", () => {});
+      db.run("ALTER TABLE files ADD COLUMN announcementId TEXT", () => { });
     }
   });
+
+  // deposits table
+  db.run(`CREATE TABLE IF NOT EXISTS deposits (
+    id TEXT PRIMARY KEY,
+    roomCode TEXT,
+    name TEXT,
+    createdAt TEXT
+  )`);
+
+  // update files table
+  db.run("ALTER TABLE files ADD COLUMN depositId TEXT", () => { });
+
+  db.run("ALTER TABLE files ADD COLUMN announcementId TEXT", () => { });
 });
+
+
+
 
 module.exports = db;

@@ -25,6 +25,7 @@ app.use(express.static('public'));
 
 // env config
 const MAX_GLOBAL_STORAGE = (parseInt(process.env.MAX_STORAGE_MO) || 10000) * 1024 * 1024;
+const DEPOT_EXPIRATION = (parseInt(process.env.DEPOT_FILE_EXPIRATION_HOURS) || 24) * 60 * 60 * 1000;
 
 // settings
 let globalSettings = {
@@ -33,6 +34,8 @@ let globalSettings = {
 };
 
 const UPLOAD_DIR = process.env.UPLOAD_DIR || './uploads';
+const PATH_ANN = path.join(UPLOAD_DIR, 'announcements');
+const PATH_DEP = path.join(UPLOAD_DIR, 'deposits');
 
 // ensure dir
 if (!fs.existsSync(UPLOAD_DIR)) {
@@ -73,22 +76,20 @@ function parseAndSearchCsv(fileContent, query, usedNames = []) {
   );
 }
 
+// multer storage dynamic
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, UPLOAD_DIR);
+    // route-based destination
+    if (req.originalUrl.includes('announcements')) cb(null, PATH_ANN);
+    else if (req.originalUrl.includes('deposits')) cb(null, PATH_DEP);
+    else cb(null, UPLOAD_DIR);
   },
   filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, 'file-' + uniqueSuffix);
+    const suffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, 'file-' + suffix);
   }
 });
-
-const upload = multer({
-  storage: storage,
-  limits: {
-    fileSize: MAX_GLOBAL_STORAGE
-  }
-});
+const upload = multer({ storage, limits: { fileSize: MAX_GLOBAL_STORAGE } });
 
 // upload errors
 app.use((err, req, res, next) => {
@@ -643,6 +644,82 @@ app.delete('/api/tickets/:id', (req, res) => {
   });
 });
 
+// post deposit (admin only)
+app.post('/api/deposits', async (req, res) => {
+  const { roomCode, userId, name } = req.body;
+
+  db.get("SELECT adminId FROM rooms WHERE code = ?", [roomCode], (err, room) => {
+    if (!room || room.adminId !== userId) return res.status(403).json({ error: "unauthorized" });
+
+    const id = "dep_" + Date.now();
+    db.run("INSERT INTO deposits (id, roomCode, name, createdAt) VALUES (?, ?, ?, ?)",
+      [id, roomCode, name, new Date().toISOString()],
+      (err) => {
+        if (err) return res.status(500).json({ error: err.message });
+        notifierClients(roomCode, 'update'); // refresh ui
+        res.status(201).json({ id, name });
+      }
+    );
+  });
+});
+
+// get deposits list
+app.get('/api/rooms/:code/deposits', (req, res) => {
+  db.all("SELECT * FROM deposits WHERE roomCode = ?", [req.params.code], (err, rows) => {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json(rows);
+  });
+});
+
+// upload file to deposit
+app.post('/api/deposits/:id/upload', upload.single('file'), async (req, res) => {
+  const depositId = req.params.id;
+  const { userId, roomCode, customName } = req.body;
+  const file = req.file;
+
+  if (!file) return res.status(400).json({ error: "no file" });
+
+  // check if already uploaded
+  db.get("SELECT id FROM files WHERE depositId = ? AND userId = ?", [depositId, userId], async (err, existing) => {
+    if (existing) {
+      fs.unlinkSync(file.path);
+      return res.status(403).json({ error: "already uploaded" });
+    }
+
+    // ai safety check on custom name
+    const isSafe = await validateContent(customName || file.originalname);
+    if (!isSafe) {
+      fs.unlinkSync(file.path);
+      return res.status(400).json({ error: "blocked by ai" });
+    }
+
+    // quota check
+    db.get("SELECT SUM(size) as total FROM files WHERE roomCode = ?", [roomCode], (err, row) => {
+      const current = row?.total || 0;
+      if (current + file.size > globalSettings.maxStoragePerRoom) {
+        fs.unlinkSync(file.path);
+        return res.status(413).json({ error: "quota exceeded" });
+      }
+
+      // save file
+      const fileId = "fdep_" + Date.now();
+      const finalName = normalize(customName || file.originalname);
+
+      db.run(`INSERT INTO files (id, originalName, encryptedName, mimeType, size, roomCode, userId, depositId)
+              VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+        [fileId, finalName, file.filename, file.mimetype, file.size, roomCode, userId, depositId],
+        (err) => {
+          if (err) {
+            fs.unlinkSync(file.path);
+            return res.status(500).json({ error: err.message });
+          }
+          res.status(201).json({ message: "uploaded" });
+        }
+      );
+    });
+  });
+});
+
 // get files
 app.get('/api/files/:roomCode', (req, res) => {
   const roomCode = req.params.roomCode;
@@ -716,6 +793,15 @@ app.post('/api/files', upload.single('file'), (req, res) => {
     });
   });
 });
+
+//normalize file name
+function normalize(str) {
+  return str.toLowerCase()
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, "") 
+    .replace(/[^a-z0-z0-9]/g, "_") 
+    .replace(/_+/g, "_"); 
+}
+
 
 // download file
 app.get('/api/files/download/:fileId', (req, res) => {
@@ -1042,10 +1128,38 @@ function supprimerRoomsInactives() {
   });
 }
 
+function supprimerDepositsExpires() {
+  const now = Date.now();
+
+  db.all("SELECT * FROM deposits", [], (err, rows) => {
+    if (err || !rows) return;
+
+    rows.forEach(dep => {
+      const age = now - new Date(dep.createdAt).getTime();
+      if (age > DEPOT_EXPIRATION) {
+        // find associated files
+        db.all("SELECT encryptedName FROM files WHERE depositId = ?", [dep.id], (err, files) => {
+          if (files) {
+            files.forEach(f => {
+              const p = path.join(PATH_DEP, f.encryptedName);
+              if (fs.existsSync(p)) fs.unlinkSync(p);
+            });
+          }
+          // delete entries
+          db.run("DELETE FROM files WHERE depositId = ?", [dep.id]);
+          db.run("DELETE FROM deposits WHERE id = ?", [dep.id]);
+          console.log(`deposit ${dep.id} expired and deleted`);
+        });
+      }
+    });
+  });
+}
+
 // intervals
 setInterval(() => {
   supprimerTicketsExpires();
   supprimerRoomsInactives();
+  supprimerDepositsExpires(); 
 }, 60000);
 
 const PORT = process.env.PORT || 3000;
