@@ -47,6 +47,10 @@ h1 {
 
 @keyframes div {
     0% {
+        opacity: 0;
+    }
+    
+    1% {
         transform: scale(0.96);
         opacity: 0;
     }
@@ -228,6 +232,11 @@ h1 {
     scrollbar-gutter: stable;
     scrollbar-width: thin;
     scrollbar-color: rgba(129, 129, 129, 0.5) transparent;
+}
+
+.loaded .announcement-container {
+    animation: div 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+    animation-delay: 200ms;
 }
 
 .loaded #subdiv {
@@ -781,6 +790,7 @@ input[type="text"]:focus {
     z-index: 50;
     animation: div 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
     animation-delay: 200ms;
+    opacity: 0;
 }
 
 .announcement-container.is-empty {
