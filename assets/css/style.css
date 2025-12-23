@@ -48,21 +48,33 @@ h1 {
 @keyframes div {
     0% {
         opacity: 0;
+        filter: blur(8px);
+        transform: perspective(1000px) rotateX(-8deg) scale(0.9) translateY(15px);
     }
     
-    1% {
-        transform: scale(0.96);
-        opacity: 0;
+    30% {
+        filter: blur(2px);
     }
-
-    60% {
-        transform: scale(1.01);
+    
+    50% {
         opacity: 1;
+        filter: blur(0.5px);
+        transform: perspective(1000px) rotateX(1.5deg) scale(1.008) translateY(-2px);
     }
-
+    
+    70% {
+        filter: blur(0px);
+        transform: perspective(1000px) rotateX(-0.5deg) scale(0.998) translateY(0.5px);
+    }
+    
+    90% {
+        transform: perspective(1000px) rotateX(0.2deg) scale(1.001) translateY(-0.2px);
+    }
+    
     100% {
-        transform: scale(1);
         opacity: 1;
+        filter: blur(0px);
+        transform: perspective(1000px) rotateX(0) scale(1) translateY(0);
     }
 }
 
@@ -198,15 +210,6 @@ h1 {
     opacity: 0;
 }
 
-.loaded .top {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 10px;
-    animation: div 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
-    animation-delay: 50ms;
-}
-
 .div {
     padding: clamp(15px, 40px, 10px) 20px;
     background: var(--bg-color);
@@ -234,18 +237,27 @@ h1 {
     scrollbar-color: rgba(129, 129, 129, 0.5) transparent;
 }
 
+.loaded .top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    animation: div 0.95s cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
+    animation-delay: 50ms;
+}
+
 .loaded .announcement-container {
-    animation: div 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+    animation: div 0.95s cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
     animation-delay: 200ms;
 }
 
 .loaded #subdiv {
-    animation: div 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+    animation: div 0.95s cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
     animation-delay: 300ms;
 }
 
 .loaded #right {
-    animation: div 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+    animation: div 0.95s cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
     animation-delay: 400ms;
 }
 
@@ -788,8 +800,6 @@ input[type="text"]:focus {
     margin-bottom: 20px;
     transition: margin-bottom 0.3s ease;
     z-index: 50;
-    animation: div 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
-    animation-delay: 200ms;
     opacity: 0;
 }
 
@@ -832,7 +842,7 @@ input[type="text"]:focus {
     transition: all 0.3s ease;
     z-index: 100;
     opacity: 0;
-    animation: div 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+    animation: div 0.95s cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
     animation-delay: 200ms;
 }
 
@@ -1243,7 +1253,7 @@ body .action-buttons {
     max-width: 380px;
     position: relative;
     z-index: 2;
-    animation: div 0.5s cubic-bezier(0.25, 0.46, 0.45, 1.94) forwards;
+    animation: div 0.95s cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
     animation-delay: 50ms;
 }
 
@@ -1361,7 +1371,6 @@ body.dark-mode .qr-card::before {
     transition: all 0.3s ease;
     z-index: 100;
     opacity: 0;
-    animation: div 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
     animation-delay: 200ms;
     transition: all 0.3s ease;
 }

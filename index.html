@@ -63,7 +63,7 @@
                 max-width: 380px;
                 position: relative;
                 z-index: 2; 
-                animation: div 0.5s cubic-bezier(0.25, 0.46, 0.45, 1.94) forwards;
+                animation: div 0.75s cubic-bezier(0.25, 0.46, 0.45, 1.94) forwards;
                 animation-delay: 50ms;
             }
 
@@ -95,6 +95,7 @@
                 display: flex;
                 gap: 10px;
             }
+
         }
     </style>
 </head>
@@ -125,7 +126,7 @@
         <p class="version-text">
             version 
             <span id="openChangelogBtn" style="text-decoration: underline wavy #9ecaff; cursor: pointer;">
-                Pre-release v0.9.2
+                Pre-release v0.9.3
             </span>
         </p>
         <p class="info-text">[!] Version Developpeur. Signaler en cas de soucis </p>
@@ -178,6 +179,28 @@
 
                 <div style="margin-bottom: 20px; text-align: left;">
 
+                    <div class="changelog-entry" style="margin-bottom: 20px;">
+                        <h2 style="margin-bottom: 15px; color: var(-text);">Pre-release v0.9.3</h2>
+                        
+                        <strong style="color: var(-text); display: block; margin-bottom: 5px;">Fonctionnalités</strong>
+                        <ul style="margin: 0 0 10px 0; padding-left: 20px; color: #808080;">
+                            <li>Ajout des dépôts pour rendre des fihciers.</li>
+                        </ul>
+
+                        <strong style="color: var(-text); display: block; margin-bottom: 5px;">Interface (UI/UX)</strong>
+                        <ul style="margin: 0 0 10px 0; padding-left: 20px; color: #808080;">
+                            <li>Nouvelles animations de chargement des pages.</li>
+                        </ul>
+
+                        <strong style="color: var(-text); display: block; margin-bottom: 5px;">Divers</strong>
+                        <ul style="margin: 0; padding-left: 20px; color: #808080;">
+                            <li>Correction de l'affichage intempestif de la barre de menus.</li>
+                            <li>Diverses améliorations mineures.</li>
+                        </ul>
+                        
+                        <hr style="border: 0; border-top: 1px solid #e0e0e0; margin: 30px 0;">
+                    </div>
+                    
                     <div class="changelog-entry" style="margin-bottom: 20px;">
                         <h2 style="margin-bottom: 15px; color: var(-text);">Pre-release v0.9.2</h2>
                         
@@ -237,7 +260,6 @@
                             <li>Diverses améliorations mineures.</li>
                         </ul>
 
-                        <hr style="border: 0; border-top: 1px solid #e0e0e0; margin: 30px 0;">
                     </div>
 
                 </div>
@@ -316,19 +338,18 @@
         </div>
       </div>
 
-    <script src="./assets/js/darkmode.js"></script>
-
     <script>
         const canvas = document.getElementById('bgCanvas');
         const ctx = canvas.getContext('2d');
 
         let width, height;
         let increment = 0;
+        let startTime = null;
 
         const waves = [
-            { y: 0.65, length: 0.007, amplitude: 40, speed: -0.0007, offset: 0 }, 
-            { y: 0.75, length: 0.005, amplitude: 35, speed: 0.0009, offset: 2 },
-            { y: 0.85, length: 0.004, amplitude: 30, speed: -0.0011, offset: 4 }
+            { y: 0.60, length: 0.006, amplitude: 50, speed: -0.0007, offset: 0, delay: 0 }, 
+            { y: 0.72, length: 0.004, amplitude: 40, speed: 0.0009, offset: 2, delay: 100 },
+            { y: 0.82, length: 0.003, amplitude: 30, speed: -0.0011, offset: 4, delay: 200 }
         ];
 
         function resize() {
@@ -340,56 +361,75 @@
         window.addEventListener('resize', resize);
         resize();
 
-        function animate() {
+        function easeOutCubic(t) {
+            return 1 - Math.pow(1 - t, 3);
+        }
+
+        function animate(timestamp) {
+            if (!startTime) startTime = timestamp;
+            const runtime = timestamp - startTime;
+
             requestAnimationFrame(animate);
             
-            // check for dark mode class on body
             const isDark = document.body.classList.contains('dark-mode');
-
             const gradient = ctx.createLinearGradient(0, 0, 0, height);
 
             if (isDark) {
-                // dark mode colors
                 gradient.addColorStop(0, '#1a1a1a'); 
                 gradient.addColorStop(1, '#2d2d2d');
                 ctx.fillStyle = gradient;
-                
                 ctx.fillRect(0, 0, width, height);
-                
-                // wave style dark
-                ctx.fillStyle = 'rgba(45, 45, 45, 1)';
                 ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
             } else {
-                // light mode colors
                 gradient.addColorStop(0, '#FFF8E7'); 
                 gradient.addColorStop(1, '#FFFFFF'); 
                 ctx.fillStyle = gradient;
-
                 ctx.fillRect(0, 0, width, height);
-
-                // wave style light
-                ctx.fillStyle = 'rgba(255, 255, 255, 1)';
                 ctx.strokeStyle = 'rgba(0, 0, 0, 0.8)';
             }
 
-            waves.forEach((wave) => {
+            waves.forEach((wave, index) => {
                 ctx.beginPath();
                 ctx.lineWidth = 1;
+                
+                const introDuration = 1500; 
+                let progress = (runtime - wave.delay) / introDuration;
+                progress = Math.max(0, Math.min(progress, 1));
+                const easedProgress = easeOutCubic(progress);
+                const startY = height + 150; 
+                const targetY = height * wave.y;
+                const currentBaseY = startY - ((startY - targetY) * easedProgress);
+
+                let alpha = isDark ? 1 : 1;
+                if (progress < 1) {
+                }
+
+                if (isDark) {
+                    ctx.fillStyle = `rgba(45, 45, 45, ${alpha})`;
+                } else {
+                    ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
+                }
 
                 ctx.moveTo(0, height);
+                
                 for (let i = 0; i < width; i++) {
-                    const y = height * wave.y + Math.sin(i * wave.length + increment * wave.speed + wave.offset) * wave.amplitude;
+                    const dynamicAmp = wave.amplitude * (1 + (1 - easedProgress) * 0.5);
+                    
+                    const y = currentBaseY + Math.sin(i * wave.length + increment * wave.speed + wave.offset) * dynamicAmp;
                     ctx.lineTo(i, y);
                 }
+
                 ctx.lineTo(width, height);
                 ctx.lineTo(0, height);
                 ctx.closePath();
                 ctx.fill();
                 ctx.stroke();
             });
+
             increment += 1;
         }
-        animate();
+        
+        requestAnimationFrame(animate);
 
         const settingsBtn = document.getElementById('settingsBtn');
         const settingsOverlay = document.getElementById('settingsOverlay');
@@ -419,22 +459,19 @@
         const changelogOverlay = document.getElementById('changelogOverlay');
         const confirmLogsBtn = document.getElementById('confirmLogs');
 
-        // Ouvrir le menu
         if (openChangelogBtn && changelogOverlay) {
             openChangelogBtn.addEventListener('click', () => {
                 changelogOverlay.style.display = 'flex';
             });
         }
 
-        // Fermer le menu via le bouton "Ok"
         if (confirmLogsBtn && changelogOverlay) {
             confirmLogsBtn.addEventListener('click', (e) => {
-                e.preventDefault(); // Empêche le comportement par défaut du lien
+                e.preventDefault();
                 changelogOverlay.style.display = 'none';
             });
         }
 
-        // Fermer le menu en cliquant en dehors de la boîte (sur le fond gris)
         if (changelogOverlay) {
             changelogOverlay.addEventListener('click', (e) => {
                 if (e.target === changelogOverlay) {
