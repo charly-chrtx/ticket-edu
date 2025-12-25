@@ -1,0 +1,27 @@
+name: opencommit action
+
+on:
+  push:
+    branches: [ master, main ]
+
+jobs:
+  opencommit:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: opencommit
+        uses: di-sukharev/opencommit-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          
+          OCO_AI_PROVIDER: ollama
+          
+          OCO_API_URL: ${{ secrets.OLLAMA_URL }}
+          
+          OCO_MODEL: ministral-3:8b
+          OCO_EMOJI: false
