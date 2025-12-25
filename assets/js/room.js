@@ -769,12 +769,16 @@ function render_deposit_ui() {
     }
 }
 
-async function create_deposit(name) {
+async function create_deposit(name, color) {
     if (!name || !name.trim()) return alert('Nom requis');
     try {
-        await api_call('/api/deposits', 'POST', { roomCode: room_code, userId: user_id, name: name.trim() });
+        await api_call('/api/deposits', 'POST', {
+            roomCode: room_code,
+            userId: user_id,
+            name: name.trim(),
+            color: color
+        });
         toggle_overlay('formOverlay', false);
-        // refresh happens via websocket update
     } catch (e) {
         alert('Erreur création dépôt: ' + (e.message || e));
     }
@@ -996,7 +1000,7 @@ async function handle_form_submit() {
         // handle deposit creation
         if (adminType === 'depot') {
             if (!name) return alert('Nom du dépôt requis.');
-            await create_deposit(name);
+            await create_deposit(name, color);
             return;
         }
         if (!name && pending_files.length === 0) return alert("Message ou fichier requis.");
