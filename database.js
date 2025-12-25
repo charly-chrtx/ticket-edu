@@ -68,10 +68,22 @@ db.serialize(() => {
     createdAt TEXT
   )`);
 
-  // update files table
-  db.run("ALTER TABLE deposits ADD COLUMN color TEXT", () => { });
+  // update  table
+  db.serialize(() => {
+    // add missing columns to files table
+    db.run(`alter table files add column depositId text`, err => {
+      if (err && !err.message.includes("duplicate column")) console.error(err);
+    });
 
-  db.run("ALTER TABLE files ADD COLUMN announcementId TEXT", () => { });
+    db.run(`alter table files add column announcementId text`, err => {
+      if (err && !err.message.includes("duplicate column")) console.error(err);
+    });
+
+    // add color to deposits table
+    db.run(`alter table deposits add column color text`, err => {
+      if (err && !err.message.includes("duplicate column")) console.error(err);
+    });
+  });
 });
 
 
