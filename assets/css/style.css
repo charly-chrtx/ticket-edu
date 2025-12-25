@@ -515,7 +515,7 @@ input[type="text"]:focus {
     align-items: center;
     border: 2px solid black;
     border-radius: 50px;
-    width: 100%; /* fill container */
+    width: 215px;
     height: 41px;
     background: var(--card-bg);
     box-shadow: 0px 2px 0px #000000;
@@ -551,7 +551,7 @@ input[type="text"]:focus {
     align-items: center;
     font-family: 'Inconsolata', monospace;
     font-weight: 600;
-    font-size: 14px;
+    font-size: 16px;
     color: black;
     transition: all 0.3s ease;
     border-radius: 40px;
@@ -567,7 +567,7 @@ input[type="text"]:focus {
 }
 
 .slider-option input:checked~.dot {
-    width: 32px;
+    width: 28px;
     background-color: #A6C5FF;
     border: 2px solid black;
     display: flex;

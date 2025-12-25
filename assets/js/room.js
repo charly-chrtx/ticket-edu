@@ -406,7 +406,7 @@ function setup_admin_type_listener() {
             const type = e.target.value;
 
             if (type === 'depot') {
-                title.textContent = "Nouveau dépot";
+                title.textContent = "Nouveau dépôt";
                 if (fileUploadContainer) {
                     fileUploadContainer.style.display = 'none';
                 }
