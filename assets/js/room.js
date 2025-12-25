@@ -1,8 +1,8 @@
 'use strict';
 
 // config
-const api_url = "http://localhost:3000";
-const ws_url = "ws://localhost:3000";
+const api_url = "https://api.ticket-edu.com";
+const ws_url = "wss://api.ticket-edu.com";
 const max_files = 10;
 const max_storage_bytes = 1.5 * 1024 * 1024 * 1024; // 1.5gb
 const animation_delay = 600;
