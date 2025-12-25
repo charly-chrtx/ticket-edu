@@ -1,4 +1,4 @@
-const API_URL = "https://api.ticket-edu.com";
+const API_URL = "http://localhost:3000";
 
 const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 const targetRoomFile = isMobile ? "room-phone.html" : "room.html";

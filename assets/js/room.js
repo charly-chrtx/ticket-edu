@@ -1,8 +1,8 @@
 'use strict';
 
 // config
-const api_url = "https://api.ticket-edu.com";
-const ws_url = "wss://api.ticket-edu.com";
+const api_url = "http://localhost:3000";
+const ws_url = "ws://localhost:3000";
 const max_files = 10;
 const max_storage_bytes = 1.5 * 1024 * 1024 * 1024; // 1.5gb
 const animation_delay = 600;
@@ -24,7 +24,10 @@ let student_name = sessionStorage.getItem('student_name_cache');
 let tickets_list = [];
 let last_ticket_ids = new Set();
 let announcements_list = [];
+let deposits_list = [];
 let pending_files = [];
+let current_deposit_target = null;
+let deposit_pending_file = null;
 let banned_terms = [];
 let current_xhr = null;
 let ws_retry_count = 0;
@@ -156,10 +159,11 @@ function init_ui() {
         'storageProgressBar', 'announcementContainer', 'announcementArea',
         'adminFilesList', 'right', 'subdiv', 'create', 'createbutton',
         'formOverlay', 'settingsOverlay', 'logoutOverlay', 'name', 'infos',
-        'fileUploadContainer', 'adminSettingsSection', 'adminTypeSelector','dropArea', 'fileInput',
+        'fileUploadContainer', 'adminSettingsSection', 'adminTypeSelector', 'dropArea', 'fileInput',
         'aiToggle', 'aiStatus', 'reportTicketOverlay',
         'loginOverlay', 'loginName', 'loginEnter', 'issueNameOverlay',
         'nameChoicesContainer', 'csvButton', 'csvInput', 'qrcode-container'
+        , 'depositOverlay', 'depositCustomName', 'depositDropArea', 'depositFileInput', 'depositFileName', 'depositSend', 'depositCancel'
     ];
 
     ids.forEach(id => {
@@ -299,6 +303,7 @@ async function load_resources() {
 
     if (proceed) {
         await sync_announcements();
+        await sync_deposits();
         await render_tickets();
     }
     return proceed;
@@ -325,18 +330,18 @@ async function check_permissions() {
     update_ai_status(ai_enabled);
 
     csv_mode = data.hasCsv || false;
-    
+
     // server returns boolean flag
     set_admin_mode(data.isAdmin === true);
 
     if (!is_admin && csv_mode) {
         if (!student_name) {
             start_login_flow();
-            return false; 
+            return false;
         }
     }
 
-    return true; 
+    return true;
 }
 
 function update_ai_status(enabled) {
@@ -374,6 +379,7 @@ function set_admin_mode(status) {
         if (name) { name.placeholder = "Message"; name.value = ""; }
         if (infos) infos.style.display = 'none';
         if (title) title.textContent = currentType === 'depot' ? "Nouveau dépot" : "Nouveau message";
+
         pending_files = [];
         render_pending_files();
     } else {
@@ -401,8 +407,12 @@ function setup_admin_type_listener() {
 
             if (type === 'depot') {
                 title.textContent = "Nouveau dépot";
+                if (fileUploadContainer) {
+                    fileUploadContainer.style.display = 'none';
+                }
             } else {
                 title.textContent = "Nouveau message";
+                fileUploadContainer.style.display = 'flex';
             }
         });
     });
@@ -572,26 +582,20 @@ function update_storage_ui() {
         }
     });
 
-    const { storageText, storageProgressBar } = ui_elements;
+    const { storageText, storageProgressBar, announcementContainer, fileCountText } = ui_elements;
 
     if (storageText) storageText.textContent = format_bytes(total_bytes) + ' / ' + format_bytes(max_storage_bytes);
     if (fileCountText) fileCountText.textContent = `${total_files} fichier${total_files > 1 ? 's' : ''} partagé${total_files > 1 ? 's' : ''}`;
 
-
-
-
     let pct = (total_bytes / max_storage_bytes) * 100;
 
     if (pct < 5 && total_bytes > 0) pct = 5;
-
     if (pct > 100) pct = 100;
-
 
     if (storageProgressBar) storageProgressBar.style.width = `${pct}%`;
 
-
     if (announcementContainer) {
-        if (announcements_list.length === 0) {
+        if (announcements_list.length === 0 && deposits_list.length === 0) {
             announcementContainer.classList.add('is-empty');
         } else {
             announcementContainer.classList.remove('is-empty');
@@ -605,39 +609,294 @@ function render_announcements() {
     container.innerHTML = '';
     container.classList.remove('hidden');
 
-    const left_container = document.querySelector('.left-container');
-    if (left_container) left_container.style.gap = announcements_list.length === 0 ? '0px' : '';
+    // merge lists and sort by date
+    const all_items = [
+        ...announcements_list.map(a => ({ ...a, item_type: 'annonce' })),
+        ...deposits_list.map(d => ({ ...d, item_type: 'depot' }))
+    ].sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
 
-    announcements_list.forEach((annonce, index) => {
+    // restore v1 layout logic
+    const left_container = document.querySelector('.left-container');
+    if (left_container) left_container.style.gap = all_items.length === 0 ? '0px' : '';
+
+    all_items.forEach((item, index) => {
+        const is_depot = item.item_type === 'depot';
         const wrapper = create_tag('div', 'announcement-wrapper');
+
         wrapper.style.setProperty('--i', index);
-        const bg = annonce.color || '#cdcdcd';
+
+        const bg = item.color || '#cdcdcd';
         const style = { display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '8px' };
         if (bg.includes('gradient')) style.backgroundImage = bg;
         else style.backgroundColor = bg;
 
         const msg_div = create_tag('div', 'announcement-item', '', style);
 
-        if (annonce.content?.trim()) {
-            const delete_btn = is_admin ? `<button class="announcement-delete" title="Supprimer"><img src="./assets/icon/delete.png" alt="X"></button>` : '';
+        // define content based on type
+        const content_text = is_depot ? `${item.name}` : item.content;
+
+        if (content_text?.trim()) {
+            let btn_html = '';
+            if (is_admin) {
+                btn_html = `<button class="announcement-delete" title="Supprimer"><img src="./assets/icon/delete.png" alt="X"></button>`;
+            } else if (is_depot) {
+                btn_html = `<button class="announcement-action-btn" title="Ajouter"><img src="./assets/icon/add.png" alt="+"></button>`;
+            }
+
             const text_row = create_tag('div', '', `
-                <div class="announcement-content" style="width:100%;"><span class="announcement-text">${annonce.content}</span></div>
-                <div class="announcement-actions">${delete_btn}</div>
+                <div class="announcement-content" style="width:100%;"><span class="announcement-text">${content_text}</span></div>
+                <div class="announcement-actions">${btn_html}</div>
             `, { display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' });
 
-            if (is_admin) text_row.querySelector('.announcement-delete').addEventListener('click', (e) => delete_item(e, `/api/announcements/${annonce.id}`, wrapper));
+            // attach events
+            if (is_admin) {
+                const path = is_depot ? `/api/deposits/${item.id}` : `/api/announcements/${item.id}`;
+                text_row.querySelector('.announcement-delete').addEventListener('click', (e) => delete_item(e, path, wrapper));
+            } else if (is_depot) {
+                const add_btn = text_row.querySelector('.announcement-action-btn');
+                if (add_btn) add_btn.addEventListener('click', () => open_deposit_overlay(item));
+            }
             msg_div.appendChild(text_row);
         }
 
-        if (annonce.files?.length > 0) {
+        // files logic
+        if (!is_depot && item.files?.length > 0) {
             const file_container = create_tag('div', '', '', { display: 'flex', flexDirection: 'column', gap: '4px', width: '100%' });
-            annonce.files.forEach(file => render_file_item(file, annonce.id, file_container));
+            item.files.forEach(file => render_file_item(file, item.id, file_container));
             msg_div.appendChild(file_container);
         }
+
         wrapper.appendChild(msg_div);
         container.appendChild(wrapper);
     });
 }
+
+function normalize_name_segment(str) {
+    if (!str) return '';
+    // strict normalization: lowercase, no accents, alphanumeric/underscores only
+    const norm = str.normalize('NFD').replace(/\p{Diacritic}/gu, '');
+    return norm.toLowerCase().replace(/[^a-z0-9\s-]/g, '').trim().replace(/[\s-]+/g, '_');
+}
+
+async function sync_deposits() {
+    try {
+        const data = await api_call(`/api/rooms/${room_code}/deposits`);
+        deposits_list = Array.isArray(data) ? data : [];
+        render_announcements(); // redraw unified list
+    } catch (e) {
+        console.error("sync deposits error", e);
+    }
+}
+
+function render_deposits_list(container) {
+    container.innerHTML = '';
+    deposits_list.forEach(dep => {
+        const row = create_tag('div', 'deposit-item', '', { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 20px', borderRadius: '50px', marginBottom: '8px', border: '2px solid black', background: '#fff' });
+        const left = create_tag('div', '', `<strong>${dep.name}</strong><div style="font-size:0.85em; opacity:0.8">Dépôt ouvert</div>`);
+        const actions = create_tag('div', '', '', { display: 'flex', gap: '8px', alignItems: 'center' });
+
+        if (is_admin) {
+            const del = create_tag('button', 'announcement-delete', `<img src="./assets/icon/delete.png" style="width:18px;height:18px">`);
+            del.onclick = async (e) => { e.preventDefault(); if (!confirm('Supprimer le dépôt ?')) return; await delete_deposit(dep.id); };
+            actions.appendChild(del);
+        } else {
+            const add = create_tag('button', 'announcement-action-btn', `<img src="./assets/icon/add.png" style="width:18px;height:18px">`);
+            add.onclick = (e) => { e.preventDefault(); open_deposit_overlay(dep); };
+            actions.appendChild(add);
+        }
+
+        row.appendChild(left); row.appendChild(actions); container.appendChild(row);
+    });
+}
+
+function open_deposit_overlay(dep) {
+    current_deposit_target = dep;
+    deposit_pending_file = null;
+    const overlay = document.getElementById('depositOverlay');
+    const nameInput = document.getElementById('depositCustomName');
+
+    // display file upload ui
+    Array.from(document.getElementsByClassName('file-upload-container')).forEach(el => {
+        el.style.display = 'block'
+    })
+
+
+
+    // clear previous file ui
+    render_deposit_ui();
+
+    if (!overlay) return;
+    if (nameInput) nameInput.value = '';
+    toggle_overlay('depositOverlay', true);
+}
+
+function render_deposit_ui() {
+    const list = document.getElementById('depositFilesList');
+    if (!list) return;
+    list.innerHTML = '';
+
+    if (deposit_pending_file) {
+        const file = deposit_pending_file;
+        const size = (file.size / (1024 * 1024)).toFixed(2);
+
+        // reuse 'admin-file-item' classes for consistent look
+        const item = create_tag('div', 'admin-file-item', `
+            <div class="admin-file-info">
+                <span class="admin-file-name">${file.name}</span>
+                <span class="admin-file-size">${size} Mo</span>
+            </div>
+            <button class="admin-file-delete">×</button>
+        `);
+
+        // delete handler
+        item.querySelector('.admin-file-delete').onclick = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            deposit_pending_file = null;
+            render_deposit_ui(); // re-render empty
+            document.getElementById('depositFileInput').value = ''; // clear input
+        };
+
+        list.appendChild(item);
+
+        // hide placeholder if file exists (optional, depends on css)
+        const ph = document.querySelector('#depositDropArea .file-placeholder');
+        if (ph) ph.style.display = 'none';
+    } else {
+        // show placeholder
+        const ph = document.querySelector('#depositDropArea .file-placeholder');
+        if (ph) ph.style.display = 'block';
+    }
+}
+
+async function create_deposit(name) {
+    if (!name || !name.trim()) return alert('Nom requis');
+    try {
+        await api_call('/api/deposits', 'POST', { roomCode: room_code, userId: user_id, name: name.trim() });
+        toggle_overlay('formOverlay', false);
+        // refresh happens via websocket update
+    } catch (e) {
+        alert('Erreur création dépôt: ' + (e.message || e));
+    }
+}
+
+async function delete_deposit(id) {
+    try {
+        await api_call(`/api/deposits/${id}?userId=${user_id}`, 'DELETE');
+        // refresh happens via websocket update
+    } catch (e) { alert('Erreur suppression'); }
+}
+
+// deposit upload handling
+function setup_deposit_drag_drop() {
+    const drop = document.getElementById('depositDropArea');
+    const input = document.getElementById('depositFileInput');
+    if (!drop || !input) return;
+
+    // click to upload
+    drop.onclick = (e) => {
+        // prevent click if clicking delete button
+        if (e.target.classList.contains('admin-file-delete')) return;
+        if (deposit_pending_file) return alert('Un seul fichier autorisé. Supprimez-le pour en changer.');
+        input.click();
+    };
+
+    // input change
+    input.onchange = () => {
+        if (input.files && input.files[0]) {
+            deposit_pending_file = input.files[0];
+            render_deposit_ui();
+        }
+    };
+
+    // drag events
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(ev => {
+        drop.addEventListener(ev, (e) => { e.preventDefault(); e.stopPropagation(); }, false);
+    });
+
+    drop.addEventListener('dragenter', () => drop.classList.add('drag-over'));
+    drop.addEventListener('dragleave', () => drop.classList.remove('drag-over'));
+
+    drop.addEventListener('drop', (e) => {
+        drop.classList.remove('drag-over');
+        const f = e.dataTransfer.files[0];
+        if (!f) return;
+
+        if (deposit_pending_file) {
+            alert('Un seul fichier autorisé. Supprimez l\'actuel pour remplacer.');
+            return;
+        }
+
+        deposit_pending_file = f;
+        render_deposit_ui();
+    });
+}
+
+async function upload_deposit() {
+    if (!current_deposit_target) return alert('Dépôt introuvable');
+    if (!deposit_pending_file) return alert('Aucun fichier sélectionné');
+
+    // Vérification de taille (limite exemple : 50 Mo pour éviter crash serveur)
+    if (deposit_pending_file.size > 50 * 1024 * 1024) {
+        return alert("Fichier trop volumineux (max 50 Mo).");
+    }
+
+    const customNameEl = document.getElementById('depositCustomName');
+    const customName = customNameEl?.value.trim() || '';
+
+    // ia/local filter check
+    if (!ai_enabled) {
+        if (banned_terms.some(term => new RegExp(`\\b${term.toLowerCase()}\\b`, 'i').test(customName))) return alert('Nom bloqué par le filtre local.');
+    }
+
+    // ui: show loading state
+    const warning = document.getElementById('depositWarning');
+    if (warning) warning.style.display = 'block';
+    const sendBtn = document.getElementById('depositSend');
+    if (sendBtn) sendBtn.classList.add('button-disabled');
+
+    // prepare filename: nomdepot_nomuser
+    const segmentA = normalize_name_segment(current_deposit_target.name || 'depot');
+    const userNameSeg = normalize_name_segment(csv_mode && student_name ? student_name : (document.getElementById('name')?.value || user_id));
+    const outNameBase = `${segmentA}_${userNameSeg}` + (customName ? `_${normalize_name_segment(customName)}` : '');
+
+    try {
+        const enc_blob = await encrypt_file(deposit_pending_file);
+        // get clean extension
+        const parts = deposit_pending_file.name.split('.');
+        const ext = parts.length > 1 ? parts.pop().replace(/[^a-zA-Z0-9]/g, '') : '';
+        const filename = ext ? `${outNameBase}.${ext}` : outNameBase;
+
+        const form = new FormData();
+        form.append('file', enc_blob, filename);
+        form.append('userId', user_id);
+        form.append('roomCode', room_code);
+        form.append('customName', customName || '');
+
+        const res = await fetch(`${api_url}/api/deposits/${current_deposit_target.id}/upload`, { method: 'POST', body: form });
+
+        if (res.ok) {
+            // success: reset ui
+            deposit_pending_file = null;
+            if (customNameEl) customNameEl.value = '';
+            render_deposit_ui(); // clear list
+            toggle_overlay('depositOverlay', false);
+            alert("Fichier envoyé avec succès !");
+        } else {
+            const data = await res.json().catch(() => ({}));
+            throw new Error(data.error || 'Erreur serveur lors de l\'envoi');
+        }
+    } catch (e) {
+        console.error(e);
+        if (e.message && e.message.includes('already')) alert('Vous avez déjà déposé un fichier pour ce rendu.');
+        else alert('Erreur upload: ' + (e.message || "Erreur inconnue"));
+    } finally {
+        // ui: reset loading state
+        if (warning) warning.style.display = 'none';
+        if (sendBtn) sendBtn.classList.remove('button-disabled');
+    }
+}
+
 
 function render_file_item(file, announcement_id, container) {
     const f_name = file.originalName || file.name;
@@ -733,6 +992,13 @@ async function handle_form_submit() {
     const color = get_color_from_element(document.querySelector('.color.selected'));
 
     if (is_admin) {
+        const adminType = document.querySelector('input[name="AdminType"]:checked')?.value || 'message';
+        // handle deposit creation
+        if (adminType === 'depot') {
+            if (!name) return alert('Nom du dépôt requis.');
+            await create_deposit(name);
+            return;
+        }
         if (!name && pending_files.length === 0) return alert("Message ou fichier requis.");
         await process_admin_upload(name, color);
         return;
@@ -867,13 +1133,23 @@ function setup_websocket() {
         if (erroroverlay) { close_all_overlays(); erroroverlay = null; }
     };
 
+
     ws.onmessage = (event) => {
         if (event.data === 'ping') return ws.send('pong');
         try {
             const msg = JSON.parse(event.data);
-            if (msg.type === 'update') { render_tickets(true); check_permissions(); }
-            if (msg.type === 'updateAnnonce') sync_announcements();
-        } catch (e) { console.error('WS parse error', e); }
+            // triggered on ticket or general room changes
+            if (msg.type === 'update') {
+                render_tickets(true);
+                check_permissions();
+                sync_deposits(); // refresh deposits
+            }
+            // triggered on announcement or deposit changes
+            if (msg.type === 'updateAnnonce') {
+                sync_announcements();
+                sync_deposits(); // refresh deposits
+            }
+        } catch (e) { console.error('ws parse error', e); }
     };
 
     ws.onclose = () => {
@@ -916,9 +1192,9 @@ function setup_csv_settings() {
             if (!confirm("Supprimer ?")) return;
             try {
                 await api_call(`/api/rooms/${room_code}/csv`, 'DELETE');
-                localStorage.removeItem('my_csv_name'); 
+                localStorage.removeItem('my_csv_name');
                 current_csv_name = "Fichier CSV";
-                
+
                 csv_mode = false;
                 setup_csv_settings();
             } catch (e) { alert(e); }
@@ -929,7 +1205,7 @@ function setup_csv_settings() {
     input.onchange = async () => {
         if (!input.files[0]) return;
         text_span.textContent = "...";
-        
+
         const form = new FormData();
         form.append('file', input.files[0]);
 
@@ -937,7 +1213,7 @@ function setup_csv_settings() {
             if ((await fetch(`${api_url}/api/rooms/${room_code}/csv`, { method: 'POST', body: form })).ok) {
                 current_csv_name = input.files[0].name;
                 localStorage.setItem('my_csv_name', current_csv_name);
-                
+
                 csv_mode = true;
                 setup_csv_settings();
             } else throw new Error();
@@ -984,7 +1260,9 @@ function setup_event_listeners() {
     const st_container = els.announcementContainer;
     if (st_container) {
         st_container.onmouseenter = () => {
-            if (announcements_list.length > 0) st_container.classList.add('open');
+            if (announcements_list.length > 0 || deposits_list.length > 0) {
+                st_container.classList.add('open');
+            }
         };
         st_container.onmouseleave = () => st_container.classList.remove('open');
     }
@@ -1047,6 +1325,11 @@ function setup_event_listeners() {
     });
 
     setup_admin_type_listener()
+
+    // deposit overlay handlers
+    document.getElementById('depositCancel')?.addEventListener('click', (e) => { e.preventDefault(); toggle_overlay('depositOverlay', false); deposit_pending_file = null; });
+    document.getElementById('depositSend')?.addEventListener('click', (e) => { e.preventDefault(); upload_deposit(); });
+    setup_deposit_drag_drop();
 
     if (els.aiToggle) els.aiToggle.addEventListener('change', async (e) => {
         if (!is_admin) { e.preventDefault(); e.target.checked = ai_enabled; return alert("Vous n'avez pas la permission."); }

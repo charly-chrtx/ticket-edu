@@ -1012,11 +1012,11 @@ input[type="text"]:focus {
     gap: 10px;
 }
 
-/* action buttons */
+/* button containers */
 .announcement-action-btn,
 .announcement-delete {
-    width: 50px;
-    aspect-ratio: 1/1;
+    width: 50px; 
+    height: 50px;
     border-radius: 50%;
     border: 2px solid black;
     display: flex;
@@ -1024,29 +1024,34 @@ input[type="text"]:focus {
     justify-content: center;
     cursor: pointer;
     transition: all 0.2s;
+    flex-shrink: 0; 
 }
+
 
 .announcement-action-btn {
     background: #fff;
-}
-
-.announcement-action-btn:hover {
-    background: #f0f0f0;
-}
-
-.announcement-delete {
-    background: #ff7070;
     box-shadow: 0 2px 0 #000;
 }
 
-.announcement-delete:hover {
+.announcement-action-btn:hover, .announcement-delete:hover {
     transform: translateY(-2px);
     box-shadow: 0 4px 0 #000;
 }
 
+
+.announcement-action-btn img, .announcement-delete img {
+    width: 16px;
+    height: 16px;
+    object-fit: contain;
+}
+
+
+.announcement-delete {
+    background: #ff7070;
+}
+
+
 .announcement-delete img {
-    width: 18px;
-    height: 18px;
     filter: invert(1);
 }
 

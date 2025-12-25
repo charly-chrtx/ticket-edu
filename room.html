@@ -439,7 +439,45 @@
     }
   </script>
   <script type="text/javascript" src="https://unpkg.com/qr-code-styling@1.5.0/lib/qr-code-styling.js"></script>
-  <script src="./assets/js/room.js"></script>+
-</body>
+
+  <div class="menu-overlay" id="depositOverlay" style="display: none;">
+    <div class="menu-box">
+      <div class="input" style="padding-bottom: 0;">
+        <h1>Dépôt</h1>
+        <p id="depositInstructions" style="opacity:0.8;">Déposez votre fichier ici. Un seul fichier est autorisé.</p>
+
+        <div style="margin: 15px 0;">
+          <input type="text" id="depositCustomName" name="depositCustomName"
+            placeholder="Nom du fichier (sans extension)" style="width: 100%;" />
+        </div>
+
+        <div class="file-upload-container" style="margin: 15px 0;">
+          <input type="file" id="depositFileInput" style="display: none;">
+          <div class="file-drop-area" id="depositDropArea">
+            <div class="drop-area-content">
+              <span class="file-placeholder">+ Glisser ou cliquer pour ajouter un fichier</span>
+              <div id="depositFilesList" class="admin-files-list"></div>
+              <div id="depositWarning" class="upload-warning" style="display:none;">Exportation...</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="overlay-footer" style="display: flex; justify-content: center; gap: 15px; margin-top: 30px;">
+          <a class="button-text" id="depositSend" href="#"
+            style="width: auto; padding: 0 30px; margin: 0; min-width: 140px;">
+            <img class="icon" src="./assets/icon/upload.png">
+            <span class="text">Envoyer</span>
+          </a>
+          <a class="button-text" id="depositCancel" href="#"
+            style="width: auto; padding: 0 30px; margin: 0; background-color: #ff7070; min-width: 140px;">
+            <img class="icon" src="./assets/icon/cross.png">
+            <span class="text">Annuler</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="./assets/js/room.js"></script>
 
 </html>
