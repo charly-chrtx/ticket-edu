@@ -615,7 +615,6 @@ function render_announcements() {
         ...deposits_list.map(d => ({ ...d, item_type: 'depot' }))
     ].sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
 
-    // restore v1 layout logic
     const left_container = document.querySelector('.left-container');
     if (left_container) left_container.style.gap = all_items.length === 0 ? '0px' : '';
 
@@ -682,6 +681,7 @@ async function sync_deposits() {
     try {
         const data = await api_call(`/api/rooms/${room_code}/deposits`);
         deposits_list = Array.isArray(data) ? data : [];
+        update_storage_ui();
         render_announcements(); // redraw unified list
     } catch (e) {
         console.error("sync deposits error", e);
@@ -719,8 +719,6 @@ function open_deposit_overlay(dep) {
     Array.from(document.getElementsByClassName('file-upload-container')).forEach(el => {
         el.style.display = 'block'
     })
-
-
 
     // clear previous file ui
     render_deposit_ui();
@@ -893,6 +891,10 @@ async function upload_deposit() {
     } catch (e) {
         console.error(e);
         if (e.message && e.message.includes('already')) alert('Vous avez déjà déposé un fichier pour ce rendu.');
+        if (e.message && e.message.includes("blocked")) {
+            close_all_overlays(); 
+            toggle_overlay('reportTicketOverlay', true);
+        }
         else alert('Erreur upload: ' + (e.message || "Erreur inconnue"));
     } finally {
         // ui: reset loading state
@@ -1008,7 +1010,7 @@ async function handle_form_submit() {
         return;
     }
 
-    // new: use student name if csv mode
+    //use student name if csv mode
     const final_name = csv_mode ? student_name : name;
 
     const active_tickets = tickets_list.filter(t => t.etat === "en cours" && t.userId === user_id);
@@ -1243,6 +1245,9 @@ function setup_event_listeners() {
         } else if (!is_admin) {
             els.name.disabled = false;
             els.name.style.opacity = '1';
+            if (fileUploadContainer) {
+                    fileUploadContainer.style.display = 'none';
+                }
         }
 
         toggle_overlay("formOverlay", true);
