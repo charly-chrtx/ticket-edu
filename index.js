@@ -41,6 +41,12 @@ const PATH_DEP = path.join(UPLOAD_DIR, 'deposits');
 if (!fs.existsSync(UPLOAD_DIR)) {
   fs.mkdirSync(UPLOAD_DIR);
 }
+if (!fs.existsSync(PATH_ANN)) {
+  fs.mkdirSync(PATH_ANN);
+}
+if (!fs.existsSync(PATH_DEP)) {
+  fs.mkdirSync(PATH_DEP);
+}
 
 // csv helper
 function parseAndSearchCsv(fileContent, query, usedNames = []) {
@@ -646,18 +652,19 @@ app.delete('/api/tickets/:id', (req, res) => {
 
 // post deposit (admin only)
 app.post('/api/deposits', async (req, res) => {
-  const { roomCode, userId, name } = req.body;
+  const { roomCode, userId, name, color } = req.body;
 
   db.get("SELECT adminId FROM rooms WHERE code = ?", [roomCode], (err, room) => {
     if (!room || room.adminId !== userId) return res.status(403).json({ error: "unauthorized" });
 
     const id = "dep_" + Date.now();
-    db.run("INSERT INTO deposits (id, roomCode, name, createdAt) VALUES (?, ?, ?, ?)",
-      [id, roomCode, name, new Date().toISOString()],
+
+    db.run("INSERT INTO deposits (id, roomCode, name, color, createdAt) VALUES (?, ?, ?, ?, ?)",
+      [id, roomCode, name, color || '#cdcdcd', new Date().toISOString()],
       (err) => {
         if (err) return res.status(500).json({ error: err.message });
-        notifierClients(roomCode, 'update'); // refresh ui
-        res.status(201).json({ id, name });
+        notifierClients(roomCode, 'update');
+        res.status(201).json({ id, name, color });
       }
     );
   });
@@ -716,6 +723,36 @@ app.post('/api/deposits/:id/upload', upload.single('file'), async (req, res) => 
           res.status(201).json({ message: "uploaded" });
         }
       );
+    });
+  });
+});
+
+// delete deposit
+app.delete('/api/deposits/:id', (req, res) => {
+  const { userId } = req.query;
+  const depositId = req.params.id;
+
+  db.get("SELECT d.*, r.adminId FROM deposits d JOIN rooms r ON d.roomCode = r.code WHERE d.id = ?", [depositId], (err, row) => {
+    if (err) return res.status(500).json({ error: err.message });
+    if (!row) return res.status(404).json({ error: "deposit not found" });
+    if (row.adminId !== userId) return res.status(403).json({ error: "unauthorized" });
+
+    db.all("SELECT encryptedName FROM files WHERE depositId = ?", [depositId], (err, files) => {
+      if (files) {
+        files.forEach(f => {
+          const p = path.join(PATH_DEP, f.encryptedName);
+          if (fs.existsSync(p)) fs.unlinkSync(p);
+        });
+      }
+
+      db.run("DELETE FROM files WHERE depositId = ?", [depositId], (err) => {
+        db.run("DELETE FROM deposits WHERE id = ?", [depositId], (err) => {
+          if (err) return res.status(500).json({ error: err.message });
+
+          notifierClients(row.roomCode, 'updateAnnonce');
+          res.json({ message: "deposit deleted" });
+        });
+      });
     });
   });
 });
@@ -797,9 +834,9 @@ app.post('/api/files', upload.single('file'), (req, res) => {
 //normalize file name
 function normalize(str) {
   return str.toLowerCase()
-    .normalize("NFD").replace(/[\u0300-\u036f]/g, "") 
-    .replace(/[^a-z0-z0-9]/g, "_") 
-    .replace(/_+/g, "_"); 
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-z0-9]/g, "_")
+    .replace(/_+/g, "_");
 }
 
 
@@ -1159,7 +1196,7 @@ function supprimerDepositsExpires() {
 setInterval(() => {
   supprimerTicketsExpires();
   supprimerRoomsInactives();
-  supprimerDepositsExpires(); 
+  supprimerDepositsExpires();
 }, 60000);
 
 const PORT = process.env.PORT || 3000;

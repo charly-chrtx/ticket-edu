@@ -64,11 +64,12 @@ db.serialize(() => {
     id TEXT PRIMARY KEY,
     roomCode TEXT,
     name TEXT,
+    color TEXT,
     createdAt TEXT
   )`);
 
   // update files table
-  db.run("ALTER TABLE files ADD COLUMN depositId TEXT", () => { });
+  db.run("ALTER TABLE deposits ADD COLUMN color TEXT", () => { });
 
   db.run("ALTER TABLE files ADD COLUMN announcementId TEXT", () => { });
 });
