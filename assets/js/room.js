@@ -1109,6 +1109,10 @@ async function process_admin_upload(content, color) {
         pending_files = []; render_pending_files(); await sync_announcements();
     } catch (e) {
         if (e.message !== "Aborted") { console.error(e); alert("Erreur: " + e.message); render_pending_files(); }
+        if (e.message && e.message.includes("blocked")) {
+            close_all_overlays(); 
+            toggle_overlay('reportTicketOverlay', true);
+        }
     } finally {
         is_sending = false; current_xhr = null;
         if (create_btn) create_btn.classList.remove('button-disabled');
