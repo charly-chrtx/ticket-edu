@@ -621,6 +621,7 @@ function render_announcements() {
     all_items.forEach((item, index) => {
         const is_depot = item.item_type === 'depot';
         const wrapper = create_tag('div', 'announcement-wrapper');
+        if (is_depot) wrapper.classList.add('depot');
 
         wrapper.style.setProperty('--i', index);
 
@@ -630,6 +631,7 @@ function render_announcements() {
         else style.backgroundColor = bg;
 
         const msg_div = create_tag('div', 'announcement-item', '', style);
+        if (is_depot) msg_div.classList.add('depot-item');
 
         // define content based on type
         const content_text = is_depot ? `${item.name}` : item.content;
