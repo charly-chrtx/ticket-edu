@@ -472,12 +472,27 @@ app.delete('/api/rooms/:code/csv', (req, res) => {
   });
 });
 
-// check name in csv
+// check name usage
 app.post('/api/rooms/:code/check-name', (req, res) => {
   const roomCode = req.params.code;
   const { nameQuery } = req.body;
 
+  // get active names
+  const activeNames = [];
+  for (let [ws, data] of clientRooms) {
+    if (data.code === roomCode && data.studentName) {
+      activeNames.push(data.studentName);
+    }
+  }
+
+  // check if name is taken (online)
+  const isTaken = activeNames.some(n => n.toLowerCase() === nameQuery.toLowerCase());
+  if (isTaken) {
+    return res.json({ status: 'taken' });
+  }
+
   db.get("SELECT csvFilePath FROM rooms WHERE code = ?", [roomCode], (err, room) => {
+    // if no csv, just validated it wasn't taken above (if forceName is on)
     if (err || !room || !room.csvFilePath) return res.status(400).json({ error: "csv not active" });
 
     const p = path.join(UPLOAD_DIR, room.csvFilePath);
@@ -485,17 +500,15 @@ app.post('/api/rooms/:code/check-name', (req, res) => {
 
     const content = fs.readFileSync(p, 'utf8');
 
-    const activeNames = [];
-    for (let [ws, data] of clientRooms) {
-      if (data.code === roomCode && data.studentName) {
-        activeNames.push(data.studentName);
-      }
-    }
+    // parse csv but we already checked duplicates above, so passed list is empty for filter
+    const results = parseAndSearchCsv(content, nameQuery, []);
 
-    const results = parseAndSearchCsv(content, nameQuery, activeNames);
+    // exact match check in csv results
+    const exactMatch = results.find(r => r.toLowerCase() === nameQuery.toLowerCase());
 
+    if (exactMatch) return res.json({ status: 'found', name: exactMatch });
     if (results.length === 0) return res.json({ status: 'none' });
-    if (results.length === 1) return res.json({ status: 'found', name: results[0] });
+
     return res.json({ status: 'multiple', options: results });
   });
 });
