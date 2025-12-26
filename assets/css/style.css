@@ -1653,3 +1653,10 @@ body.dark-mode #qrcode-container {
     
 }
 
+
+.cloudservices {
+    display: flex; 
+    justify-content: center; 
+    margin-top: 10px;
+    gap: 15px;
+}
