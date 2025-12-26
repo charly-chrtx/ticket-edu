@@ -448,12 +448,27 @@ async function check_permissions() {
     if (ui_elements.aiToggle) ui_elements.aiToggle.checked = ai_enabled;
     update_ai_status(ai_enabled);
 
-    // csv logic update
+    // csv logic
     csv_mode = data.hasCsv || false;
     force_name_mode = data.forceName || false;
 
-    // uodate UI toggle
-    if (ui_elements.forceNameToggle) ui_elements.forceNameToggle.checked = force_name_mode;
+    // update ui toggle
+    const fnToggle = ui_elements.forceNameToggle;
+    if (fnToggle) {
+        if (csv_mode) {
+            // if csv active, force name is mandatory and locked
+            fnToggle.checked = true;
+            fnToggle.disabled = true;
+            fnToggle.parentElement.style.opacity = '0.5';
+            fnToggle.parentElement.title = "Géré par le fichier CSV";
+        } else {
+            // standard mode
+            fnToggle.checked = force_name_mode;
+            fnToggle.disabled = false;
+            fnToggle.parentElement.style.opacity = '1';
+            fnToggle.parentElement.title = "";
+        }
+    }
 
     // server status
     const new_admin_status = data.isAdmin === true;
@@ -1338,7 +1353,7 @@ function setup_csv_settings() {
     ui_elements.csvButton = new_btn;
     const text_span = new_btn.querySelector('.text');
 
-    // AFFICHAGE
+    // render
     if (csv_mode) {
         text_span.style.cssText = "display:flex; justify-content:space-between; align-items:center; width:100%; font-size: 14px;";
         text_span.innerHTML = `<img class="icon" src="assets/icon/delete.png" style="width:24px;"><span> ${current_csv_name}</span>`;
@@ -1348,7 +1363,7 @@ function setup_csv_settings() {
         text_span.innerHTML = '<img class="icon" src="assets/icon/add.png" style="width:24px;"><span> Ajouter</span>';
     }
 
-    // CLICK (SUPPRESSION)
+    // delete
     new_btn.onclick = async (e) => {
         e.preventDefault();
         if (csv_mode) {
@@ -1359,6 +1374,16 @@ function setup_csv_settings() {
                 current_csv_name = "Fichier CSV";
 
                 csv_mode = false;
+
+                // unlock force name toggle
+                const fnToggle = ui_elements.forceNameToggle;
+                if (fnToggle) {
+                    fnToggle.disabled = false;
+                    fnToggle.parentElement.style.opacity = '1';
+                    fnToggle.checked = false;
+                    api_call(`/api/rooms/${room_code}`, "PUT", { forceName: false });
+                }
+
                 setup_csv_settings();
             } catch (e) { alert(e); }
         } else input.click();
@@ -1378,6 +1403,15 @@ function setup_csv_settings() {
                 localStorage.setItem('my_csv_name', current_csv_name);
 
                 csv_mode = true;
+
+                // lock force name toggle
+                const fnToggle = ui_elements.forceNameToggle;
+                if (fnToggle) {
+                    fnToggle.checked = true;
+                    fnToggle.disabled = true;
+                    fnToggle.parentElement.style.opacity = '0.5';
+                }
+
                 setup_csv_settings();
             } else throw new Error();
         } catch (e) { alert("Erreur upload"); setup_csv_settings(); }
