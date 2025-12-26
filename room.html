@@ -525,20 +525,30 @@
     </div>
   </div>
 
-  <div id="download-modal" class="modal-overlay hidden">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h3>Fichiers du dépôt</h3>
-        <button id="close-modal" class="btn-icon">
-          <img src="assets/icon/cross.png" alt="close">
-        </button>
-      </div>
-      <div class="modal-body">
+  <div class="menu-overlay hidden" id="download-modal">
+    <div class="menu-box">
+      <div class="input" style="padding-bottom: 0;">
+
+        <h1>Fichiers du dépôt</h1>
+
         <ul id="file-list" class="file-list">
         </ul>
-      </div>
-      <div class="modal-footer">
-        <button class="btn-secondary" id="download-all">Tout télécharger (.zip)</button>
+
+        <div class="overlay-footer" style="display: flex; justify-content: center; gap: 15px; margin-top: 30px;">
+
+          <a class="button-text" id="download-all" href="#"
+            style="width: auto; padding: 0 30px; margin: 0; min-width: 140px;">
+            <img class="icon" src="./assets/icon/download.png">
+            <span class="text">Tout télécharger</span>
+          </a>
+
+          <a class="button-text" id="close-modal" href="#"
+            style="width: auto; padding: 0 30px; margin: 0; background-color: #ff7070; min-width: 140px;">
+            <img class="icon" src="./assets/icon/cross.png">
+            <span class="text">Fermer</span>
+          </a>
+
+        </div>
       </div>
     </div>
   </div>

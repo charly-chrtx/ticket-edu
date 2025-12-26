@@ -30,6 +30,7 @@ let current_deposit_target = null;
 let deposit_pending_file = null;
 let banned_terms = [];
 let current_xhr = null;
+let current_modal_deposit_id = null;
 let ws_retry_count = 0;
 let erroroverlay;
 let global_ws = null;
@@ -106,6 +107,8 @@ function create_tag(tag, class_name, content = '', style = {}) {
 // download modal logic
 
 function open_download_modal(deposit) {
+    current_modal_deposit_id = deposit.id;
+
     const modal = document.getElementById('download-modal');
     const list = document.getElementById('file-list');
     const dl_all_btn = document.getElementById('download-all');
@@ -130,7 +133,7 @@ function open_download_modal(deposit) {
                 </div>
             `);
 
-            const btn = create_tag('button', 'btn-icon', '<img src="./assets/icon/download.png" style="width:20px;">');
+            const btn = create_tag('button', 'announcement-download', '<img src="./assets/icon/download.png" style="width:20px;">');
             btn.onclick = () => handle_file_download(file.id, file.originalName || file.name);
 
             li.appendChild(btn);
@@ -157,12 +160,18 @@ function setup_download_modal_listeners() {
     const close_btn = document.getElementById('close-modal');
 
     if (close_btn && modal) {
-        close_btn.onclick = () => modal.classList.add('hidden');
+        close_btn.onclick = () => {
+            modal.classList.add('hidden');
+            current_modal_deposit_id = null; // reset tracker
+        };
     }
 
     if (modal) {
         modal.addEventListener('click', (e) => {
-            if (e.target === modal) modal.classList.add('hidden');
+            if (e.target === modal) {
+                modal.classList.add('hidden');
+                current_modal_deposit_id = null; // reset tracker
+            }
         });
     }
 }
@@ -851,7 +860,18 @@ function render_announcements() {
         const msg_div = create_tag('div', 'announcement-item', '', style);
         if (is_depot) msg_div.classList.add('depot-item');
 
-        const content_text = is_depot ? `${item.name}` : item.content;
+        // check for user file in deposit
+        let user_file = null;
+        if (is_depot && !is_admin && item.files) {
+            user_file = item.files.find(f => f.userId === user_id);
+        }
+
+        let content_text = is_depot ? `${item.name}` : item.content;
+
+        // append filename if user uploaded
+        if (user_file) {
+            content_text += `<div style="font-size:0.85em; opacity:0.8; margin-top:4px; font-weight:normal;">Fichier envoyé : ${user_file.originalName}</div>`;
+        }
 
         if (content_text?.trim()) {
             let btn_html = '';
@@ -875,7 +895,13 @@ function render_announcements() {
                     btn_html = `<button class="announcement-delete" title="Supprimer"><img src="./assets/icon/delete.png" alt="X"></button>`;
                 }
             } else if (is_depot) {
-                btn_html = `<button class="announcement-action-btn" title="Ajouter"><img src="./assets/icon/add.png" alt="+"></button>`;
+                if (user_file) {
+                    // show delete button
+                    btn_html = `<button class="announcement-delete-file" title="Supprimer mon fichier"><img src="./assets/icon/delete.png" alt="X"></button>`;
+                } else {
+                    // show add button
+                    btn_html = `<button class="announcement-action-btn" title="Ajouter"><img src="./assets/icon/add.png" alt="+"></button>`;
+                }
             }
 
             const text_row = create_tag('div', '', `
@@ -888,7 +914,6 @@ function render_announcements() {
                 const delete_btn = text_row.querySelector('.announcement-delete');
                 const path = is_depot ? `/api/deposits/${item.id}` : `/api/announcements/${item.id}`;
 
-                // custom delete logic for deposits with files
                 delete_btn.addEventListener('click', (e) => {
                     if (is_depot && item.files && item.files.length > 0) {
                         e.preventDefault();
@@ -898,7 +923,6 @@ function render_announcements() {
                     delete_item(e, path, wrapper);
                 });
 
-                // attach download modal event
                 if (is_depot) {
                     const download_btn = text_row.querySelector('.announcement-download');
                     if (download_btn) {
@@ -910,8 +934,20 @@ function render_announcements() {
                 }
 
             } else if (is_depot) {
-                const add_btn = text_row.querySelector('.announcement-action-btn');
-                if (add_btn) add_btn.addEventListener('click', () => open_deposit_overlay(item));
+                if (user_file) {
+                    // delete user file handler
+                    const del_btn = text_row.querySelector('.announcement-delete-file');
+                    if (del_btn) {
+                        del_btn.addEventListener('click', (e) => {
+                            // delete via file api
+                            delete_item(e, `/api/files/${user_file.id}`, null); // null wrapper to force refresh via ws or sync
+                        });
+                    }
+                } else {
+                    // upload handler
+                    const add_btn = text_row.querySelector('.announcement-action-btn');
+                    if (add_btn) add_btn.addEventListener('click', () => open_deposit_overlay(item));
+                }
             }
             msg_div.appendChild(text_row);
         }
@@ -941,6 +977,14 @@ async function sync_deposits() {
         deposits_list = Array.isArray(data) ? data : [];
         update_storage_ui();
         render_announcements(); // redraw unified list
+
+        // refresh admin modal if open
+        if (current_modal_deposit_id) {
+            const updated_dep = deposits_list.find(d => d.id === current_modal_deposit_id);
+            if (updated_dep) {
+                open_download_modal(updated_dep);
+            }
+        }
     } catch (e) {
         console.error("sync deposits error", e);
     }
@@ -1135,11 +1179,15 @@ async function upload_deposit() {
         const res = await fetch(`${api_url}/api/deposits/${current_deposit_target.id}/upload`, { method: 'POST', body: form });
 
         if (res.ok) {
-            //reset ui
+            // reset ui
             deposit_pending_file = null;
             if (customNameEl) customNameEl.value = '';
             render_deposit_ui(); // clear list
             toggle_overlay('depositOverlay', false);
+
+            // force update immediately
+            await sync_deposits();
+
             alert("Fichier envoyé avec succès !");
         } else {
             const data = await res.json().catch(() => ({}));
@@ -1194,13 +1242,18 @@ function render_file_item(file, announcement_id, container) {
 async function delete_item(e, endpoint, dom_element) {
     e.preventDefault();
     if (!confirm("Supprimer ?")) return;
-    dom_element.style.opacity = '0.5';
+    if (dom_element) dom_element.style.opacity = '0.5'; // check if exists
     try {
         const success = await api_call(`${endpoint}?userId=${user_id}`, "DELETE");
-        if (success) { dom_element.remove(); await sync_announcements(); }
+        if (success) {
+            if (dom_element) dom_element.remove();
+            await sync_announcements();
+            await sync_deposits(); // ensure deposits refresh
+        }
         else throw new Error("Delete failed");
     } catch (err) {
-        console.error(err); alert("Erreur suppression."); dom_element.style.opacity = '1';
+        console.error(err); alert("Erreur suppression.");
+        if (dom_element) dom_element.style.opacity = '1';
     }
 }
 
@@ -1419,11 +1472,12 @@ function setup_websocket() {
         try {
             const msg = JSON.parse(event.data);
             // triggered on ticket or general room changes
-            if (msg.type === 'update') {
+            if (msg.type === 'update' || msg.type === 'updateDeposit') {
                 render_tickets(true);
                 check_permissions();
-                sync_deposits(); // refresh deposits
+                sync_deposits(); // refresh lists and modal
             }
+
             // triggered on announcement or deposit changes
             if (msg.type === 'updateAnnonce') {
                 sync_announcements();
