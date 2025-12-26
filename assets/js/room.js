@@ -168,12 +168,9 @@ function open_download_modal(deposit) {
 
         // download all handler
         if (dl_all_btn) {
-            dl_all_btn.onclick = async () => {
-                if (!confirm(`Télécharger les ${files.length} fichiers ?\n(Cela peut ouvrir plusieurs fenêtres)`)) return;
-                for (const file of files) {
-                    handle_file_download(file.id, file.originalName || file.name);
-                    await new Promise(r => setTimeout(r, 800))
-                }
+            dl_all_btn.onclick = (e) => {
+                e.preventDefault();
+                window.location.href = `${api_url}/api/deposits/${deposit.id}/zip`;
             };
         }
     }
@@ -1691,7 +1688,7 @@ function setup_event_listeners() {
     });
 
     setup_download_modal_listeners();
-    
+
     // logout
     document.getElementById("logout")?.addEventListener('click', (e) => { e.preventDefault(); toggle_overlay("logoutOverlay", true); });
     document.getElementById("cancelLogout")?.addEventListener('click', (e) => { e.preventDefault(); close_all_overlays(); });
