@@ -183,21 +183,21 @@
               </div>
 
               <div style="display: flex; justify-content: space-between; align-items: center; margin: 15px 0;">
-                  <span>Nombre maximum d'utilisateur dans le groupe</span>
-                  
-                  <div class="quantity-selector" style="opacity: 30%; pointer-events: none;">
-                      
-                      <button class="qty-btn">
-                          <img src="assets/icon/remove.png" alt="Moins">
-                      </button>
+                <span>Nombre maximum d'utilisateur dans le groupe</span>
 
-                      <div class="qty-val">~~</div>
+                <div class="quantity-selector" style="opacity: 30%; pointer-events: none;">
 
-                      <button class="qty-btn">
-                          <img src="assets/icon/add.png" alt="Plus">
-                      </button>
-                      
-                  </div>
+                  <button class="qty-btn">
+                    <img src="assets/icon/remove.png" alt="Moins">
+                  </button>
+
+                  <div class="qty-val">~~</div>
+
+                  <button class="qty-btn">
+                    <img src="assets/icon/add.png" alt="Plus">
+                  </button>
+
+                </div>
               </div>
 
               <div style="display: flex; justify-content: space-between; align-items: center; margin: 15px 0;">
@@ -272,8 +272,8 @@
             <div
               style="display: flex; justify-content: space-between; align-items: center; margin: 15px 0; flex-wrap: wrap; gap: 10px;">
               <span>Veuillez signaler les problèmes ou bugs constatés.</span>
-              <a class="button-text" target="_blank"
-                style="min-height: 41px; padding: 0 20px; flex: unset; width: 100%; max-width: 200px; margin: 0; opacity: 30%; pointer-events: none;">
+              <a class="button-text" id="openGlobalReport" target="_blank"
+                style="min-height: 41px; padding: 0 20px; flex: unset; width: 100%; max-width: 200px; margin: 0;">
                 <img class="icon" src="./assets/icon/report.png">
                 <span class="text" style="font-size: 14px;">Signaler un problème</span>
               </a>
@@ -341,8 +341,8 @@
 
             <div class="overlay-footer" style="display: flex; justify-content: center; gap: 15px; margin-top: 30px;">
 
-              <a class="button-text" id="confirmLogout"
-                style="width: auto; padding: 0 30px; margin: 0; background-color: #ff7070; min-width: 140px; opacity: 30%; pointer-events: none;">
+              <a class="button-text" id="openAiReport"
+                style="width: auto; padding: 0 30px; margin: 0; background-color: #ff7070; min-width: 140px;">
                 <img class="icon" src="./assets/icon/report.png" alt="">
                 <span class="text">Signaler</span>
               </a>
@@ -392,6 +392,34 @@
               <a class="button-text" id="loginEnter" href="#"
                 style="width: auto; padding: 0 30px; margin: 0; min-width: 140px;">
                 <span class="text">Entrer</span>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="menu-overlay" id="bugReportOverlay" style="display: none;">
+        <div class="menu-box">
+          <div class="input" style="padding-bottom: 0;">
+            <h1>Signaler un problème</h1>
+
+            <p style="margin: 15px 0; opacity: 0.7;">
+              Les logs de la console seront envoyés automatiquement.
+            </p>
+
+            <textarea id="bugDescription" placeholder="Décrivez le problème (optionnel)..."></textarea>
+
+            <div class="overlay-footer" style="display: flex; justify-content: center; gap: 15px; margin-top: 30px;">
+              <a class="button-text" id="sendBugReport" href="#"
+                style="width: auto; padding: 0 30px; margin: 0; min-width: 140px;">
+                <img class="icon" src="./assets/icon/check.png">
+                <span class="text">Envoyer</span>
+              </a>
+
+              <a class="button-text" id="cancelBugReport" href="#"
+                style="width: auto; padding: 0 30px; margin: 0; background-color: #ff7070; min-width: 140px;">
+                <img class="icon" src="./assets/icon/cross.png">
+                <span class="text">Annuler</span>
               </a>
             </div>
           </div>

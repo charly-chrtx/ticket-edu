@@ -17,7 +17,6 @@ let is_sending = false;
 let max_tickets = 1;
 let ai_enabled = false;
 let qr_instance = null;
-// new csv state
 let csv_mode = false;
 let student_name = sessionStorage.getItem('student_name_cache');
 
@@ -33,6 +32,7 @@ let current_xhr = null;
 let ws_retry_count = 0;
 let erroroverlay;
 let global_ws = null;
+let report_enabled = false;
 
 // crypto
 let crypto_key = null;
@@ -40,6 +40,16 @@ let crypto_key = null;
 // ui state
 let ui_elements = {};
 let dot_interval = null;
+
+//logs
+const log_buffer = [];
+const max_logs = 50;
+
+const original_console = {
+    log: console.log,
+    error: console.error,
+    warn: console.warn
+};
 
 // validation
 if (!room_code) {
@@ -90,6 +100,109 @@ function create_tag(tag, class_name, content = '', style = {}) {
     if (content) el.innerHTML = content;
     Object.assign(el.style, style);
     return el;
+}
+
+// logs
+
+function capture_log(type, args) {
+    original_console[type].apply(console, args);
+    const msg = args.map(arg =>
+        typeof arg === 'object' ? JSON.stringify(arg) : String(arg)
+    ).join(' ');
+    log_buffer.push(`[${new Date().toISOString()}] [${type.toUpperCase()}] ${msg}`);
+    if (log_buffer.length > max_logs) log_buffer.shift();
+}
+
+console.log = (...args) => capture_log('log', args);
+console.error = (...args) => capture_log('error', args);
+console.warn = (...args) => capture_log('warn', args);
+
+window.onerror = (msg, source, lineno) => {
+    console.error(`Uncaught: ${msg} at ${source}:${lineno}`);
+};
+
+let current_report_ctx = 'manual';
+let last_blocked_info = null;
+
+function open_report_overlay(context, prefill_text = '') {
+    close_all_overlays(); // close settings or ai warning
+    current_report_ctx = context;
+
+    const desc = document.getElementById('bugDescription');
+    if (desc) {
+        desc.value = prefill_text ? `Erreur IA: ${prefill_text}\n\nCommentaire: ` : '';
+        // focus if manual, otherwise just show
+        if (!prefill_text) setTimeout(() => desc.focus(), 100);
+    }
+
+    toggle_overlay('bugReportOverlay', true);
+}
+
+async function submit_bug_report() {
+    const btn = document.getElementById('sendBugReport');
+    const desc = document.getElementById('bugDescription');
+    const description = desc ? desc.value.trim() : '';
+
+    if (btn) btn.classList.add('button-disabled');
+
+    let ai_context_data = null;
+    if (current_report_ctx === 'ai_blocked' && last_blocked_info) {
+        ai_context_data = {
+            user_input: last_blocked_info.input,
+            ai_response: last_blocked_info.reason
+        };
+    }
+
+    const payload = {
+        logs: log_buffer,
+        description: description,
+        context: current_report_ctx,
+        aiData: ai_context_data,
+        roomCode: room_code, // from global state
+        clientData: {
+            userAgent: navigator.userAgent,
+            url: window.location.href,
+            resolution: `${window.innerWidth}x${window.innerHeight}`
+        }
+    };
+
+    try {
+        // simulation of api call using original console to avoid loop
+        original_console.log('Sending report...', payload);
+
+        const res = await fetch(`${api_url}/api/report`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+
+        if (res.ok) {
+            alert('Signalement envoyé.');
+            toggle_overlay('bugReportOverlay', false);
+            if (desc) desc.value = '';
+        } else {
+            throw new Error('Server error ' + res.status);
+        }
+    } catch (err) {
+        original_console.error('Report failed', err);
+        alert('Erreur envoi signalement.');
+    } finally {
+        if (btn) btn.classList.remove('button-disabled');
+    }
+}
+
+function update_report_ui() {
+    const globalBtn = document.getElementById('openGlobalReport');
+    const aiBtn = document.getElementById('openAiReport');
+
+    if (!report_enabled) {
+        if (globalBtn) globalBtn.style.display = 'none';
+        if (aiBtn) aiBtn.style.display = 'none';
+    } else {
+        // restore display if enabled 
+        if (globalBtn) globalBtn.style.display = 'flex'; // ou 'block'
+        if (aiBtn) aiBtn.style.display = 'inline-block'; // ou 'flex'
+    }
 }
 
 
@@ -163,7 +276,9 @@ function init_ui() {
         'aiToggle', 'aiStatus', 'reportTicketOverlay',
         'loginOverlay', 'loginName', 'loginEnter', 'issueNameOverlay',
         'nameChoicesContainer', 'csvButton', 'csvInput', 'qrcode-container'
-        , 'depositOverlay', 'depositCustomName', 'depositDropArea', 'depositFileInput', 'depositFileName', 'depositSend', 'depositCancel'
+        , 'depositOverlay', 'depositCustomName', 'depositDropArea', 'depositFileInput', 'depositFileName', 'depositSend', 'depositCancel',
+        'bugReportOverlay', 'bugDescription', 'sendBugReport',
+        'cancelBugReport', 'openGlobalReport', 'openAiReport'
     ];
 
     ids.forEach(id => {
@@ -318,6 +433,9 @@ async function check_permissions() {
         window.location.href = "/";
         return false;
     }
+
+    report_enabled = data.reportEnabled || false;
+    update_report_ui();
 
     if (data.maxTickets) {
         max_tickets = data.maxTickets;
@@ -840,7 +958,6 @@ async function upload_deposit() {
     if (!current_deposit_target) return alert('Dépôt introuvable');
     if (!deposit_pending_file) return alert('Aucun fichier sélectionné');
 
-    // Vérification de taille (limite exemple : 50 Mo pour éviter crash serveur)
     if (deposit_pending_file.size > 50 * 1024 * 1024) {
         return alert("Fichier trop volumineux (max 50 Mo).");
     }
@@ -853,7 +970,7 @@ async function upload_deposit() {
         if (banned_terms.some(term => new RegExp(`\\b${term.toLowerCase()}\\b`, 'i').test(customName))) return alert('Nom bloqué par le filtre local.');
     }
 
-    // ui: show loading state
+    // show loading state
     const warning = document.getElementById('depositWarning');
     if (warning) warning.style.display = 'block';
     const sendBtn = document.getElementById('depositSend');
@@ -880,7 +997,7 @@ async function upload_deposit() {
         const res = await fetch(`${api_url}/api/deposits/${current_deposit_target.id}/upload`, { method: 'POST', body: form });
 
         if (res.ok) {
-            // success: reset ui
+            //reset ui
             deposit_pending_file = null;
             if (customNameEl) customNameEl.value = '';
             render_deposit_ui(); // clear list
@@ -894,12 +1011,16 @@ async function upload_deposit() {
         console.error(e);
         if (e.message && e.message.includes('already')) alert('Vous avez déjà déposé un fichier pour ce rendu.');
         if (e.message && e.message.includes("blocked")) {
-            close_all_overlays(); 
+            last_blocked_info = {
+                input: `Nom fichier custom: ${customName || deposit_pending_file.name}`,
+                reason: e.message
+            };
+            close_all_overlays();
             toggle_overlay('reportTicketOverlay', true);
         }
         else alert('Erreur upload: ' + (e.message || "Erreur inconnue"));
     } finally {
-        // ui: reset loading state
+        // reset loading state
         if (warning) warning.style.display = 'none';
         if (sendBtn) sendBtn.classList.remove('button-disabled');
     }
@@ -1030,7 +1151,13 @@ async function handle_form_submit() {
         infos_input.value = "";
         close_all_overlays();
     } catch (e) {
-        if (e.message && e.message.includes("blocked")) toggle_overlay('reportTicketOverlay', true);
+        if (e.message && e.message.includes("blocked")) {
+            last_blocked_info = {
+                input: `Nom: ${final_name} | Desc: ${description}`,
+                reason: e.message
+            };
+            toggle_overlay('reportTicketOverlay', true);
+        }
         else alert(e.message || "Erreur de création");
     } finally {
         is_sending = false;
@@ -1110,7 +1237,11 @@ async function process_admin_upload(content, color) {
     } catch (e) {
         if (e.message !== "Aborted") { console.error(e); alert("Erreur: " + e.message); render_pending_files(); }
         if (e.message && e.message.includes("blocked")) {
-            close_all_overlays(); 
+            last_blocked_info = {
+                input: `Contenu annonce: ${content}`,
+                reason: e.message
+            };
+            close_all_overlays();
             toggle_overlay('reportTicketOverlay', true);
         }
     } finally {
@@ -1213,7 +1344,7 @@ function setup_csv_settings() {
         } else input.click();
     };
 
-    // UPLOAD (AJOUT)
+    // upload
     input.onchange = async () => {
         if (!input.files[0]) return;
         text_span.textContent = "...";
@@ -1252,8 +1383,8 @@ function setup_event_listeners() {
             els.name.disabled = false;
             els.name.style.opacity = '1';
             if (fileUploadContainer) {
-                    fileUploadContainer.style.display = 'none';
-                }
+                fileUploadContainer.style.display = 'none';
+            }
         }
 
         toggle_overlay("formOverlay", true);
@@ -1353,6 +1484,29 @@ function setup_event_listeners() {
             await api_call(`/api/rooms/${room_code}`, "PUT", { aiEnabled: new_state });
             ai_enabled = new_state; update_ai_status(ai_enabled);
         } catch (err) { e.target.checked = !new_state; alert("Erreur IA"); }
+    });
+
+    // open report from settings
+    document.getElementById('openGlobalReport')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        open_report_overlay('manual_report');
+    });
+
+    // open report from ai block (replace specific listener if needed)
+    document.getElementById('openAiReport')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        open_report_overlay('ai_blocked', 'L\'IA a bloqué mon contenu de manière injustifiée.');
+    });
+
+    // report form actions
+    document.getElementById('cancelBugReport')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        toggle_overlay('bugReportOverlay', false);
+    });
+
+    document.getElementById('sendBugReport')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        submit_bug_report();
     });
 
     setup_drag_and_drop();
