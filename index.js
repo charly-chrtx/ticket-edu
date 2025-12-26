@@ -537,7 +537,7 @@ app.put('/api/rooms/:code', (req, res) => {
     if (err) return res.status(500).json({ error: err.message });
 
     notifierClients(roomCode, 'update', updatePayload);
-    res.json({ message: "settings updated", maxTickets, aiEnabled });
+    res.json({ message: "settings updated", maxTickets, aiEnabled, forceName });
   });
 });
 
