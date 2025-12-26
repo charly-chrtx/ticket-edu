@@ -105,7 +105,6 @@ function create_tag(tag, class_name, content = '', style = {}) {
 }
 
 // download modal logic
-
 function open_download_modal(deposit) {
     current_modal_deposit_id = deposit.id;
 
@@ -118,29 +117,54 @@ function open_download_modal(deposit) {
     list.innerHTML = '';
     const files = deposit.files || [];
 
+    // remove default list styling
+    list.style.listStyle = 'none';
+    list.style.padding = '0';
+
     if (files.length === 0) {
-        list.innerHTML = '<li style="justify-content:center; opacity:0.5;">Aucun fichier</li>';
+        list.innerHTML = '<li style="justify-content:center; opacity:0.5; padding: 20px; text-align:center;">Aucun fichier</li>';
         if (dl_all_btn) dl_all_btn.style.display = 'none';
     } else {
-        if (dl_all_btn) dl_all_btn.style.display = 'block';
+        if (dl_all_btn) dl_all_btn.style.display = 'flex';
 
         files.forEach(file => {
             const size = (file.size / (1024 * 1024)).toFixed(2);
-            const li = create_tag('li', '', `
-                <div style="display:flex; flex-direction:column;">
-                    <span style="font-weight:600;">${file.originalName || file.name}</span>
-                    <span style="font-size:0.8em; opacity:0.6;">${size} Mo</span>
-                </div>
-            `);
+            
+            //custom name priority
+            const original_name = file.originalName || file.name;
+            const main_name = file.customName || original_name;
+            const sub_info = file.customName ? `${original_name} • ${size} Mo` : `${size} Mo`;
+
+            const li_style = {
+                display: 'flex', 
+                justifyContent: 'space-between', 
+                alignItems: 'center', 
+                padding: '10px 20px', 
+                borderRadius: '50px', 
+                marginBottom: '8px', 
+                border: '2px solid black', 
+                background: '#fff'
+            };
+
+            const li = create_tag('li', '', '', li_style);
+
+            // content structure
+            const content_div = create_tag('div', '', `
+                <div style="font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:280px;" title="${main_name}">${main_name}</div>
+                <div style="font-size:0.8em; opacity:0.6; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:280px;">${sub_info}</div>
+            `, { display: 'flex', flexDirection: 'column', overflow: 'hidden', marginRight: '10px' });
 
             const btn = create_tag('button', 'announcement-download', '<img src="./assets/icon/download.png" style="width:20px;">');
+            // fix button style for modal context
+            btn.style.flexShrink = '0';
             btn.onclick = () => handle_file_download(file.id, file.originalName || file.name);
 
+            li.appendChild(content_div);
             li.appendChild(btn);
             list.appendChild(li);
         });
 
-        // download all handler (download one by one with delay)
+        // download all handler
         if (dl_all_btn) {
             dl_all_btn.onclick = async () => {
                 if (!confirm(`Télécharger les ${files.length} fichiers ?\n(Cela peut ouvrir plusieurs fenêtres)`)) return;
