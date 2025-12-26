@@ -18,6 +18,7 @@ let max_tickets = 1;
 let ai_enabled = false;
 let qr_instance = null;
 let csv_mode = false;
+let force_name_mode = false;
 let student_name = sessionStorage.getItem('student_name_cache');
 
 let tickets_list = [];
@@ -273,7 +274,7 @@ function init_ui() {
         'adminFilesList', 'right', 'subdiv', 'create', 'createbutton',
         'formOverlay', 'settingsOverlay', 'logoutOverlay', 'name', 'infos',
         'fileUploadContainer', 'adminSettingsSection', 'adminTypeSelector', 'dropArea', 'fileInput',
-        'aiToggle', 'aiStatus', 'reportTicketOverlay',
+        'aiToggle', 'aiStatus', 'forceNameToggle', 'reportTicketOverlay',
         'loginOverlay', 'loginName', 'loginEnter', 'issueNameOverlay',
         'nameChoicesContainer', 'csvButton', 'csvInput', 'qrcode-container'
         , 'depositOverlay', 'depositCustomName', 'depositDropArea', 'depositFileInput', 'depositFileName', 'depositSend', 'depositCancel',
@@ -449,7 +450,11 @@ async function check_permissions() {
 
     // csv logic update
     csv_mode = data.hasCsv || false;
-    
+    force_name_mode = data.forceName || false;
+
+    // uodate UI toggle
+    if (ui_elements.forceNameToggle) ui_elements.forceNameToggle.checked = force_name_mode;
+
     // server status
     const new_admin_status = data.isAdmin === true;
 
@@ -458,7 +463,7 @@ async function check_permissions() {
         document.body.dataset.initDone = "true";
     }
 
-    if (!is_admin && csv_mode) {
+    if (!is_admin && (csv_mode || force_name_mode)) {
         if (!student_name) {
             const overlay = document.getElementById('loginOverlay');
             if (overlay && overlay.style.display !== 'flex') {
@@ -556,6 +561,12 @@ async function handle_login_submit() {
     const input = ui_elements.loginName;
     const val = input.value.trim();
     if (!val) return;
+
+    if (force_name_mode && !csv_mode) {
+        if (val.length < 2) return alert("Nom trop court.");
+        complete_login(val);
+        return;
+    }
 
     try {
         const res = await api_call(`/api/rooms/${room_code}/check-name`, 'POST', { nameQuery: val });
@@ -1494,6 +1505,22 @@ function setup_event_listeners() {
             await api_call(`/api/rooms/${room_code}`, "PUT", { aiEnabled: new_state });
             ai_enabled = new_state; update_ai_status(ai_enabled);
         } catch (err) { e.target.checked = !new_state; alert("Erreur IA"); }
+    });
+
+    if (els.forceNameToggle) els.forceNameToggle.addEventListener('change', async (e) => {
+        if (!is_admin) { 
+            e.preventDefault(); 
+            e.target.checked = force_name_mode; 
+            return alert("Vous n'avez pas la permission."); 
+        }
+        const new_state = e.target.checked;
+        try {
+            await api_call(`/api/rooms/${room_code}`, "PUT", { forceName: new_state });
+            force_name_mode = new_state;
+        } catch (err) { 
+            e.target.checked = !new_state; 
+            alert("Erreur serveur"); 
+        }
     });
 
     // open report from settings
