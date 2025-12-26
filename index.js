@@ -372,6 +372,8 @@ app.get('/api/rooms/:code', (req, res) => {
 
       if (!room.maxTickets) room.maxTickets = 1;
 
+      room.reportEnabled = ENABLE_REPORT;
+
       // ai global status
       const isGlobalOnline = getAiStatus();
       room.aiEnabled = (room.aiEnabled === 1) && isGlobalOnline;
@@ -1116,7 +1118,7 @@ app.post('/api/report', (req, res) => {
     return res.status(403).json({ error: "reporting disabled" });
   }
 
-  const { logs, description, context, clientData } = req.body;
+  const { logs, description, context, clientData, aiData } = req.body;
 
   // basic validation
   if (!logs && !description) {
@@ -1132,6 +1134,7 @@ app.post('/api/report', (req, res) => {
     timestamp: new Date().toISOString(),
     context: context || "unknown",
     description: description || "no description",
+    aiContextData: aiData || null,
     clientData: clientData || {}, 
     logs: logs || []
   };
