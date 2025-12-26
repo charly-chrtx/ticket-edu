@@ -7,7 +7,6 @@ const url = require('url');
 const multer = require('multer');
 const fs = require('fs');
 const path = require('path');
-const archiver = require('archiver');
 require('dotenv').config();
 
 // ai filter
@@ -767,7 +766,6 @@ app.post('/api/deposits/:id/upload', upload.single('file'), async (req, res) => 
 
       // save file
       const fileId = "fdep_" + Date.now();
-      const finalName = normalize(customName || file.originalname);
 
       db.run(`INSERT INTO files (id, originalName, encryptedName, mimeType, size, roomCode, userId, depositId)
               VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
@@ -816,45 +814,6 @@ app.delete('/api/deposits/:id', (req, res) => {
   });
 });
 
-// download deposit zip
-app.get('/api/deposits/:id/zip', (req, res) => {
-  const depositId = req.params.id;
-
-  db.get("SELECT name FROM deposits WHERE id = ?", [depositId], (err, deposit) => {
-    if (err) return res.status(500).json({ error: err.message });
-    if (!deposit) return res.status(404).json({ error: "deposit not found" });
-
-    db.all("SELECT * FROM files WHERE depositId = ?", [depositId], (err, files) => {
-      if (err) return res.status(500).json({ error: err.message });
-      if (!files || files.length === 0) return res.status(404).json({ error: "no files" });
-
-      const safeName = normalize(deposit.name);
-
-      res.writeHead(200, {
-        'Content-Type': 'application/zip',
-        'Content-Disposition': `attachment; filename="deposit-${safeName}.zip"`
-      });
-
-      const archive = archiver('zip', { zlib: { level: 9 } });
-
-      archive.on('error', (err) => {
-        console.log('zip error', err);
-        res.status(500).end();
-      });
-
-      archive.pipe(res);
-
-      files.forEach(file => {
-        const filePath = path.join(PATH_DEP, file.encryptedName);
-        if (fs.existsSync(filePath)) {
-          archive.file(filePath, { name: file.originalName });
-        }
-      });
-
-      archive.finalize();
-    });
-  });
-});
 
 // get files
 app.get('/api/files/:roomCode', (req, res) => {
@@ -956,47 +915,6 @@ app.get('/api/files/download/:fileId', (req, res) => {
       return res.status(404).json({ error: 'file missing' });
     }
     res.download(filePath, file.originalName);
-  });
-});
-
-// download all files zip
-app.get('/api/files/:roomCode/zip', (req, res) => {
-  const roomCode = req.params.roomCode;
-
-  db.all("SELECT * FROM files WHERE roomCode = ?", [roomCode], (err, files) => {
-    if (err) return res.status(500).json({ error: err.message });
-    if (!files || files.length === 0) return res.status(404).json({ error: "no files" });
-
-    // headers for zip download
-    res.writeHead(200, {
-      'Content-Type': 'application/zip',
-      'Content-Disposition': `attachment; filename="room-${roomCode}.zip"`
-    });
-
-    const archive = archiver('zip', { zlib: { level: 9 } });
-
-    archive.on('error', (err) => {
-      console.log('zip error', err);
-      res.status(500).end();
-    });
-
-    archive.pipe(res);
-
-    files.forEach(file => {
-      // determine correct path
-      let targetDir = UPLOAD_DIR;
-      if (file.depositId) targetDir = PATH_DEP;
-      else if (file.announcementId) targetDir = PATH_ANN;
-
-      const filePath = path.join(targetDir, file.encryptedName);
-
-      // add file if exists
-      if (fs.existsSync(filePath)) {
-        archive.file(filePath, { name: file.originalName });
-      }
-    });
-
-    archive.finalize();
   });
 });
 
