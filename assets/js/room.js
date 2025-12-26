@@ -447,14 +447,23 @@ async function check_permissions() {
     if (ui_elements.aiToggle) ui_elements.aiToggle.checked = ai_enabled;
     update_ai_status(ai_enabled);
 
+    // csv logic update
     csv_mode = data.hasCsv || false;
+    
+    // server status
+    const new_admin_status = data.isAdmin === true;
 
-    // server returns boolean flag
-    set_admin_mode(data.isAdmin === true);
+    if (is_admin !== new_admin_status || !document.body.dataset.initDone) {
+        set_admin_mode(new_admin_status);
+        document.body.dataset.initDone = "true";
+    }
 
     if (!is_admin && csv_mode) {
         if (!student_name) {
-            start_login_flow();
+            const overlay = document.getElementById('loginOverlay');
+            if (overlay && overlay.style.display !== 'flex') {
+                start_login_flow();
+            }
             return false;
         }
     }
@@ -475,6 +484,8 @@ function update_ai_status(enabled) {
 }
 
 function set_admin_mode(status) {
+    if (is_admin === status && document.body.dataset.initDone === "true") return;
+
     // update state
     is_admin = status;
     const { createbutton, name, infos, formOverlay, fileUploadContainer, adminSettingsSection, adminTypeSelector } = ui_elements;
@@ -484,7 +495,7 @@ function set_admin_mode(status) {
     if (adminSettingsSection) adminSettingsSection.style.display = is_admin ? 'block' : 'none';
     if (fileUploadContainer) fileUploadContainer.style.display = is_admin ? 'flex' : 'none';
 
-    setup_csv_settings(); // update button state
+    setup_csv_settings();
 
     // ui elements update
     const title = formOverlay.querySelector('h1');
@@ -510,7 +521,6 @@ function set_admin_mode(status) {
         if (title) title.textContent = "Nouveau ticket";
     }
 
-    // if admin or cached, sync is safe
     if (is_admin || (csv_mode && student_name) || !csv_mode) {
         sync_announcements();
         render_tickets();
