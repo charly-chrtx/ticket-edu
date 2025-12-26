@@ -114,6 +114,8 @@ function open_download_modal(deposit) {
 
     if (!modal || !list) return;
 
+    modal.style.display = '';
+
     list.innerHTML = '';
     const files = deposit.files || [];
 
@@ -1685,9 +1687,11 @@ function setup_event_listeners() {
             close_all_overlays();
         });
 
-        setup_download_modal_listeners();
+        
     });
 
+    setup_download_modal_listeners();
+    
     // logout
     document.getElementById("logout")?.addEventListener('click', (e) => { e.preventDefault(); toggle_overlay("logoutOverlay", true); });
     document.getElementById("cancelLogout")?.addEventListener('click', (e) => { e.preventDefault(); close_all_overlays(); });
