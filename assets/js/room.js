@@ -103,6 +103,70 @@ function create_tag(tag, class_name, content = '', style = {}) {
     return el;
 }
 
+// download modal logic
+
+function open_download_modal(deposit) {
+    const modal = document.getElementById('download-modal');
+    const list = document.getElementById('file-list');
+    const dl_all_btn = document.getElementById('download-all');
+
+    if (!modal || !list) return;
+
+    list.innerHTML = '';
+    const files = deposit.files || [];
+
+    if (files.length === 0) {
+        list.innerHTML = '<li style="justify-content:center; opacity:0.5;">Aucun fichier</li>';
+        if (dl_all_btn) dl_all_btn.style.display = 'none';
+    } else {
+        if (dl_all_btn) dl_all_btn.style.display = 'block';
+
+        files.forEach(file => {
+            const size = (file.size / (1024 * 1024)).toFixed(2);
+            const li = create_tag('li', '', `
+                <div style="display:flex; flex-direction:column;">
+                    <span style="font-weight:600;">${file.originalName || file.name}</span>
+                    <span style="font-size:0.8em; opacity:0.6;">${size} Mo</span>
+                </div>
+            `);
+
+            const btn = create_tag('button', 'btn-icon', '<img src="./assets/icon/download.png" style="width:20px;">');
+            btn.onclick = () => handle_file_download(file.id, file.originalName || file.name);
+
+            li.appendChild(btn);
+            list.appendChild(li);
+        });
+
+        // download all handler (download one by one with delay)
+        if (dl_all_btn) {
+            dl_all_btn.onclick = async () => {
+                if (!confirm(`Télécharger les ${files.length} fichiers ?\n(Cela peut ouvrir plusieurs fenêtres)`)) return;
+                for (const file of files) {
+                    handle_file_download(file.id, file.originalName || file.name);
+                    await new Promise(r => setTimeout(r, 800))
+                }
+            };
+        }
+    }
+
+    modal.classList.remove('hidden');
+}
+
+function setup_download_modal_listeners() {
+    const modal = document.getElementById('download-modal');
+    const close_btn = document.getElementById('close-modal');
+
+    if (close_btn && modal) {
+        close_btn.onclick = () => modal.classList.add('hidden');
+    }
+
+    if (modal) {
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) modal.classList.add('hidden');
+        });
+    }
+}
+
 // logs
 
 function capture_log(type, args) {
@@ -787,26 +851,64 @@ function render_announcements() {
         const msg_div = create_tag('div', 'announcement-item', '', style);
         if (is_depot) msg_div.classList.add('depot-item');
 
-        // define content based on type
         const content_text = is_depot ? `${item.name}` : item.content;
 
         if (content_text?.trim()) {
             let btn_html = '';
+
+            // admin logic for buttons
             if (is_admin) {
-                btn_html = `<button class="announcement-delete" title="Supprimer"><img src="./assets/icon/delete.png" alt="X"></button>`;
+                if (is_depot) {
+                    // count files
+                    const file_count = item.files ? item.files.length : 0;
+                    const count_txt = `<span style="font-size:0.8em; margin-right:10px; white-space: nowrap; opacity:0.6;">${file_count} fichier${file_count > 1 ? 's' : ''} partagé${file_count > 1 ? 's' : ''}</span>`;
+
+                    // download button
+                    const dl_btn = `<button class="announcement-download" title="Voir les fichiers" style="margin-right:5px;"><img src="./assets/icon/download.png" alt="DL"></button>`;
+
+                    // delete button
+                    const del_btn = `<button class="announcement-delete" title="Supprimer"><img src="./assets/icon/delete.png" alt="X"></button>`;
+
+                    btn_html = count_txt + dl_btn + del_btn;
+                } else {
+                    // standard announcement delete
+                    btn_html = `<button class="announcement-delete" title="Supprimer"><img src="./assets/icon/delete.png" alt="X"></button>`;
+                }
             } else if (is_depot) {
                 btn_html = `<button class="announcement-action-btn" title="Ajouter"><img src="./assets/icon/add.png" alt="+"></button>`;
             }
 
             const text_row = create_tag('div', '', `
                 <div class="announcement-content" style="width:100%;"><span class="announcement-text">${content_text}</span></div>
-                <div class="announcement-actions">${btn_html}</div>
+                <div class="announcement-actions" style="display:flex; align-items:center;">${btn_html}</div>
             `, { display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' });
 
             // attach events
             if (is_admin) {
+                const delete_btn = text_row.querySelector('.announcement-delete');
                 const path = is_depot ? `/api/deposits/${item.id}` : `/api/announcements/${item.id}`;
-                text_row.querySelector('.announcement-delete').addEventListener('click', (e) => delete_item(e, path, wrapper));
+
+                // custom delete logic for deposits with files
+                delete_btn.addEventListener('click', (e) => {
+                    if (is_depot && item.files && item.files.length > 0) {
+                        e.preventDefault();
+                        const confirm_msg = `Attention !\nCe dépôt contient ${item.files.length} fichier(s).\n\nVoulez-vous vraiment le supprimer définitivement ?`;
+                        if (!confirm(confirm_msg)) return;
+                    }
+                    delete_item(e, path, wrapper);
+                });
+
+                // attach download modal event
+                if (is_depot) {
+                    const download_btn = text_row.querySelector('.announcement-download');
+                    if (download_btn) {
+                        download_btn.addEventListener('click', (e) => {
+                            e.preventDefault();
+                            open_download_modal(item);
+                        });
+                    }
+                }
+
             } else if (is_depot) {
                 const add_btn = text_row.querySelector('.announcement-action-btn');
                 if (add_btn) add_btn.addEventListener('click', () => open_deposit_overlay(item));
@@ -814,7 +916,7 @@ function render_announcements() {
             msg_div.appendChild(text_row);
         }
 
-        // files logic
+        // files logic (for standard announcements)
         if (!is_depot && item.files?.length > 0) {
             const file_container = create_tag('div', '', '', { display: 'flex', flexDirection: 'column', gap: '4px', width: '100%' });
             item.files.forEach(file => render_file_item(file, item.id, file_container));
@@ -1504,6 +1606,8 @@ function setup_event_listeners() {
             }
             close_all_overlays();
         });
+
+        setup_download_modal_listeners();
     });
 
     // logout
