@@ -1181,10 +1181,22 @@ async function upload_deposit() {
     const sendBtn = document.getElementById('depositSend');
     if (sendBtn) sendBtn.classList.add('button-disabled');
 
-    // prepare filename: nomdepot_nomuser
-    const segmentA = normalize_name_segment(current_deposit_target.name || 'depot');
-    const userNameSeg = normalize_name_segment(csv_mode && student_name ? student_name : (document.getElementById('name')?.value || user_id));
-    const outNameBase = `${segmentA}_${userNameSeg}` + (customName ? `_${normalize_name_segment(customName)}` : '');
+    // prepare filename logic
+    let outNameBase = '';
+    
+    if (customName) {
+        // use custom name only
+        outNameBase = normalize_name_segment(customName);
+    } else {
+        // use depositname.originalfilename
+        const segmentA = normalize_name_segment(current_deposit_target.name || 'depot');
+        
+        // get original name without extension
+        const parts = deposit_pending_file.name.split('.');
+        const originalBase = parts.length > 1 ? parts.slice(0, -1).join('.') : parts[0];
+        
+        outNameBase = `${segmentA}.${normalize_name_segment(originalBase)}`;
+    }
 
     try {
         const enc_blob = await encrypt_file(deposit_pending_file);
