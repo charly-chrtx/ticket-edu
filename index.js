@@ -165,14 +165,14 @@ wss.on('connection', async (ws, req) => {
   }
 
   // validation for csv mode
-  db.get("SELECT csvFilePath FROM rooms WHERE code = ?", [roomCode], (err, room) => {
+  db.get("SELECT csvFilePath, forceName FROM rooms WHERE code = ?", [roomCode], (err, room) => { // AJOUT forceName
     if (err || !room) {
       ws.close();
       return;
     }
 
     // if csv active, validate name
-    if (room.csvFilePath) {
+    if (room.csvFilePath || room.forceName === 1) {
       if (!requestedName) {
         ws.close(1008, "name required");
         return;
@@ -188,20 +188,22 @@ wss.on('connection', async (ws, req) => {
         return;
       }
 
-      // check if name exists in csv
-      try {
-        const content = fs.readFileSync(path.join(UPLOAD_DIR, room.csvFilePath), 'utf8');
-        const matches = parseAndSearchCsv(content, requestedName, []);
-        const exists = matches.some(n => n === requestedName);
+      // check in csv if applicable
+      if (room.csvFilePath) {
+        try {
+          const content = fs.readFileSync(path.join(UPLOAD_DIR, room.csvFilePath), 'utf8');
+          const matches = parseAndSearchCsv(content, requestedName, []);
+          const exists = matches.some(n => n === requestedName);
 
-        if (!exists) {
-          ws.close(1008, "invalid name");
+          if (!exists) {
+            ws.close(1008, "invalid name");
+            return;
+          }
+        } catch (e) {
+          console.log("csv read error", e);
+          ws.close(1011, "server error");
           return;
         }
-      } catch (e) {
-        console.log("csv read error", e);
-        ws.close(1011, "server error");
-        return;
       }
     }
 
@@ -378,6 +380,8 @@ app.get('/api/rooms/:code', (req, res) => {
       const isGlobalOnline = getAiStatus();
       room.aiEnabled = (room.aiEnabled === 1) && isGlobalOnline;
 
+      room.forceName = room.forceName === 1;
+
       room.hasCsv = !!room.csvFilePath;
       delete room.csvFilePath;
 
@@ -517,6 +521,12 @@ app.put('/api/rooms/:code', (req, res) => {
     updatePayload.refreshSettings = true;
   }
 
+  if (forceName !== undefined) {
+    fields.push("forceName = ?");
+    values.push(forceName ? 1 : 0);
+    updatePayload.refreshSettings = true;
+  }
+
   if (fields.length === 0) return res.status(400).json({ error: "no fields" });
 
   values.push(roomCode);
@@ -545,11 +555,11 @@ app.post('/api/tickets', (req, res) => {
   let { nom, description, couleur, etat, userId, roomCode } = req.body;
   if (!nom || !userId || !roomCode) return res.status(400).json({ error: 'missing fields' });
 
-  db.get("SELECT maxTickets, aiEnabled, csvFilePath FROM rooms WHERE code = ?", [roomCode], async (err, room) => {
+  db.get("SELECT maxTickets, aiEnabled, csvFilePath, forceName FROM rooms WHERE code = ?", [roomCode], async (err, room) => {
     if (err) return res.status(500).json({ error: err.message });
     if (!room) return res.status(404).json({ error: "room not found" });
 
-    if (room.csvFilePath) {
+    if (room.csvFilePath || room.forceName === 1) {
       const sessions = [...clientRooms.values()].filter(c =>
         c.code === roomCode && c.userId === userId
       );
@@ -1135,7 +1145,7 @@ app.post('/api/report', (req, res) => {
     context: context || "unknown",
     description: description || "no description",
     aiContextData: aiData || null,
-    clientData: clientData || {}, 
+    clientData: clientData || {},
     logs: logs || []
   };
 

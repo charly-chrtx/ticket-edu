@@ -30,6 +30,7 @@ db.serialize(() => {
       db.run("ALTER TABLE rooms ADD COLUMN maxTickets INTEGER DEFAULT 1", () => { });
       db.run("ALTER TABLE rooms ADD COLUMN aiEnabled INTEGER DEFAULT 0", () => { });
       db.run("ALTER TABLE rooms ADD COLUMN csvFilePath TEXT", () => { });
+      db.run("ALTER TABLE rooms ADD COLUMN forceName INTEGER DEFAULT 0", () => { });
     }
   });
 
