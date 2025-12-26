@@ -168,9 +168,51 @@ function open_download_modal(deposit) {
 
         // download all handler
         if (dl_all_btn) {
-            dl_all_btn.onclick = (e) => {
+            const new_btn = dl_all_btn.cloneNode(true);
+            dl_all_btn.parentNode.replaceChild(new_btn, dl_all_btn);
+            
+            new_btn.onclick = async (e) => {
                 e.preventDefault();
-                window.location.href = `${api_url}/api/deposits/${deposit.id}/zip`;
+                const originalText = new_btn.innerHTML;
+                new_btn.innerHTML = 'Préparation du ZIP...';
+                new_btn.style.opacity = '0.7';
+                new_btn.disabled = true;
+
+                try {
+                    const zip = new JSZip();
+                    
+                    // get and process each file
+                    for (const file of files) {
+                        // download encrypted blob
+                        const blob_enc = await api_download(file.id);
+                        
+                        // decrypt blob
+                        const blob_clear = await decrypt_blob(blob_enc);
+                        
+                        // determine filename
+                        const original_name = file.originalName || file.name;
+                        let filename = file.customName 
+                            ? `${normalize_name_segment(file.customName)}.${original_name.split('.').pop()}`
+                            : original_name;
+
+                        // add to zip
+                        zip.file(filename, blob_clear);
+                    }
+
+                    // generate zip
+                    const content = await zip.generateAsync({type: "blob"});
+                    
+                    // save
+                    saveAs(content, `depot-${deposit.name || 'fichiers'}.zip`);
+
+                } catch (err) {
+                    console.error("Erreur ZIP:", err);
+                    alert("Erreur lors de la création du ZIP via le navigateur.");
+                } finally {
+                    new_btn.innerHTML = originalText;
+                    new_btn.style.opacity = '1';
+                    new_btn.disabled = false;
+                }
             };
         }
     }
