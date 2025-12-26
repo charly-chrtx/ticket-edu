@@ -358,7 +358,7 @@ function toggle_overlay(id, show) {
 function close_all_overlays() {
     document.querySelectorAll('.menu-overlay').forEach(el => {
         // prevent closing login overlay if locked
-        if (el.id === 'loginOverlay' && !is_admin && csv_mode && !student_name) return;
+        if (el.id === 'loginOverlay' && !is_admin && (csv_mode || force_name_mode) && !student_name) return;
         el.style.display = "none";
     });
 }
@@ -1155,12 +1155,11 @@ async function handle_form_submit() {
     }
 
     //use student name if csv mode
-    const final_name = csv_mode ? student_name : name;
+    const final_name = (csv_mode || force_name_mode) ? student_name : name;
 
     const active_tickets = tickets_list.filter(t => t.etat === "en cours" && t.userId === user_id);
     if (active_tickets.length >= max_tickets) return alert("Limite atteinte.");
-    if (!final_name && !csv_mode) return alert("Nom requis.");
-
+    if (!final_name && !csv_mode && !force_name_mode) return alert("Nom requis.");
     is_sending = true;
     if (create_btn) create_btn.classList.add('button-disabled');
 
@@ -1168,7 +1167,7 @@ async function handle_form_submit() {
         await api_call('/api/tickets', "POST", {
             nom: final_name, description, couleur: color, etat: "en cours", userId: user_id, roomCode: room_code
         });
-        if (!csv_mode) name_input.value = "";
+        if (!csv_mode && !force_name_mode) name_input.value = "";
         infos_input.value = "";
         close_all_overlays();
     } catch (e) {
@@ -1396,11 +1395,12 @@ function setup_event_listeners() {
         e.preventDefault();
 
         // lock name input if logged in
-        if (!is_admin && csv_mode && student_name) {
+        if (!is_admin && (csv_mode || force_name_mode) && student_name) {
             els.name.value = student_name;
             els.name.disabled = true;
             els.name.style.opacity = '0.6';
         } else if (!is_admin) {
+            els.name.disabled = false;
             els.name.disabled = false;
             els.name.style.opacity = '1';
             if (fileUploadContainer) {
@@ -1464,8 +1464,7 @@ function setup_event_listeners() {
         overlay.addEventListener('click', (e) => {
             if (e.target !== overlay) return;
             // protect form/login close
-            if (overlay.id === 'loginOverlay' && !is_admin && csv_mode && !student_name) return;
-            if (overlay.id === 'formOverlay' && (is_sending || pending_files.length > 0)) {
+            if (overlay.id === 'loginOverlay' && !is_admin && (csv_mode || force_name_mode) && !student_name) return; if (overlay.id === 'formOverlay' && (is_sending || pending_files.length > 0)) {
                 if (is_sending) { if (confirm("Annuler l'envoi ?")) current_xhr?.abort(); else return; }
                 else { if (confirm("Fermer et perdre les fichiers ?")) { pending_files = []; render_pending_files(); } else return; }
             }
@@ -1508,18 +1507,18 @@ function setup_event_listeners() {
     });
 
     if (els.forceNameToggle) els.forceNameToggle.addEventListener('change', async (e) => {
-        if (!is_admin) { 
-            e.preventDefault(); 
-            e.target.checked = force_name_mode; 
-            return alert("Vous n'avez pas la permission."); 
+        if (!is_admin) {
+            e.preventDefault();
+            e.target.checked = force_name_mode;
+            return alert("Vous n'avez pas la permission.");
         }
         const new_state = e.target.checked;
         try {
             await api_call(`/api/rooms/${room_code}`, "PUT", { forceName: new_state });
             force_name_mode = new_state;
-        } catch (err) { 
-            e.target.checked = !new_state; 
-            alert("Erreur serveur"); 
+        } catch (err) {
+            e.target.checked = !new_state;
+            alert("Erreur serveur");
         }
     });
 

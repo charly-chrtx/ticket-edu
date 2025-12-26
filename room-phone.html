@@ -614,7 +614,6 @@
       border-color: #fff;
     }
 
-    /* Ajustement des sliders pour qu'ils s'alignent bien avec les petits boutons */
     .slider-selector,
     .quantity-selector {
       transform: scale(0.9);
@@ -624,7 +623,6 @@
       flex: 0 0 auto;
     }
 
-    /* Correction pour le slider radio sur mobile */
     .slider-selector {
       display: flex;
       gap: 5px;
@@ -634,7 +632,6 @@
       margin: 0 2px;
     }
 
-    /* Titres de section plus discrets */
     #settingsOverlay h2 {
       margin-top: 25px !important;
       margin-bottom: 5px !important;
@@ -833,6 +830,14 @@
               <span class="text">Ajouter</span>
             </a>
             <input type="file" id="csvInput" accept=".csv" style="display: none;">
+          </div>
+
+          <div style="display: flex; justify-content: space-between; align-items: center; margin: 15px 0;">
+            <span>Nom requis pour entrer dans la salle</span>
+            <label>
+              <input type="checkbox" class="toggle-checkbox" id="forceNameToggle">
+              <span class="toggle-slider"></span>
+            </label>
           </div>
 
           <div class="setting-row">
