@@ -504,7 +504,6 @@
       flex-wrap: wrap;
     }
 
-    /* Responsive text */
     h1 {
       font-size: 1.5rem;
     }
@@ -514,10 +513,27 @@
       font-size: 15px;
     }
 
-    /* Fix paragraphs in overlays */
     .menu-box p {
       font-size: 0.9rem;
       line-height: 1.5;
+    }
+
+    .admin-selector {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+
+    .admin-selector .slider-selector {
+      transform: scale(1);
+      width: auto;
+      padding: 5px;
+    }
+
+    .admin-selector .label-text {
+      padding: 0 20px;
+      min-width: 80px;
     }
 
     /* ==========================================================================
@@ -694,6 +710,20 @@
 
   <div class="menu-overlay" id="formOverlay" style="display: none;">
     <div class="menu-box" style="margin: 0px 20px;">
+
+      <div class="admin-selector" id="adminTypeSelector" style="display: none;">
+        <div class="slider-selector">
+          <label class="slider-option">
+            <input type="radio" name="AdminType" value="message" checked>
+            <span class="label-text">Message</span>
+          </label>
+          <label class="slider-option">
+            <input type="radio" name="AdminType" value="depot">
+            <span class="label-text">Dépôt</span>
+          </label>
+        </div>
+      </div>
+
       <div class="input" style="padding-bottom: 0;">
         <h1>Nouveau ticket</h1>
 
@@ -750,8 +780,23 @@
       <div class="input" style="padding-bottom: 0;">
         <h1 style="margin-bottom: 10px;">Paramètres</h1>
 
-        <div id="qrcode-container">
-          <h2 style="text-align: left; margin-top: 30px; font-size: 1.2rem;">QR Code</h2>
+        <div class="qr-card"
+          style="height: auto; width: 100%; opacity: 1; animation: none; padding: 20px 15px; gap: 15px; justify-content: center;">
+
+          <div id="qrcode-container" style="transition: all 0.2s;"></div>
+
+          <div style="display: flex; flex-direction: column; gap: 25px; text-align: center;">
+
+            <div id="codebutton" style="font-size: 1.1rem; font-weight: 600; line-height: 1.4;">
+              Scannez pour nous rejoindre.
+            </div>
+
+            <div id="copyText" style="font-size: 1.8rem; font-weight: 600; line-height: 1.4;">
+              *****
+            </div>
+
+          </div>
+
         </div>
 
         <div id="adminSettingsSection" style="display: none;">
@@ -838,7 +883,7 @@
 
         <div class="setting-row">
           <span>Signaler un bug</span>
-          <a class="button-text" target="_blank" style="opacity: 0.5; pointer-events: none;">
+          <a class="button-text" id="openGlobalReport" target="_blank">
             <img class="icon" src="./assets/icon/report.png">
             <span class="text">Signaler</span>
           </a>
@@ -945,6 +990,71 @@
           <a class="button-text" id="loginEnter" href="#"
             style="width: 100%; padding: 0 30px; margin: 0; min-width: 140px;">
             <span class="text">Entrer</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="menu-overlay" id="bugReportOverlay" style="display: none;">
+    <div class="menu-box" style="margin: 0px 20px;">
+      <div class="input" style="padding-bottom: 0;">
+        <h1>Signaler un problème</h1>
+
+        <p style="margin: 15px 0; opacity: 0.7;">
+          Les logs de la console seront envoyés automatiquement.
+        </p>
+
+        <textarea id="bugDescription" placeholder="Décrivez le problème (optionnel)..."
+          style="width: 100%; min-height: 100px; padding: 15px; border-radius: 15px; border: 2px solid #000; font-family: inherit; margin-bottom: 15px; resize: none;"></textarea>
+
+        <div class="overlay-footer" style="display: flex; justify-content: center; gap: 15px; margin-top: 30px;">
+          <a class="button-text" id="sendBugReport" href="#" style="width: 100%; padding: 0 30px; margin: 0;">
+            <img class="icon" src="./assets/icon/check.png">
+            <span class="text">Envoyer</span>
+          </a>
+
+          <a class="button-text" id="cancelBugReport" href="#"
+            style="width: 100%; padding: 0 30px; margin: 0; background-color: #ff7070;">
+            <img class="icon" src="./assets/icon/cross.png">
+            <span class="text">Annuler</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="menu-overlay" id="depositOverlay" style="display: none;">
+    <div class="menu-box" style="margin: 0px 20px;">
+      <div class="input" style="padding-bottom: 0;">
+        <h1>Dépôt</h1>
+        <p id="depositInstructions" style="opacity:0.8; margin-bottom: 20px;">Déposez votre fichier ici. Un seul fichier
+          est autorisé.</p>
+
+        <div style="margin: 15px 0;">
+          <input type="text" id="depositCustomName" name="depositCustomName"
+            placeholder="Nom du fichier (sans extension)" style="width: 100%;" />
+        </div>
+
+        <div class="file-upload-container" style="margin: 15px 0;">
+          <input type="file" id="depositFileInput" style="display: none;">
+          <div class="file-drop-area" id="depositDropArea">
+            <div class="drop-area-content">
+              <span class="file-placeholder">+ Glisser ou cliquer pour ajouter un fichier</span>
+              <div id="depositFilesList" class="admin-files-list"></div>
+              <div id="depositWarning" class="upload-warning" style="display:none;">Exportation...</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="overlay-footer" style="display: flex; justify-content: center; gap: 15px; margin-top: 30px;">
+          <a class="button-text" id="depositSend" href="#" style="width: 100%; padding: 0 30px; margin: 0;">
+            <img class="icon" src="./assets/icon/check.png">
+            <span class="text">Envoyer</span>
+          </a>
+          <a class="button-text" id="depositCancel" href="#"
+            style="width: 100%; padding: 0 30px; margin: 0; background-color: #ff7070;">
+            <img class="icon" src="./assets/icon/cross.png">
+            <span class="text">Annuler</span>
           </a>
         </div>
       </div>
