@@ -366,7 +366,7 @@ app.get('/api/rooms/:code', (req, res) => {
   const roomCode = req.params.code;
 
   db.get(
-    "SELECT code, adminId, maxTickets, aiEnabled, csvFilePath FROM rooms WHERE code = ?",
+    "SELECT code, adminId, maxTickets, aiEnabled, csvFilePath, forceName FROM rooms WHERE code = ?",
     [roomCode],
     (err, room) => {
       if (err) return res.status(500).json({ error: err.message });
