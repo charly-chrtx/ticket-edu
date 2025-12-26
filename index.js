@@ -749,6 +749,14 @@ app.post('/api/deposits/:id/upload', upload.single('file'), async (req, res) => 
       return res.status(400).json({ error: "blocked by ai" });
     }
 
+
+    // get extension and define base name
+    const ext = path.extname(file.originalname);
+    let baseName = customName || path.basename(file.originalname, ext);
+
+    // normalize and attach extension
+    const finalName = normalize(baseName) + ext;
+
     // quota check
     db.get("SELECT SUM(size) as total FROM files WHERE roomCode = ?", [roomCode], (err, row) => {
       const current = row?.total || 0;
