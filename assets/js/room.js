@@ -201,7 +201,7 @@ function update_report_ui() {
     } else {
         // restore display if enabled 
         if (globalBtn) globalBtn.style.display = 'flex'; // ou 'block'
-        if (aiBtn) aiBtn.style.display = 'inline-block'; // ou 'flex'
+        if (aiBtn) aiBtn.style.display = 'flex'; // ou 'flex'
     }
 }
 

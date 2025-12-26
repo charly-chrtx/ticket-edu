@@ -341,16 +341,17 @@
 
             <div class="overlay-footer" style="display: flex; justify-content: center; gap: 15px; margin-top: 30px;">
 
-              <a class="button-text" id="openAiReport"
-                style="width: auto; padding: 0 30px; margin: 0; background-color: #ff7070; min-width: 140px;">
-                <img class="icon" src="./assets/icon/report.png" alt="">
-                <span class="text">Signaler</span>
-              </a>
-
-              <a class="button-text" id="cancelLogout" href="#" onclick="closeReportTicketOverlay()"
+              <a class="button-text" id="cancelLogout" href="#"
                 style="width: auto; padding: 0 30px; margin: 0; min-width: 140px;">
                 <img class="icon" src="./assets/icon/check.png" alt="">
                 <span class="text">Ok</span>
+              </a>
+
+              <a class="button-text" id="openAiReport" href="#" 
+                onclick="envoyerSignalement()" 
+                style="width: auto; padding: 0 30px; margin: 0; min-width: 140px; background-color: #ff7070;">
+                <img class="icon" src="./assets/icon/report.png" alt="">
+                <span class="text">Signaler</span>
               </a>
 
             </div>
@@ -410,17 +411,18 @@
             <textarea id="bugDescription" placeholder="Décrivez le problème (optionnel)..."></textarea>
 
             <div class="overlay-footer" style="display: flex; justify-content: center; gap: 15px; margin-top: 30px;">
-              <a class="button-text" id="sendBugReport" href="#"
-                style="width: auto; padding: 0 30px; margin: 0; min-width: 140px;">
-                <img class="icon" src="./assets/icon/check.png">
-                <span class="text">Envoyer</span>
-              </a>
-
               <a class="button-text" id="cancelBugReport" href="#"
-                style="width: auto; padding: 0 30px; margin: 0; background-color: #ff7070; min-width: 140px;">
+                style="width: auto; padding: 0 30px; margin: 0; min-width: 140px;">
                 <img class="icon" src="./assets/icon/cross.png">
                 <span class="text">Annuler</span>
               </a>
+
+              <a class="button-text" id="sendBugReport" href="#"
+                style="width: auto; padding: 0 30px; margin: 0; background-color: #9ecaff; min-width: 140px;">
+                <img class="icon" src="./assets/icon/send.png">
+                <span class="text">Envoyer</span>
+              </a>
+
             </div>
           </div>
         </div>

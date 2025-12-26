@@ -977,7 +977,7 @@ textarea:hover:not(:focus) {
 
 .announcement-container.open .main-card:hover {
     transform: none;
-    box-shadow: 0px 3px 0px rgba(0, 0, 0, 0.2);
+    box-shadow: 0px 4px 0px rgba(0, 0, 0, 0.2) !important;
 }
 
 /* announcement list */
@@ -985,7 +985,8 @@ textarea:hover:not(:focus) {
     width: 100%;
     display: flex;
     flex-direction: column;
-    transition: opacity 0.3s ease;
+    position: relative;
+    z-index: 1;
 
 }
 
@@ -1004,9 +1005,8 @@ textarea:hover:not(:focus) {
     left: auto;
     z-index: 90;
     margin-top: 6px;
+    padding-top: 10px;
     animation: bounce-in 0.4s ease forwards;
-
-    /* new scroll properties */
     max-height: 700px;
     overflow-y: auto;
     overflow-x: hidden;
@@ -1040,7 +1040,7 @@ textarea:hover:not(:focus) {
     left: 0;
     transform: translateY(calc(12px * (var(--i) + 1))) scale(calc(1 - (0.04 * (var(--i) + 1))));
     z-index: calc(90 - var(--i));
-    opacity: calc(1 - (var(--i) * 0.3));
+    filter: brightness(calc(1 - (var(--i) * 0.25)));
     pointer-events: none;
     transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), opacity 0.3s ease, position 0s 0.4s;
 }
@@ -1050,12 +1050,12 @@ textarea:hover:not(:focus) {
     top: auto;
     left: auto;
     transform: none;
+    filter: brightness(1);
     opacity: 1;
     z-index: 90;
     pointer-events: auto;
     margin-top: 15px;
-    transition: transform 0.3s ease, opacity 0.3s ease, margin-top 0.3s ease;
-    transition-delay: calc(var(--i) * 0.05s);
+    transition-delay: calc(var(--i) * 0.10s);
 }
 
 .announcement-container:not(.open) .announcement-wrapper[style*="--i: 3"],
@@ -1075,9 +1075,9 @@ textarea:hover:not(:focus) {
     background-color: var(--card-bg);
     box-shadow: 0px 2px 0px rgba(0, 0, 0, 0.2);
     transition: all 0.2s ease;
-    animation: ease-in 0.3s ease;
     min-height: 60px;
     gap: 8px;
+    overflow: hidden;
 }
 
 
@@ -1086,7 +1086,6 @@ textarea:hover:not(:focus) {
     min-height: 55px;
     max-height: 55px;
     overflow: hidden;
-    transition: opacity 0.1s ease;
 }
 
 .announcement-container.open .announcement-item {
@@ -1094,7 +1093,6 @@ textarea:hover:not(:focus) {
     min-height: 60px;
     max-height: none;
     overflow: visible;
-    transition: opacity 0.3s ease 0.15s;
 }
 
 .announcement-text {
