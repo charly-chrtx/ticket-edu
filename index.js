@@ -503,7 +503,7 @@ app.post('/api/rooms/:code/check-name', (req, res) => {
 // update settings
 app.put('/api/rooms/:code', (req, res) => {
   const roomCode = req.params.code;
-  const { maxTickets, aiEnabled } = req.body;
+  const { maxTickets, aiEnabled, forceName } = req.body;
 
   let fields = [];
   let values = [];
