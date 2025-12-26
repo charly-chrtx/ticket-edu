@@ -743,7 +743,7 @@ app.post('/api/deposits/:id/upload', upload.single('file'), async (req, res) => 
     }
 
     // ai safety check on custom name
-    const isSafe = await validateContent(customName || file.originalname);
+    const isSafe = await validateContent(customName);
     if (!isSafe) {
       fs.unlinkSync(file.path);
       return res.status(400).json({ error: "blocked by ai" });
@@ -769,6 +769,8 @@ app.post('/api/deposits/:id/upload', upload.single('file'), async (req, res) => 
             fs.unlinkSync(file.path);
             return res.status(500).json({ error: err.message });
           }
+
+          notifierClients(roomCode, 'updateDeposit');
           res.status(201).json({ message: "uploaded" });
         }
       );
@@ -1015,7 +1017,11 @@ app.delete('/api/files/:fileId', (req, res) => {
       db.run("DELETE FROM files WHERE id = ?", [fileId], (err) => {
         if (err) return res.status(500).json({ error: err.message });
         updateRoomActivity(file.roomCode);
-        notifierClients(file.roomCode, 'deleteFile', { fileId });
+        if (file.depositId) {
+          notifierClients(file.roomCode, 'updateDeposit');
+        } else {
+          notifierClients(file.roomCode, 'updateAnnonce');
+        }
         res.json({ message: "file deleted" });
       });
     });
