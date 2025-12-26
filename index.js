@@ -33,6 +33,9 @@ let globalSettings = {
   maxStoragePerRoom: 1.25 * 1024 * 1024 * 1024 // default 1.25gb per room
 };
 
+const ENABLE_REPORT = process.env.REPORT === 'true';
+const REPORT_DIR = process.env.REPORT_DIR || './reports';
+
 const UPLOAD_DIR = process.env.UPLOAD_DIR || './uploads';
 const PATH_ANN = path.join(UPLOAD_DIR, 'announcements');
 const PATH_DEP = path.join(UPLOAD_DIR, 'deposits');
@@ -46,6 +49,9 @@ if (!fs.existsSync(PATH_ANN)) {
 }
 if (!fs.existsSync(PATH_DEP)) {
   fs.mkdirSync(PATH_DEP);
+}
+if (ENABLE_REPORT && !fs.existsSync(REPORT_DIR)) {
+  fs.mkdirSync(REPORT_DIR);
 }
 
 // csv helper
@@ -1100,6 +1106,44 @@ app.delete('/api/announcements/:id', (req, res) => {
         });
       });
     });
+  });
+});
+
+// report route
+app.post('/api/report', (req, res) => {
+  // check env var
+  if (!ENABLE_REPORT) {
+    return res.status(403).json({ error: "reporting disabled" });
+  }
+
+  const { logs, description, context, clientData } = req.body;
+
+  // basic validation
+  if (!logs && !description) {
+    return res.status(400).json({ error: "empty report" });
+  }
+
+  const reportId = Date.now();
+  const filename = `report-${reportId}.json`;
+  const filePath = path.join(REPORT_DIR, filename);
+
+  const reportContent = {
+    id: reportId,
+    timestamp: new Date().toISOString(),
+    context: context || "unknown",
+    description: description || "no description",
+    clientData: clientData || {}, 
+    logs: logs || []
+  };
+
+  // write file
+  fs.writeFile(filePath, JSON.stringify(reportContent, null, 2), (err) => {
+    if (err) {
+      console.log("report write error", err);
+      return res.status(500).json({ error: "server error" });
+    }
+    console.log(`new report received: ${filename}`);
+    res.status(201).json({ message: "report saved", id: reportId });
   });
 });
 
