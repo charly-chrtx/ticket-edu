@@ -35,6 +35,7 @@ let ws_retry_count = 0;
 let erroroverlay;
 let global_ws = null;
 let report_enabled = false;
+let is_connecting_cloud = false;
 
 // crypto
 let crypto_key = null;
@@ -200,6 +201,11 @@ async function update_cloud_ui() {
 
 // handshake
 async function handle_cloud_handshake(provider) {
+    if (is_connecting_cloud) return;
+    is_connecting_cloud = true;
+    document.body.style.cursor = 'wait'
+
+
     if (!crypto_key) return alert("Clé de chiffrement introuvable.");
 
     let auth_data = {};
@@ -225,7 +231,7 @@ async function handle_cloud_handshake(provider) {
 
         const res = await api_call('/api/cloud/handshake', 'POST', body);
 
-        if (res.redirectUrl) { 
+        if (res.redirectUrl) {
             // redirect flow (google/onedrive)
             window.open(res.redirectUrl, '_blank', 'width=500,height=600');
         } else if (res.connected) {
@@ -233,6 +239,9 @@ async function handle_cloud_handshake(provider) {
         }
     } catch (e) {
         alert("Erreur connexion: " + e.message);
+    } finally {
+        is_connecting_cloud = false;
+        document.body.style.cursor = 'default';
     }
 }
 
@@ -494,12 +503,12 @@ async function init_crypto(room_code_str) {
     const key_material = await window.crypto.subtle.importKey(
         "raw", enc.encode(room_code_str), "PBKDF2", false, ["deriveKey"]
     );
-    
+
     crypto_key = await window.crypto.subtle.deriveKey(
         { name: "PBKDF2", salt: enc.encode("ticket-static-salt"), iterations: 100000, hash: "SHA-256" },
-        key_material, 
-        { name: "AES-GCM", length: 256 }, 
-        true, 
+        key_material,
+        { name: "AES-GCM", length: 256 },
+        true,
         ["encrypt", "decrypt"]
     );
     console.log('🔒 Crypto key ready');
@@ -525,7 +534,7 @@ async function decrypt_blob(blob) {
 
 async function api_call(endpoint, method = "GET", body = null) {
     try {
-        const options = { method, headers: { "Content-Type": "application/json" } };
+        const options = { method, headers: { "Content-Type": "application/json" }, credentials: 'include' };
         if (body) options.body = JSON.stringify(body);
 
         const res = await fetch(`${api_url}${endpoint}`, options);
@@ -1390,7 +1399,7 @@ async function upload_deposit() {
         form.append('roomCode', room_code);
         form.append('customName', customName || '');
 
-        const res = await fetch(`${api_url}/api/deposits/${current_deposit_target.id}/upload`, { method: 'POST', body: form });
+        const res = await fetch(`${api_url}/api/deposits/${current_deposit_target.id}/upload`, { method: 'POST', body: form, credentials: 'include' });
 
         if (res.ok) {
             // reset ui
@@ -1598,6 +1607,7 @@ async function process_admin_upload(content, color) {
             const xhr = new XMLHttpRequest();
             current_xhr = xhr;
             xhr.open('POST', `${api_url}/api/announcements`, true);
+            xhr.withCredentials = true;
             stop_dots();
 
             xhr.upload.onprogress = (e) => {
@@ -1875,41 +1885,6 @@ function setup_event_listeners() {
             }
             close_all_overlays();
         });
-
-        // cloud checkbox listener
-        const cloudBox = document.getElementById('SaveToCloud');
-        if (cloudBox) {
-            const checkbox = cloudBox.querySelector('.checkbox');
-            if (checkbox) {
-                // handle click to toggle services visibility
-                checkbox.addEventListener('click', () => {
-                    // wait for class toggle (inline onclick)
-                    setTimeout(() => {
-                        const services = document.querySelector('.cloudservices');
-                        const isChecked = checkbox.classList.contains('checkbox-checked');
-                        if (services) services.style.display = isChecked ? 'flex' : 'none';
-                    }, 10);
-                });
-            }
-        }
-
-        // cloud providers click handlers
-        document.getElementById('googleDriveButton')?.addEventListener('click', (e) => {
-            e.preventDefault();
-            handle_cloud_handshake('google');
-        });
-
-        document.getElementById('onedriveButton')?.addEventListener('click', (e) => {
-            e.preventDefault();
-            handle_cloud_handshake('onedrive');
-        });
-
-        document.getElementById('nextcloudButton')?.addEventListener('click', (e) => {
-            e.preventDefault();
-            handle_cloud_handshake('nextcloud');
-        });
-
-
     });
 
     setup_download_modal_listeners();
@@ -2001,6 +1976,22 @@ function setup_event_listeners() {
             });
         }
     }
+
+    // cloud providers click handlers
+    document.getElementById('googleDriveButton')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        handle_cloud_handshake('google');
+    });
+
+    document.getElementById('onedriveButton')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        handle_cloud_handshake('onedrive');
+    });
+
+    document.getElementById('nextcloudButton')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        handle_cloud_handshake('nextcloud');
+    });
 
     setup_drag_and_drop();
 }
