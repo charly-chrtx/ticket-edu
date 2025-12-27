@@ -1,6 +1,41 @@
 <!DOCTYPE html>
 <html lang="en">
 
+<style>
+
+  @keyframes csvslide {
+    0% {
+      opacity: 0;
+      transform: translateY(-30px) scale(0.9);
+      max-height: 0;
+      filter: blur(8px);
+    }
+
+    100% {
+      opacity: 1;
+      transform: translateY(0px) scale(1);
+      max-height: 100px;
+      filter: blur(0px);
+    }
+  }
+  .csv-anim-container {
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    transition: all 0.3s ease-in;
+    transform: translateY(-20px); 
+  }
+
+  .csv-anim-container.open {
+    max-height: 80px;
+    opacity: 1;
+    scale: 0.98;
+    animation: csvslide 0.4s ease-in;
+    transform: translateY(0);
+  }
+</style>
+
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -190,7 +225,7 @@
 
                 <a class="button-text" id="copyLink" href="#"
                   style="min-height: 41px; padding: 0 20px; flex: unset; width: 100%; width: auto; margin: 0;">
-                  <img class="icon" src="./assets/icon/icon thin.png">
+                  <img class="icon" src="./assets/icon/link.png">
                   <span class="text" id="copyText" style="font-size: 14px;">Copier le lien du groupe</span>
                 </a>
 
@@ -246,30 +281,35 @@
 
                 </div>
               </div>
-
-              <div style="display: flex; justify-content: space-between; align-items: center; margin: 15px 0;">
-                <span>
-                  Verification du nom via un
-                  <span
-                    title="Un fichier CSV (Comma-Separated Values) est un fichier texte simple utilisé pour stocker des données sous forme de tableau (comme Excel)."
-                    style="text-decoration: underline wavy #9ecaff;">
-                    fichier CSV
-                  </span>
-                </span>
-
-                <a class="button-text" id="csvButton" href="#"
-                  style="min-height: 41px; width: auto; padding: 0 20px; flex: unset; min-width: 80px;">
-                  <span class="text" style="font-size: 14px;"> Add</span>
-                </a>
-                <input type="file" id="csvInput" accept=".csv" style="display: none;">
-              </div>
-
+              
               <div style="display: flex; justify-content: space-between; align-items: center; margin: 15px 0;">
                 <span>Nom requis pour entrer dans le groupe</span>
                 <label>
-                  <input type="checkbox" class="toggle-checkbox" id="forceNameToggle">
+                  <input 
+                    type="checkbox" 
+                    class="toggle-checkbox" 
+                    id="forceNameToggle"
+                    onchange="document.getElementById('csvWrapper').classList.toggle('open', this.checked)"
+                  >
                   <span class="toggle-slider"></span>
                 </label>
+              </div>
+
+              <div id="csvWrapper" class="csv-anim-container">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin: 15px 0;">
+                  <span>
+                    ➤ Verification du nom via un
+                    <span title="Un fichier CSV..." style="text-decoration: underline wavy #9ecaff;">
+                      fichier CSV
+                    </span>
+                  </span>
+
+                  <a class="button-text" id="csvButton" href="#"
+                    style="min-height: 41px; width: auto; padding: 0 20px; flex: unset; min-width: 80px;">
+                    <span class="text" style="font-size: 14px;"> Add</span>
+                  </a>
+                  <input type="file" id="csvInput" accept=".csv" style="display: none;">
+                </div>
               </div>
 
               <div style="display: flex; justify-content: space-between; align-items: center; margin: 15px 0;">
@@ -307,8 +347,8 @@
               <span>Projet open-source Github</span>
               <a class="button-text" href="https://github.com/charly-chrtx/ticket-edu" target="_blank"
                 style="min-height: 41px; padding: 0 20px; flex: unset; width: 100%; max-width: 200px; margin: 0;">
-                <img class="icon" src="./assets/icon/icon thin.png">
-                <span class="text" style="font-size: 14px;">lien Github</span>
+                <img class="icon" src="./assets/icon/github.png">
+                <span class="text" style="font-size: 14px;">Voir le projet</span>
               </a>
             </div>
 
