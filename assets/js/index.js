@@ -1,15 +1,31 @@
 let API_URL = "https://api.ticket-edu.com";
 
+(function checkCloudPopup() {
+  const params = new URLSearchParams(window.location.search);
+  if (params.has('cloud')) {
+    const status = params.get('cloud');
+
+    if (window.opener) {
+      window.opener.postMessage({ type: 'CLOUD_AUTH_RESULT', status: status }, '*');
+      window.close();
+    }
+    if (status === 'success') {
+      document.body.innerHTML = "<h1 style='color:green; text-align:center; margin-top:50px;'>Connexion réussie ! Vous pouvez fermer cette fenêtre.</h1>";
+      throw new Error("Arrêt du script (Connexion Cloud OK)");
+    }
+  }
+})();
+
 const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 const targetRoomFile = isMobile ? "room-phone.html" : "room.html";
 const targetIndexFile = "index-phone.html";
 
 if (isMobile) {
-    if (!window.location.href.includes("phone")) {
-        const currentParams = window.location.search;
-        window.location.href = targetIndexFile + currentParams;
-        throw new Error("Redirection vers la version mobile...");
-    }
+  if (!window.location.href.includes("phone")) {
+    const currentParams = window.location.search;
+    window.location.href = targetIndexFile + currentParams;
+    throw new Error("Redirection vers la version mobile...");
+  }
 }
 
 

@@ -1292,14 +1292,15 @@ function render_deposit_ui() {
     }
 }
 
-async function create_deposit(name, color) {
+async function create_deposit(name, color, provider = null) {
     if (!name || !name.trim()) return alert('Nom requis');
     try {
         await api_call('/api/deposits', 'POST', {
             roomCode: room_code,
             userId: user_id,
             name: name.trim(),
-            color: color
+            color: color,
+            cloudProvider: provider
         });
         toggle_overlay('formOverlay', false);
     } catch (e) {
@@ -1539,7 +1540,27 @@ async function handle_form_submit() {
         // handle deposit creation
         if (adminType === 'depot') {
             if (!name) return alert('Nom du dépôt requis.');
-            await create_deposit(name, color);
+
+            let provider = null;
+            const cloudBox = document.getElementById('SaveToCloud');
+            const checkbox = cloudBox ? cloudBox.querySelector('.checkbox') : null;
+
+            // check if cloud enabled
+            if (checkbox && checkbox.classList.contains('checkbox-checked')) {
+                // get current session status
+                try {
+                    const status = await api_call(`/api/cloud/status?roomCode=${room_code}`);
+                    if (status.connected) {
+                        provider = status.provider;
+                    } else {
+                        return alert("Veuillez vous connecter au service Cloud avant de créer.");
+                    }
+                } catch (e) {
+                    console.error(e);
+                }
+            }
+
+            await create_deposit(name, color, provider);
             return;
         }
         if (!name && pending_files.length === 0) return alert("Message ou fichier requis.");
@@ -1991,6 +2012,24 @@ function setup_event_listeners() {
     document.getElementById('nextcloudButton')?.addEventListener('click', (e) => {
         e.preventDefault();
         handle_cloud_handshake('nextcloud');
+    });
+
+    window.addEventListener('message', (event) => {
+        if (event.data && event.data.type === 'CLOUD_AUTH_RESULT') {
+            if (event.data.status === 'success') {
+                alert("Connexion Cloud réussie !");
+                update_cloud_ui();
+
+                // check the cloud box
+                const cloudBox = document.getElementById('SaveToCloud');
+                const checkbox = cloudBox?.querySelector('.checkbox');
+                if (checkbox && !checkbox.classList.contains('checkbox-checked')) {
+                    checkbox.click();
+                }
+            } else {
+                alert("Erreur lors de la connexion au service Cloud.");
+            }
+        }
     });
 
     setup_drag_and_drop();
