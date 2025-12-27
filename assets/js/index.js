@@ -7,7 +7,11 @@ let API_URL = "https://api.ticket-edu.com";
 
     if (window.opener) {
       window.opener.postMessage({ type: 'CLOUD_AUTH_RESULT', status: status }, '*');
-      window.close();
+
+      // wait for message delivery before closing
+      setTimeout(() => {
+        window.close();
+      }, 500);
     }
     if (status === 'success') {
       document.body.innerHTML = "<h1 style='color:green; text-align:center; margin-top:50px;'>Connexion réussie ! Vous pouvez fermer cette fenêtre.</h1>";
