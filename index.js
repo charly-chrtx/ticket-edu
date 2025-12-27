@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const http = require('http');
@@ -16,7 +17,7 @@ const NextcloudProvider = require('./CloudProviders/NextcloudProvider');
 cloudManager.registerProvider('google', new GoogleProvider());
 cloudManager.registerProvider('onedrive', new OneDriveProvider());
 cloudManager.registerProvider('nextcloud', new NextcloudProvider());
-require('dotenv').config();
+
 
 // ai filter
 const { checkTicketSafety, getAiStatus, setAiStatusCallback } = require('./ai_filter');
