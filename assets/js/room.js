@@ -264,18 +264,31 @@ async function update_cloud_ui() {
 // handshake
 async function handle_cloud_handshake(provider) {
     if (is_connecting_cloud) return;
+
     is_connecting_cloud = true;
-    document.body.style.cursor = 'wait'
-
-
-    if (!crypto_key) return alert("Clé de chiffrement introuvable.");
+    if (provider != 'nextcloud') {
+        document.body.style.cursor = 'wait';
+    }
+    
+    if (!crypto_key) {
+        is_connecting_cloud = false;
+        document.body.style.cursor = 'default';
+        set_cloud_card_state(provider, 'error', "Clé manquante");
+        return alert("Clé de chiffrement introuvable.");
+    }
 
     let auth_data = {};
 
     // nextcloud specific flow
     if (provider === 'nextcloud') {
         const creds = await prompt_nextcloud_creds();
-        if (!creds) return; // user cancelled
+
+        if (!creds) {
+            is_connecting_cloud = false;
+            document.body.style.cursor = 'default';
+            set_cloud_card_state(provider, 'idle');
+            return;
+        }
         auth_data = creds;
     }
 
@@ -300,6 +313,7 @@ async function handle_cloud_handshake(provider) {
             alert('Connexion réussie !');
         }
     } catch (e) {
+        set_cloud_card_state(provider, 'error');
         alert("Erreur connexion: " + e.message);
     } finally {
         is_connecting_cloud = false;
@@ -321,8 +335,10 @@ async function disconnect_cloud() {
 // nextcloud modal helper
 function prompt_nextcloud_creds() {
     return new Promise((resolve) => {
-        // create temp overlay
+
         const overlay = create_tag('div', 'menu-overlay');
+        overlay.style.display = 'flex';
+
         const box = create_tag('div', 'menu-box');
 
         box.innerHTML = `
@@ -341,9 +357,19 @@ function prompt_nextcloud_creds() {
         overlay.appendChild(box);
         document.body.appendChild(overlay);
 
-        document.getElementById('ncCancel').onclick = () => {
+        const closeAndResolve = (value) => {
             overlay.remove();
-            resolve(null);
+            resolve(value);
+        };
+
+        document.getElementById('ncCancel').onclick = () => {
+            closeAndResolve(null);
+        };
+
+        overlay.onclick = (e) => {
+            if (e.target === overlay) {
+                closeAndResolve(null);
+            }
         };
 
         document.getElementById('ncSubmit').onclick = () => {
@@ -353,8 +379,7 @@ function prompt_nextcloud_creds() {
 
             if (!url || !user || !pass) return alert("Tout les champs sont requis");
 
-            overlay.remove();
-            resolve({ ncUrl: url, ncUser: user, ncPass: pass });
+            closeAndResolve({ ncUrl: url, ncUser: user, ncPass: pass });
         };
     });
 }
