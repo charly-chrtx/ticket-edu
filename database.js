@@ -66,6 +66,7 @@ db.serialize(() => {
     roomCode TEXT,
     name TEXT,
     color TEXT,
+    cloudProvider TEXT,
     createdAt TEXT
   )`);
 
@@ -84,10 +85,12 @@ db.serialize(() => {
     db.run(`alter table deposits add column color text`, err => {
       if (err && !err.message.includes("duplicate column")) console.error(err);
     });
+
+    db.run(`alter table deposits add column cloudProvider text`, err => {
+      if (err && !err.message.includes("duplicate column")) console.error(err);
+    });
   });
 });
-
-
 
 
 module.exports = db;

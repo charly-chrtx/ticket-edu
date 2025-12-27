@@ -7,6 +7,15 @@ const url = require('url');
 const multer = require('multer');
 const fs = require('fs');
 const path = require('path');
+const cookieParser = require('cookie-parser'); 
+const cloudManager = require('./cloud_session');
+const crypto = require('crypto');
+const GoogleProvider = require('./CloudProviders/GoogleProvider');
+const OneDriveProvider = require('./CloudProviders/OneDriveProvider');
+const NextcloudProvider = require('./CloudProviders/NextcloudProvider');
+cloudManager.registerProvider('google', new GoogleProvider());
+cloudManager.registerProvider('onedrive', new OneDriveProvider());
+cloudManager.registerProvider('nextcloud', new NextcloudProvider());
 require('dotenv').config();
 
 // ai filter
@@ -19,6 +28,7 @@ const wss = new WebSocket.Server({ server });
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 
 // public assets
 app.use(express.static('public'));
@@ -53,6 +63,112 @@ if (!fs.existsSync(PATH_DEP)) {
 if (ENABLE_REPORT && !fs.existsSync(REPORT_DIR)) {
   fs.mkdirSync(REPORT_DIR);
 }
+
+// cloud status
+app.get('/api/cloud/status', (req, res) => {
+  const sessionId = req.cookies.sessionID;
+  const session = cloudManager.getSession(sessionId);
+  
+  if (session) {
+    res.json({ connected: true, provider: session.provider });
+  } else {
+    res.json({ connected: false });
+  }
+});
+
+// cloud handshake 
+app.post('/api/cloud/handshake', async (req, res) => {
+  const { roomCode, cryptoKey, provider, authData } = req.body;
+  
+  if (!roomCode || !cryptoKey || !provider) {
+    return res.status(400).json({ error: "missing fields" });
+  }
+
+  // store key in ram
+  cloudManager.setRoomKey(roomCode, cryptoKey);
+  
+  const providerInstance = cloudManager.getProvider(provider);
+  if (!providerInstance) {
+    return res.status(400).json({ error: "provider not supported" });
+  }
+
+  try {
+    // direct auth (nextcloud)
+    if (provider === 'nextcloud') {
+      await providerInstance.verifyCredentials(authData);
+      
+      // create session id if needed
+      let sessionId = req.cookies.sessionID;
+      if (!sessionId) {
+        sessionId = crypto.randomUUID();
+        res.cookie('sessionID', sessionId, { httpOnly: true });
+      }
+
+      cloudManager.setSession(sessionId, {
+        provider: 'nextcloud',
+        token: authData, 
+        email: authData.user || 'unknown'
+      });
+      
+      return res.json({ status: "connected" });
+    }
+    
+    // oauth flow (google)
+    if (provider === 'google') {
+      const state = JSON.stringify({ roomCode }); 
+      // callback url should be defined in env
+      const callbackUrl = `${process.env.BASE_URL}/api/cloud/callback/google`;
+      const url = providerInstance.getAuthUrl(callbackUrl, state);
+      return res.json({ redirectUrl: url });
+    }
+
+  } catch (e) {
+    console.error("handshake error", e);
+    return res.status(500).json({ error: e.message });
+  }
+});
+
+// cloud callback
+app.get('/api/cloud/callback/:provider', async (req, res) => {
+  const { code, state } = req.query;
+  const providerName = req.params.provider;
+  
+  const providerInstance = cloudManager.getProvider(providerName);
+  if (!providerInstance) return res.status(400).send("unknown provider");
+
+  try {
+    const callbackUrl = `${process.env.BASE_URL}/api/cloud/callback/${providerName}`;
+    const tokenData = await providerInstance.getTokenFromCode(code, callbackUrl);
+    
+    // create session
+    let sessionId = req.cookies.sessionID;
+    if (!sessionId) {
+      sessionId = crypto.randomUUID();
+      res.cookie('sessionID', sessionId, { httpOnly: true });
+    }
+
+    cloudManager.setSession(sessionId, {
+      provider: providerName,
+      token: tokenData,
+      email: tokenData.email || 'oauth-user'
+    });
+
+    res.redirect('/private/index.html?cloud=success');
+  } catch (e) {
+    console.error("callback error", e);
+    res.redirect('/?error=cloud_auth_failed');
+  }
+});
+
+app.get('/api/cloud/config', (req, res) => {
+  const providers = [];
+  // check of env 
+  if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) providers.push('google');
+  if (process.env.ONEDRIVE_CLIENT_ID) providers.push('onedrive');
+  providers.push('nextcloud'); 
+  
+  res.json(providers);
+});
 
 // csv helper
 function parseAndSearchCsv(fileContent, query, usedNames = []) {
@@ -683,19 +799,20 @@ app.delete('/api/tickets/:id', (req, res) => {
 
 // post deposit (admin only)
 app.post('/api/deposits', async (req, res) => {
-  const { roomCode, userId, name, color } = req.body;
+  const { roomCode, userId, name, color, cloudProvider } = req.body;
 
   db.get("SELECT adminId FROM rooms WHERE code = ?", [roomCode], (err, room) => {
     if (!room || room.adminId !== userId) return res.status(403).json({ error: "unauthorized" });
 
     const id = "dep_" + Date.now();
 
-    db.run("INSERT INTO deposits (id, roomCode, name, color, createdAt) VALUES (?, ?, ?, ?, ?)",
-      [id, roomCode, name, color || '#cdcdcd', new Date().toISOString()],
+    // insert with provider
+    db.run("INSERT INTO deposits (id, roomCode, name, color, cloudProvider, createdAt) VALUES (?, ?, ?, ?, ?, ?)",
+      [id, roomCode, name, color || '#cdcdcd', cloudProvider || null, new Date().toISOString()],
       (err) => {
         if (err) return res.status(500).json({ error: err.message });
         notifierClients(roomCode, 'update');
-        res.status(201).json({ id, name, color });
+        res.status(201).json({ id, name, color, cloudProvider });
       }
     );
   });
@@ -734,52 +851,80 @@ app.post('/api/deposits/:id/upload', upload.single('file'), async (req, res) => 
 
   if (!file) return res.status(400).json({ error: "no file" });
 
-  // check if already uploaded
-  db.get("SELECT id FROM files WHERE depositId = ? AND userId = ?", [depositId, userId], async (err, existing) => {
-    if (existing) {
-      fs.unlinkSync(file.path);
-      return res.status(403).json({ error: "already uploaded" });
+  // fetch deposit info first to check cloud provider
+  db.get("SELECT cloudProvider FROM deposits WHERE id = ?", [depositId], async (err, deposit) => {
+    if (err || !deposit) {
+       fs.unlinkSync(file.path);
+       return res.status(404).json({ error: "deposit not found" });
     }
 
-    // ai safety check on custom name
-    const isSafe = await validateContent(customName);
-    if (!isSafe) {
-      fs.unlinkSync(file.path);
-      return res.status(400).json({ error: "blocked by ai" });
-    }
-
-
-    // get extension and define base name
-    const ext = path.extname(file.originalname);
-    let baseName = customName || path.basename(file.originalname, ext);
-
-    // normalize and attach extension
-    const finalName = normalize(baseName) + ext;
-
-    // quota check
-    db.get("SELECT SUM(size) as total FROM files WHERE roomCode = ?", [roomCode], (err, row) => {
-      const current = row?.total || 0;
-      if (current + file.size > globalSettings.maxStoragePerRoom) {
+    // existing db checks
+    db.get("SELECT id FROM files WHERE depositId = ? AND userId = ?", [depositId, userId], async (err, existing) => {
+      if (existing) {
         fs.unlinkSync(file.path);
-        return res.status(413).json({ error: "quota exceeded" });
+        return res.status(403).json({ error: "already uploaded" });
       }
 
-      // save file
-      const fileId = "fdep_" + Date.now();
+      const isSafe = await validateContent(customName);
+      if (!isSafe) {
+        fs.unlinkSync(file.path);
+        return res.status(400).json({ error: "blocked by ai" });
+      }
 
-      db.run(`INSERT INTO files (id, originalName, encryptedName, mimeType, size, roomCode, userId, depositId)
-              VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-        [fileId, finalName, file.filename, file.mimetype, file.size, roomCode, userId, depositId],
-        (err) => {
-          if (err) {
-            fs.unlinkSync(file.path);
-            return res.status(500).json({ error: err.message });
-          }
+      const ext = path.extname(file.originalname);
+      let baseName = customName || path.basename(file.originalname, ext);
+      const finalName = normalize(baseName) + ext;
 
-          notifierClients(roomCode, 'updateDeposit');
-          res.status(201).json({ message: "uploaded" });
+      // quota check
+      db.get("SELECT SUM(size) as total FROM files WHERE roomCode = ?", [roomCode], (err, row) => {
+        const current = row?.total || 0;
+        if (current + file.size > globalSettings.maxStoragePerRoom) {
+          fs.unlinkSync(file.path);
+          return res.status(413).json({ error: "quota exceeded" });
         }
-      );
+
+        const fileId = "fdep_" + Date.now();
+
+        // db insert
+        db.run(`INSERT INTO files (id, originalName, encryptedName, mimeType, size, roomCode, userId, depositId)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+          [fileId, finalName, file.filename, file.mimetype, file.size, roomCode, userId, depositId],
+          async (err) => {
+            if (err) {
+              fs.unlinkSync(file.path);
+              return res.status(500).json({ error: err.message });
+            }
+
+            // cloud logic
+            const sessionId = req.cookies.sessionID;
+            const session = cloudManager.getSession(sessionId);
+            
+            // check if deposit wants cloud AND session matches
+            if (deposit.cloudProvider && session && session.provider === deposit.cloudProvider) {
+              const roomKey = cloudManager.getRoomKey(roomCode);
+              
+              if (roomKey) {
+                console.log("cloud upload triggered");
+                try {
+                  const provider = cloudManager.getProvider(session.provider);
+                  if (provider) {
+                    const decryptStream = await cloudManager.createDecryptedStream(file.path, roomKey);
+                    const cloudMeta = { name: finalName, mimeType: file.mimetype };
+                    
+                    await provider.uploadStream(decryptStream, cloudMeta, session.token);
+                    console.log("cloud upload success");
+                  }
+                } catch (cloudErr) {
+                  console.error("cloud upload failed (silent)", cloudErr);
+                }
+              }
+            }
+
+            notifierClients(roomCode, 'updateDeposit');
+            res.status(201).json({ message: "uploaded" });
+          }
+        );
+      });
     });
   });
 });
