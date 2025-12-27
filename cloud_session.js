@@ -1,5 +1,6 @@
 const crypto = require('crypto');
 const fs = require('fs');
+const roomTokenMap = new Map();
 
 // global maps (ram only)
 // map: cookie_id -> { token, provider, email, ... }
@@ -48,6 +49,14 @@ function deleteRoomKey(roomCode) {
   roomKeyMap.delete(roomCode);
 }
 
+function setRoomToken(roomCode, tokenData) {
+  roomTokenMap.set(roomCode, tokenData);
+}
+
+function getRoomToken(roomCode) {
+  return roomTokenMap.get(roomCode);
+}
+
 // decryption stream helper
 // assumes iv is first 12 bytes of file
 async function createDecryptedStream(filePath, key) {
@@ -78,5 +87,7 @@ module.exports = {
   setRoomKey,
   getRoomKey,
   deleteRoomKey,
-  createDecryptedStream
+  createDecryptedStream,
+  setRoomToken, 
+  getRoomToken
 };

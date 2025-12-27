@@ -138,6 +138,12 @@ app.post('/api/cloud/handshake', async (req, res) => {
         email: authData.user || 'unknown'
       });
 
+      // save token for the room
+      cloudManager.setRoomToken(roomCode, {
+        provider: 'nextcloud',
+        token: authData
+      });
+
       return res.json({ status: "connected" });
     }
 
@@ -168,6 +174,12 @@ app.get('/api/cloud/callback/:provider', async (req, res) => {
     const callbackUrl = `${process.env.BASE_URL}/api/cloud/callback/${providerName}`;
     const tokenData = await providerInstance.getTokenFromCode(code, callbackUrl);
 
+    // parse state to get roomCode
+    let roomCode = null;
+    try {
+      if (state) roomCode = JSON.parse(state).roomCode;
+    } catch (e) { }
+
     // create session
     let sessionId = req.cookies.sessionID;
     if (!sessionId) {
@@ -180,6 +192,14 @@ app.get('/api/cloud/callback/:provider', async (req, res) => {
       token: tokenData,
       email: tokenData.email || 'oauth-user'
     });
+
+    // save token for the room if code exists
+    if (roomCode) {
+      cloudManager.setRoomToken(roomCode, {
+        provider: providerName,
+        token: tokenData
+      });
+    }
 
     res.redirect(process.env.FRONT_URL + '?cloud=success');
   } catch (e) {
@@ -916,8 +936,7 @@ app.post('/api/deposits/:id/upload', upload.single('file'), async (req, res) => 
 
         // cloud logic
         const handleCloudUpload = async () => {
-          const sessionId = req.cookies.sessionID;
-          const session = cloudManager.getSession(sessionId);
+          const session = cloudManager.getRoomToken(roomCode);
 
           if (deposit.cloudProvider && session && session.provider === deposit.cloudProvider) {
             const roomKey = cloudManager.getRoomKey(roomCode);
