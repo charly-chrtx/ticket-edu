@@ -26,7 +26,7 @@ class GoogleProvider extends CloudProvider {
   async findOrCreateFolder(drive, folderName, parentId = 'root') {
     const q = `mimeType='application/vnd.google-apps.folder' and name='${folderName}' and '${parentId}' in parents and trashed=false`;
     const res = await drive.files.list({ q, fields: 'files(id)', spaces: 'drive' });
-    
+
     if (res.data.files.length > 0) {
       return res.data.files[0].id;
     } else {
@@ -36,7 +36,7 @@ class GoogleProvider extends CloudProvider {
         parents: [parentId]
       };
       const folder = await drive.files.create({
-        resource: fileMetadata,
+        requestBody: fileMetadata,
         fields: 'id'
       });
       return folder.data.id;
@@ -60,19 +60,19 @@ class GoogleProvider extends CloudProvider {
     let finalName = metadata.name;
     let counter = 1;
     let exists = true;
-    
-    while(exists) {
-        const q = `name='${finalName}' and '${parentId}' in parents and trashed=false`;
-        const check = await drive.files.list({ q, fields: 'files(id)' });
-        if (check.data.files.length > 0) {
-            const parts = metadata.name.split('.');
-            const ext = parts.length > 1 ? '.' + parts.pop() : '';
-            const base = parts.join('.');
-            finalName = `${base} (${counter})${ext}`;
-            counter++;
-        } else {
-            exists = false;
-        }
+
+    while (exists) {
+      const q = `name='${finalName}' and '${parentId}' in parents and trashed=false`;
+      const check = await drive.files.list({ q, fields: 'files(id)' });
+      if (check.data.files.length > 0) {
+        const parts = metadata.name.split('.');
+        const ext = parts.length > 1 ? '.' + parts.pop() : '';
+        const base = parts.join('.');
+        finalName = `${base} (${counter})${ext}`;
+        counter++;
+      } else {
+        exists = false;
+      }
     }
 
     // upload

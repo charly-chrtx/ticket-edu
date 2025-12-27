@@ -1145,17 +1145,29 @@ app.delete('/api/files/:fileId', (req, res) => {
 
     // cloud delete
     if (file.cloudId && file.cloudProvider) {
-      const sessionId = req.cookies.sessionID;
-      const session = cloudManager.getSession(sessionId);
+      let tokenToUse = null;
 
-      if (session && session.provider === file.cloudProvider) {
+      // get sessions
+      const roomSession = cloudManager.getRoomToken(file.roomCode);
+      const userSession = cloudManager.getSession(req.cookies.sessionID);
+
+      //room admin token
+      if (roomSession && roomSession.provider === file.cloudProvider) {
+        tokenToUse = roomSession.token;
+      } 
+      //current user session
+      else if (userSession && userSession.provider === file.cloudProvider) {
+        tokenToUse = userSession.token;
+      }
+
+      if (tokenToUse) {
         const provider = cloudManager.getProvider(file.cloudProvider);
         if (provider) {
           console.log(`deleting cloud file ${file.cloudId}...`);
-          provider.deleteFile(file.cloudId, session.token).catch(e => console.error("cloud delete error:", e));
+          provider.deleteFile(file.cloudId, tokenToUse).catch(e => console.error("cloud delete error:", e));
         }
       } else {
-        console.warn("cannot delete cloud file: user session not matching provider");
+        console.warn("cannot delete cloud file: no valid session found");
       }
     }
 
