@@ -1767,7 +1767,6 @@ body.dark-mode #qrcode-container {
 .cloud-provider-card.loading {
     opacity: 0.8;
     pointer-events: none;
-    background-color: #FFF9ED;
 }
 
 .cloud-provider-card.loading .status-indicator {
@@ -1778,11 +1777,6 @@ body.dark-mode #qrcode-container {
 
 .cloud-provider-card.error {
     background-color: #fff0f0;
-    border-color: #ff7070;
-}
-
-.cloud-provider-card.error .status-indicator {
-    background-color: #ff7070;
 }
 
 .cloud-provider-card.error .provider-status {

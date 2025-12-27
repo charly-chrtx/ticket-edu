@@ -1294,7 +1294,7 @@ function render_announcements() {
             } else if (is_depot) {
                 if (user_file) {
                     // delete user file handler
-                    const del_btn = text_row.querySelector('.announcement-delete-file');
+                    const del_btn = text_row.querySelector('.announcement-delete-file')
                     if (del_btn) {
                         del_btn.addEventListener('click', (e) => {
                             // delete via file api
