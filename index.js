@@ -153,7 +153,7 @@ app.get('/api/cloud/callback/:provider', async (req, res) => {
       email: tokenData.email || 'oauth-user'
     });
 
-    res.redirect('/private/index.html?cloud=success');
+    res.redirect( process.env.FRONT_URL +'?cloud=success');
   } catch (e) {
     console.error("callback error", e);
     res.redirect('/?error=cloud_auth_failed');

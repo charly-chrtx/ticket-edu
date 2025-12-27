@@ -1,4 +1,6 @@
 PORT=3000
+BASE_URL=http://localhost:3000
+FRONT_URL=http://localhost:5500
 ADMIN_PASSWORD=admin
 REPORT=true
 REPORT_DIR=./reports
@@ -19,3 +21,6 @@ GOOGLE_CLIENT_SECRET=
 # Microsoft OneDrive
 ONEDRIVE_CLIENT_ID=
 ONEDRIVE_CLIENT_SECRET=
+
+# Nextcloud
+NEXTCLOUD_ENABLE=false
