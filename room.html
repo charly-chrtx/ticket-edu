@@ -113,23 +113,41 @@
             </div>
 
             <div class="cloudservices">
-                <a class="button-text" id="googleDriveButton" href="#"
-                  style="width: auto; padding: 0 20px; margin: 0; min-width: 140px;">
-                  <img class="icon" src="./assets/icon/gdrive.png" alt="">
-                  <span class="text">Google Drive</span>
-                </a>
 
-                <a class="button-text" id="nextcloudButton" href="#"
-                  style="width: auto; padding: 0 20px; margin: 0; min-width: 140px;">
-                  <img class="icon" src="./assets/icon/nextcloud.png" alt="">
-                  <span class="text">Nextcloud</span>
-                </a>
-                <a class="button-text" id="onedriveButton" href="#"
-                  style="width: auto; padding: 0 20px; margin: 0; min-width: 140px;">
-                  <img class="icon" src="./assets/icon/onedrive.png" alt="">
-                  <span class="text">OneDrive</span>
-                </a>
+              <div class="cloud-provider-card" id="googleDriveCard" onclick="handle_cloud_click('google')">
+                <div class="provider-icon-wrapper">
+                  <img class="icon" src="./assets/icon/gdrive.png" alt="Google Drive">
+                </div>
+                <div class="provider-info">
+                  <span class="provider-name">Google Drive</span>
+                  <span class="provider-status">Non connecté</span>
+                </div>
+                <div class="status-indicator"></div>
               </div>
+
+              <div class="cloud-provider-card" id="nextcloudCard" onclick="handle_cloud_click('nextcloud')">
+                <div class="provider-icon-wrapper">
+                  <img class="icon" src="./assets/icon/nextcloud.png" alt="Nextcloud">
+                </div>
+                <div class="provider-info">
+                  <span class="provider-name">Nextcloud</span>
+                  <span class="provider-status">Non connecté</span>
+                </div>
+                <div class="status-indicator"></div>
+              </div>
+
+              <div class="cloud-provider-card" id="onedriveCard" onclick="handle_cloud_click('onedrive')">
+                <div class="provider-icon-wrapper">
+                  <img class="icon" src="./assets/icon/onedrive.png" alt="OneDrive">
+                </div>
+                <div class="provider-info">
+                  <span class="provider-name">OneDrive</span>
+                  <span class="provider-status">Non connecté</span>
+                </div>
+                <div class="status-indicator"></div>
+              </div>
+
+            </div>
 
             <div class="overlay-footer" style="display: flex; justify-content: center; gap: 15px; margin-top: 30px;">
 

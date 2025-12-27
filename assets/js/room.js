@@ -135,7 +135,65 @@ function create_tag(tag, class_name, content = '', style = {}) {
     return el;
 }
 
-// cloud logic
+// cloud interaction
+function handle_cloud_click(provider) {
+    const cardId = provider === 'google' ? 'googleDriveCard' : `${provider}Card`;
+    const card = document.getElementById(cardId);
+
+    if (!card) return;
+    // check if disconnect needed
+    if (card.classList.contains('connected')) {
+        if (confirm(`Déconnecter ${provider} ?`)) {
+            disconnect_cloud();
+            set_cloud_card_state(provider, 'idle');
+        }
+        return;
+    }
+
+    // start auth flow
+    set_cloud_card_state(provider, 'loading');
+    handle_cloud_handshake(provider);
+}
+
+// update card visual state
+function set_cloud_card_state(provider, state, msg = null) {
+    // reset others if connecting
+    if (state === 'connected') {
+        ['google', 'nextcloud', 'onedrive'].forEach(p => {
+            if (p !== provider) set_cloud_card_state(p, 'idle');
+        });
+    }
+
+    const cardId = provider === 'google' ? 'googleDriveCard' : `${provider}Card`;
+    const card = document.getElementById(cardId);
+    if (!card) return;
+
+    const statusText = card.querySelector('.provider-status');
+
+    // clear classes
+    card.classList.remove('connected', 'loading', 'error');
+
+    switch (state) {
+        case 'loading':
+            card.classList.add('loading');
+            statusText.textContent = "Connexion en cours...";
+            break;
+        case 'connected':
+            card.classList.add('connected');
+            statusText.textContent = "Connecté & Prêt";
+            break;
+        case 'error':
+            card.classList.add('error');
+            statusText.textContent = msg || "Erreur de connexion";
+            break;
+        case 'idle':
+        default:
+            statusText.textContent = "Non connecté";
+            break;
+    }
+}
+
+// sync ui with config
 async function update_cloud_ui() {
     const cloudBox = document.getElementById('SaveToCloud');
     const cloudServices = document.querySelector('.cloudservices');
@@ -146,7 +204,6 @@ async function update_cloud_ui() {
     const typeRadio = document.querySelector('input[name="AdminType"]:checked');
     const isDepositMode = typeRadio && typeRadio.value === 'depot';
 
-    // hide if not admin or not deposit mode
     if (!isAdmin || !isDepositMode) {
         cloudBox.style.display = 'none';
         cloudServices.style.display = 'none';
@@ -154,38 +211,43 @@ async function update_cloud_ui() {
     }
 
     try {
-        // fetch available providers from backend
         const providers = await api_call('/api/cloud/config');
-
-        const buttons = {
-            'google': 'googleDriveButton',
-            'nextcloud': 'nextcloudButton',
-            'onedrive': 'onedriveButton'
+        const cards = {
+            'google': 'googleDriveCard',
+            'nextcloud': 'nextcloudCard',
+            'onedrive': 'onedriveCard'
         };
 
         let activeCount = 0;
 
-        // toggle buttons based on config
-        for (const [provider, id] of Object.entries(buttons)) {
-            const btn = document.getElementById(id);
-            if (btn) {
+        for (const [provider, id] of Object.entries(cards)) {
+            const el = document.getElementById(id);
+            if (el) {
                 if (providers.includes(provider)) {
-                    btn.style.display = 'flex';
+                    el.style.display = 'flex';
                     activeCount++;
                 } else {
-                    btn.style.display = 'none';
+                    el.style.display = 'none';
                 }
             }
         }
 
-        // show container only if at least one provider is available
         if (activeCount > 0) {
             cloudBox.style.display = 'flex';
-
-            // check checkbox state for services visibility
             const checkbox = cloudBox.querySelector('.checkbox');
             const isChecked = checkbox && checkbox.classList.contains('checkbox-checked');
             cloudServices.style.display = isChecked ? 'flex' : 'none';
+
+            // check active session
+            try {
+                const status = await api_call(`/api/cloud/status?roomCode=${room_code}`);
+                if (status.connected && status.provider) {
+                    set_cloud_card_state(status.provider, 'connected');
+                } else {
+                    ['google', 'nextcloud', 'onedrive'].forEach(p => set_cloud_card_state(p, 'idle'));
+                }
+            } catch (e) { }
+
         } else {
             cloudBox.style.display = 'none';
             cloudServices.style.display = 'none';
@@ -2017,17 +2079,20 @@ function setup_event_listeners() {
     window.addEventListener('message', (event) => {
         if (event.data && event.data.type === 'CLOUD_AUTH_RESULT') {
             if (event.data.status === 'success') {
-                alert("Connexion Cloud réussie !");
+                // refresh ui
                 update_cloud_ui();
 
-                // check the cloud box
+                // auto-check box
                 const cloudBox = document.getElementById('SaveToCloud');
                 const checkbox = cloudBox?.querySelector('.checkbox');
                 if (checkbox && !checkbox.classList.contains('checkbox-checked')) {
                     checkbox.click();
                 }
             } else {
+                // error feedback
                 alert("Erreur lors de la connexion au service Cloud.");
+                // Reset visuel des cartes en erreur
+                ['google', 'nextcloud', 'onedrive'].forEach(p => set_cloud_card_state(p, 'error'));
             }
         }
     });

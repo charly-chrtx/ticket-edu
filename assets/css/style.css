@@ -1655,72 +1655,147 @@ body.dark-mode #qrcode-container {
 
 
 .cloudservices {
-    display: flex; 
-    justify-content: center; 
-    margin-top: 10px;
+    display: none; 
+    flex-direction: row;
     gap: 15px;
-}
-
-#SaveToCloud, .cloudservices {
-    display: none;
-}
-
-.cloud-section {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
+    width: 100%;
     margin-top: 20px;
-    border-top: 1px solid rgba(0,0,0,0.1);
-    padding-top: 20px;
 }
 
-.cloud-status {
-    font-weight: 600;
+.cloud-provider-card {
     display: flex;
     align-items: center;
-    gap: 10px;
     justify-content: space-between;
-}
-
-.cloud-status.connected {
-    color: #4CAF50;
-}
-
-.cloud-providers {
-    display: flex;
-    gap: 10px;
-    justify-content: center;
-    flex-wrap: wrap;
-    margin-top: 10px;
-}
-
-.cloud-btn {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 8px 16px;
+    width: 100%;
+    height: 70px;
+    background: var(--card-bg);
     border: 2px solid black;
     border-radius: 50px;
-    background: white;
+    padding: 0 10px 0 20px;
+    box-sizing: border-box;
+    box-shadow: 0px 2px 0px #000000;
+    transition: all 0.3s ease;
     cursor: pointer;
-    font-weight: 600;
-    transition: transform 0.2s;
-    text-decoration: none;
-    color: black;
-    font-size: 0.9rem;
+    position: relative;
+    overflow: hidden;
 }
 
-.cloud-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 3px 0 rgba(0,0,0,0.2);
+
+.cloud-provider-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0px 5px 0px #000000;
 }
 
-.cloud-btn img {
-    width: 20px;
-    height: 20px;
+.cloud-provider-card:active {
+    transform: translateY(0px);
+    box-shadow: 0px 0px 0px #000000;
+}
+
+
+.provider-icon-wrapper {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.provider-icon-wrapper img {
+    width: 100%;
+    height: 100%;
     object-fit: contain;
+    pointer-events: none;
 }
 
+
+.provider-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    margin-left: 15px;
+    font-family: 'Inconsolata', monospace;
+}
+
+.provider-name {
+    font-weight: 600;
+    font-size: 1.1rem;
+    color: var(--text-color);
+}
+
+.provider-status {
+    font-size: 0.8rem;
+    opacity: 0.6;
+    color: var(--text-color);
+}
+
+.status-indicator {
+    width: 16px;
+    height: 16px;
+    border: 2px solid black;
+    border-radius: 50%;
+    background-color: #e0e0e0; 
+    margin-right: 15px;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+
+
+.cloud-provider-card.connected {
+    background-color: #e6fcf5; 
+    border-color: black;
+    box-shadow: inset 0 0 0 2px black; 
+}
+
+.cloud-provider-card.connected .status-indicator {
+    background-color: #AEFFA6; 
+    transform: scale(1.2);
+    box-shadow: 0 0 0 2px rgba(0,0,0,0.1);
+}
+
+.cloud-provider-card.connected .provider-status {
+    color: #2d8a2d;
+    opacity: 1;
+    font-weight: 600;
+}
+
+
+.cloud-provider-card.loading {
+    opacity: 0.8;
+    pointer-events: none;
+    background-color: #FFF9ED;
+}
+
+.cloud-provider-card.loading .status-indicator {
+    background-color: #FFF5A6;
+    animation: bounce-reverse 1s infinite;
+}
+
+
+.cloud-provider-card.error {
+    background-color: #fff0f0;
+    border-color: #ff7070;
+}
+
+.cloud-provider-card.error .status-indicator {
+    background-color: #ff7070;
+}
+
+.cloud-provider-card.error .provider-status {
+    color: #d32f2f;
+    opacity: 1;
+}
+
+
+@media (max-width: 600px) {
+    .cloud-provider-card {
+        height: 60px;
+    }
+    .provider-name {
+        font-size: 1rem;
+    }
+}
 
 .nc-input-group {
     display: flex;
