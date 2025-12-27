@@ -58,21 +58,31 @@ function getRoomToken(roomCode) {
 }
 
 // decryption stream helper
-// assumes iv is first 12 bytes of file
 async function createDecryptedStream(filePath, key) {
-  // read first 12 bytes for iv
+  const stats = await fs.promises.stat(filePath);
+  const fileSize = stats.size;
+
+  if (fileSize < 28) {
+    throw new Error("File too small to be encrypted");
+  }
+
   const fd = await fs.promises.open(filePath, 'r');
+
   const iv = Buffer.alloc(12);
   await fd.read(iv, 0, 12, 0);
+
+
+  const authTag = Buffer.alloc(16);
+  await fd.read(authTag, 0, 16, fileSize - 16);
+
   await fd.close();
 
-  // create read stream skipping iv
-  const input = fs.createReadStream(filePath, { start: 12 });
-  
-  // create decipher
   const decipher = crypto.createDecipheriv('aes-256-gcm', key, iv);
-  
-  // pipe
+  decipher.setAuthTag(authTag);
+
+
+  const input = fs.createReadStream(filePath, { start: 12, end: fileSize - 17 });
+
   return input.pipe(decipher);
 }
 
@@ -88,6 +98,6 @@ module.exports = {
   getRoomKey,
   deleteRoomKey,
   createDecryptedStream,
-  setRoomToken, 
+  setRoomToken,
   getRoomToken
 };
