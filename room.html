@@ -220,7 +220,7 @@
               </div>
 
               <div style="display: flex; justify-content: space-between; align-items: center; margin: 15px 0;">
-                <span>Nom requis pour entrer dans la salle</span>
+                <span>Nom requis pour entrer dans le groupe</span>
                 <label>
                   <input type="checkbox" class="toggle-checkbox" id="forceNameToggle">
                   <span class="toggle-slider"></span>
@@ -392,7 +392,7 @@
           <div class="input" style="padding-bottom: 0;">
             <h1>Identification</h1>
 
-            <p style="margin: 20px 0; opacity: 0.7;">Cette salle nécessite une identification.</p>
+            <p style="margin: 20px 0; opacity: 0.7;">Ce groupe nécessite une identification.</p>
 
             <div style="margin: 15px 0;">
               <input type="text" id="loginName" placeholder="Votre Prénom" style="width: 100%;" />
@@ -493,7 +493,7 @@
     <div class="menu-box">
       <div class="input" style="padding-bottom: 0;">
         <h1>Dépôt</h1>
-        <p id="depositInstructions" style="opacity:0.8;">Déposez votre fichier ici. Un seul fichier est autorisé.</p>
+        <p id="depositInstructions" style="opacity:0.8;">Un seul fichier est autorisé.</p>
 
         <div style="margin: 15px 0;">
           <input type="text" id="depositCustomName" name="depositCustomName"
@@ -512,16 +512,19 @@
         </div>
 
         <div class="overlay-footer" style="display: flex; justify-content: center; gap: 15px; margin-top: 30px;">
-          <a class="button-text" id="depositSend" href="#"
-            style="width: auto; padding: 0 30px; margin: 0; min-width: 140px;">
-            <img class="icon" src="./assets/icon/check.png">
-            <span class="text">Envoyer</span>
-          </a>
+          
           <a class="button-text" id="depositCancel" href="#"
-            style="width: auto; padding: 0 30px; margin: 0; background-color: #ff7070; min-width: 140px;">
+            style="width: auto; padding: 0 30px; margin: 0; min-width: 140px;">
             <img class="icon" src="./assets/icon/cross.png">
             <span class="text">Annuler</span>
           </a>
+          
+          <a class="button-text" id="depositSend" href="#"
+            style="width: auto; padding: 0 30px; margin: 0; min-width: 140px; background-color: #A6C5FF;">
+            <img class="icon" src="./assets/icon/send.png">
+            <span class="text">Envoyer</span>
+          </a>
+          
         </div>
       </div>
     </div>
@@ -529,25 +532,18 @@
 
   <div class="menu-overlay hidden" id="download-modal">
     <div class="menu-box">
-      <div class="input" style="padding-bottom: 0;">
+      <div class="input" style="padding-bottom: 0; align-items: center;">
 
         <h1>Fichiers du dépôt</h1>
 
-        <ul id="file-list" class="file-list">
-        </ul>
+        <ul id="file-list" class="file-list"></ul>
 
         <div class="overlay-footer" style="display: flex; justify-content: center; gap: 15px; margin-top: 30px;">
 
           <a class="button-text" id="download-all" href="#"
             style="width: auto; padding: 0 30px; margin: 0; min-width: 140px;">
             <img class="icon" src="./assets/icon/download.png">
-            <span class="text">Tout télécharger</span>
-          </a>
-
-          <a class="button-text" id="close-modal" href="#"
-            style="width: auto; padding: 0 30px; margin: 0; background-color: #ff7070; min-width: 140px;">
-            <img class="icon" src="./assets/icon/cross.png">
-            <span class="text">Fermer</span>
+            <span class="text">Tout télécharger .zip</span>
           </a>
 
         </div>

@@ -1059,7 +1059,7 @@ textarea:hover:not(:focus) {
     width: 100%;
     display: flex;
     justify-content: space-between;
-    padding: 0 25px;
+    padding: 0 30px;
     font-family: 'Inconsolata', monospace;
     font-weight: 600;
     font-size: 1.1rem;
@@ -1137,7 +1137,7 @@ textarea:hover:not(:focus) {
 .announcement-wrapper {
     width: 100%;
     position: absolute;
-    top: 0;
+    top: 4px;
     left: 0;
     transform: translateY(calc(12px * (var(--i) + 1))) scale(calc(1 - (0.04 * (var(--i) + 1))));
     z-index: calc(90 - var(--i));
