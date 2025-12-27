@@ -7,7 +7,7 @@ const url = require('url');
 const multer = require('multer');
 const fs = require('fs');
 const path = require('path');
-const cookieParser = require('cookie-parser'); 
+const cookieParser = require('cookie-parser');
 const cloudManager = require('./cloud_session');
 const crypto = require('crypto');
 const GoogleProvider = require('./CloudProviders/GoogleProvider');
@@ -68,7 +68,7 @@ if (ENABLE_REPORT && !fs.existsSync(REPORT_DIR)) {
 app.get('/api/cloud/status', (req, res) => {
   const sessionId = req.cookies.sessionID;
   const session = cloudManager.getSession(sessionId);
-  
+
   if (session) {
     res.json({ connected: true, provider: session.provider });
   } else {
@@ -79,14 +79,14 @@ app.get('/api/cloud/status', (req, res) => {
 // cloud handshake 
 app.post('/api/cloud/handshake', async (req, res) => {
   const { roomCode, cryptoKey, provider, authData } = req.body;
-  
+
   if (!roomCode || !cryptoKey || !provider) {
     return res.status(400).json({ error: "missing fields" });
   }
 
   // store key in ram
   cloudManager.setRoomKey(roomCode, cryptoKey);
-  
+
   const providerInstance = cloudManager.getProvider(provider);
   if (!providerInstance) {
     return res.status(400).json({ error: "provider not supported" });
@@ -96,7 +96,7 @@ app.post('/api/cloud/handshake', async (req, res) => {
     // direct auth (nextcloud)
     if (provider === 'nextcloud') {
       await providerInstance.verifyCredentials(authData);
-      
+
       // create session id if needed
       let sessionId = req.cookies.sessionID;
       if (!sessionId) {
@@ -106,16 +106,16 @@ app.post('/api/cloud/handshake', async (req, res) => {
 
       cloudManager.setSession(sessionId, {
         provider: 'nextcloud',
-        token: authData, 
+        token: authData,
         email: authData.user || 'unknown'
       });
-      
+
       return res.json({ status: "connected" });
     }
-    
+
     // oauth flow (google)
     if (provider === 'google') {
-      const state = JSON.stringify({ roomCode }); 
+      const state = JSON.stringify({ roomCode });
       // callback url should be defined in env
       const callbackUrl = `${process.env.BASE_URL}/api/cloud/callback/google`;
       const url = providerInstance.getAuthUrl(callbackUrl, state);
@@ -132,14 +132,14 @@ app.post('/api/cloud/handshake', async (req, res) => {
 app.get('/api/cloud/callback/:provider', async (req, res) => {
   const { code, state } = req.query;
   const providerName = req.params.provider;
-  
+
   const providerInstance = cloudManager.getProvider(providerName);
   if (!providerInstance) return res.status(400).send("unknown provider");
 
   try {
     const callbackUrl = `${process.env.BASE_URL}/api/cloud/callback/${providerName}`;
     const tokenData = await providerInstance.getTokenFromCode(code, callbackUrl);
-    
+
     // create session
     let sessionId = req.cookies.sessionID;
     if (!sessionId) {
@@ -153,21 +153,23 @@ app.get('/api/cloud/callback/:provider', async (req, res) => {
       email: tokenData.email || 'oauth-user'
     });
 
-    res.redirect( process.env.FRONT_URL +'?cloud=success');
+    res.redirect(process.env.FRONT_URL + '?cloud=success');
   } catch (e) {
     console.error("callback error", e);
     res.redirect('/?error=cloud_auth_failed');
   }
 });
 
-app.get('/api/cloud/config', (req, res) => {
+// helper to get providers
+function getActiveProviders() {
   const providers = [];
-  // check of env 
   if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) providers.push('google');
   if (process.env.ONEDRIVE_CLIENT_ID) providers.push('onedrive');
-  providers.push('nextcloud'); 
-  
-  res.json(providers);
+  if (process.env.NEXTCLOUD_ENABLE === 'true') providers.push('nextcloud');
+  return providers;
+}
+app.get('/api/cloud/config', (req, res) => {
+  res.json(getActiveProviders());
 });
 
 // csv helper
@@ -854,8 +856,8 @@ app.post('/api/deposits/:id/upload', upload.single('file'), async (req, res) => 
   // fetch deposit info first to check cloud provider
   db.get("SELECT cloudProvider FROM deposits WHERE id = ?", [depositId], async (err, deposit) => {
     if (err || !deposit) {
-       fs.unlinkSync(file.path);
-       return res.status(404).json({ error: "deposit not found" });
+      fs.unlinkSync(file.path);
+      return res.status(404).json({ error: "deposit not found" });
     }
 
     // existing db checks
@@ -898,11 +900,11 @@ app.post('/api/deposits/:id/upload', upload.single('file'), async (req, res) => 
             // cloud logic
             const sessionId = req.cookies.sessionID;
             const session = cloudManager.getSession(sessionId);
-            
+
             // check if deposit wants cloud AND session matches
             if (deposit.cloudProvider && session && session.provider === deposit.cloudProvider) {
               const roomKey = cloudManager.getRoomKey(roomCode);
-              
+
               if (roomKey) {
                 console.log("cloud upload triggered");
                 try {
@@ -910,7 +912,7 @@ app.post('/api/deposits/:id/upload', upload.single('file'), async (req, res) => 
                   if (provider) {
                     const decryptStream = await cloudManager.createDecryptedStream(file.path, roomKey);
                     const cloudMeta = { name: finalName, mimeType: file.mimetype };
-                    
+
                     await provider.uploadStream(decryptStream, cloudMeta, session.token);
                     console.log("cloud upload success");
                   }
@@ -1454,3 +1456,11 @@ setInterval(() => {
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => console.log(`api running on ${PORT}`));
+
+// print available cloud providers
+const providers = getActiveProviders();
+if (providers.length > 0) {
+  console.log('available cloud providers:', providers.join(', '));
+} else {
+  console.log('no cloud providers configured');
+}
