@@ -1,4 +1,4 @@
-const API_URL = "https://api.ticket-edu.com";
+let API_URL = "https://api.ticket-edu.com";
 
 const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 const targetRoomFile = isMobile ? "room-phone.html" : "room.html";
@@ -45,8 +45,29 @@ async function tryAutoJoin() {
   }
 }
 
-// run auto join check
-tryAutoJoin();
+// // try to use local api first
+async function resolveApiBase() {
+  const local = 'http://localhost:3000';
+  const remote = 'https://api.ticket-edu.com';
+  const controller = new AbortController();
+  const timeoutMs = 1500;
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const res = await fetch(`${local}`, { method: 'GET', signal: controller.signal });
+    clearTimeout(timeout);
+    if (res.ok) {
+      API_URL = local;
+      return;
+    }
+  } catch (e) {
+  }
+  API_URL = remote;
+  console.log('API base:', API_URL);
+}
+(async function initIndex() {
+  await resolveApiBase();
+  tryAutoJoin();
+})();
 
 // select main buttons
 const buttons = document.querySelectorAll('.button-text');
