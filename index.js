@@ -32,6 +32,8 @@ app.use(cookieParser());
 const allowedOrigins = [
   "http://127.0.0.1:5500",
   "http://localhost:5500",
+  "https://charly-chrtx.github.io", //Github pages
+  "https://ticket-edu.com", // Production
   process.env.FRONT_URL,
   process.env.BASE_URL
 ];
@@ -1154,7 +1156,7 @@ app.delete('/api/files/:fileId', (req, res) => {
       //room admin token
       if (roomSession && roomSession.provider === file.cloudProvider) {
         tokenToUse = roomSession.token;
-      } 
+      }
       //current user session
       else if (userSession && userSession.provider === file.cloudProvider) {
         tokenToUse = userSession.token;
