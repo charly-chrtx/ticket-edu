@@ -1,15 +1,31 @@
-const API_URL = "https://api.ticket-edu.com";
+let API_URL = "https://api.ticket-edu.com";
+
+(function checkCloudPopup() {
+  const params = new URLSearchParams(window.location.search);
+  if (params.has('cloud')) {
+    const status = params.get('cloud');
+
+    if (window.opener) {
+      window.opener.postMessage({ type: 'CLOUD_AUTH_RESULT', status: status }, '*');
+      window.close();
+    }
+    if (status === 'success') {
+      document.body.innerHTML = "<h1 style='color:green; text-align:center; margin-top:50px;'>Connexion réussie ! Vous pouvez fermer cette fenêtre.</h1>";
+      throw new Error("Arrêt du script (Connexion Cloud OK)");
+    }
+  }
+})();
 
 const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 const targetRoomFile = isMobile ? "room-phone.html" : "room.html";
 const targetIndexFile = "index-phone.html";
 
 if (isMobile) {
-    if (!window.location.href.includes("phone")) {
-        const currentParams = window.location.search;
-        window.location.href = targetIndexFile + currentParams;
-        throw new Error("Redirection vers la version mobile...");
-    }
+  if (!window.location.href.includes("phone")) {
+    const currentParams = window.location.search;
+    window.location.href = targetIndexFile + currentParams;
+    throw new Error("Redirection vers la version mobile...");
+  }
 }
 
 
@@ -45,8 +61,29 @@ async function tryAutoJoin() {
   }
 }
 
-// run auto join check
-tryAutoJoin();
+// // try to use local api first
+async function resolveApiBase() {
+  const local = 'http://localhost:3000';
+  const remote = 'https://api.ticket-edu.com';
+  const controller = new AbortController();
+  const timeoutMs = 1500;
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const res = await fetch(`${local}`, { method: 'GET', signal: controller.signal });
+    clearTimeout(timeout);
+    if (res.ok) {
+      API_URL = local;
+      return;
+    }
+  } catch (e) {
+  }
+  API_URL = remote;
+  console.log('API base:', API_URL);
+}
+(async function initIndex() {
+  await resolveApiBase();
+  tryAutoJoin();
+})();
 
 // select main buttons
 const buttons = document.querySelectorAll('.button-text');

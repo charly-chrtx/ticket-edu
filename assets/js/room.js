@@ -1,8 +1,8 @@
 'use strict';
 
 // config
-const api_url = "https://api.ticket-edu.com";
-const ws_url = "wss://api.ticket-edu.com";
+let api_url = "https://api.ticket-edu.com";
+let ws_url = "wss://api.ticket-edu.com";
 const max_files = 10;
 const max_storage_bytes = 1.5 * 1024 * 1024 * 1024; // 1.5gb
 const animation_delay = 600;
@@ -35,9 +35,40 @@ let ws_retry_count = 0;
 let erroroverlay;
 let global_ws = null;
 let report_enabled = false;
+let is_connecting_cloud = false;
 
 // crypto
 let crypto_key = null;
+
+// try to use local api first
+async function resolveApiBase() {
+    const local = 'http://localhost:3000';
+    const remote = 'https://api.ticket-edu.com';
+    const controller = new AbortController();
+    const timeoutMs = 1500;
+    const timeout = setTimeout(() => controller.abort(), timeoutMs);
+    try {
+        const res = await fetch(`${local}`, { method: 'GET', signal: controller.signal });
+        clearTimeout(timeout);
+        if (res.ok) {
+            api_url = local;
+        } else {
+            api_url = remote;
+        }
+    } catch (e) {
+        api_url = remote;
+    }
+
+    // derive websocket URL from api_url
+    if (api_url.startsWith('https://')) {
+        ws_url = api_url.replace(/^https:/, 'wss:');
+    } else if (api_url.startsWith('http://')) {
+        ws_url = api_url.replace(/^http:/, 'ws:');
+    } else {
+        ws_url = api_url;
+    }
+    console.log('API base:', api_url, 'WS base:', ws_url);
+}
 
 // ui state
 let ui_elements = {};
@@ -104,6 +135,261 @@ function create_tag(tag, class_name, content = '', style = {}) {
     return el;
 }
 
+// cloud interaction
+function handle_cloud_click(provider) {
+    const cardId = provider === 'google' ? 'googleDriveCard' : `${provider}Card`;
+    const card = document.getElementById(cardId);
+
+    if (!card) return;
+    // check if disconnect needed
+    if (card.classList.contains('connected')) {
+        if (confirm(`Déconnecter ${provider} ?`)) {
+            disconnect_cloud();
+            set_cloud_card_state(provider, 'idle');
+        }
+        return;
+    }
+
+    // start auth flow
+    set_cloud_card_state(provider, 'loading');
+    handle_cloud_handshake(provider);
+}
+
+// update card visual state
+function set_cloud_card_state(provider, state, msg = null) {
+    // reset others if connecting
+    if (state === 'connected') {
+        ['google', 'nextcloud', 'onedrive'].forEach(p => {
+            if (p !== provider) set_cloud_card_state(p, 'idle');
+        });
+    }
+
+    const cardId = provider === 'google' ? 'googleDriveCard' : `${provider}Card`;
+    const card = document.getElementById(cardId);
+    if (!card) return;
+
+    const statusText = card.querySelector('.provider-status');
+
+    // clear classes
+    card.classList.remove('connected', 'loading', 'error');
+
+    switch (state) {
+        case 'loading':
+            card.classList.add('loading');
+            statusText.textContent = "Connexion en cours...";
+            break;
+        case 'connected':
+            card.classList.add('connected');
+            statusText.textContent = "Connecté & Prêt";
+            break;
+        case 'error':
+            card.classList.add('error');
+            statusText.textContent = msg || "Erreur de connexion";
+            break;
+        case 'idle':
+        default:
+            statusText.textContent = "Non connecté";
+            break;
+    }
+}
+
+// sync ui with config
+async function update_cloud_ui() {
+    const cloudBox = document.getElementById('SaveToCloud');
+    const cloudServices = document.querySelector('.cloudservices');
+
+    if (!cloudBox || !cloudServices) return;
+
+    const isAdmin = typeof is_admin !== 'undefined' ? is_admin : false;
+    const typeRadio = document.querySelector('input[name="AdminType"]:checked');
+    const isDepositMode = typeRadio && typeRadio.value === 'depot';
+
+    if (!isAdmin || !isDepositMode) {
+        cloudBox.style.display = 'none';
+        cloudServices.style.display = 'none';
+        return;
+    }
+
+    try {
+        const providers = await api_call('/api/cloud/config');
+        const cards = {
+            'google': 'googleDriveCard',
+            'nextcloud': 'nextcloudCard',
+            'onedrive': 'onedriveCard'
+        };
+
+        let activeCount = 0;
+
+        for (const [provider, id] of Object.entries(cards)) {
+            const el = document.getElementById(id);
+            if (el) {
+                if (providers.includes(provider)) {
+                    el.style.display = 'flex';
+                    activeCount++;
+                } else {
+                    el.style.display = 'none';
+                }
+            }
+        }
+
+        if (activeCount > 0) {
+            cloudBox.style.display = 'flex';
+            const checkbox = cloudBox.querySelector('.checkbox');
+            const isChecked = checkbox && checkbox.classList.contains('checkbox-checked');
+            cloudServices.style.display = isChecked ? 'flex' : 'none';
+
+            // check active session
+            try {
+                const status = await api_call(`/api/cloud/status?roomCode=${room_code}`);
+                if (status.connected && status.provider) {
+                    set_cloud_card_state(status.provider, 'connected');
+                } else {
+                    ['google', 'nextcloud', 'onedrive'].forEach(p => set_cloud_card_state(p, 'idle'));
+                }
+            } catch (e) { }
+
+        } else {
+            cloudBox.style.display = 'none';
+            cloudServices.style.display = 'none';
+        }
+
+    } catch (e) {
+        console.error("cloud config error", e);
+        cloudBox.style.display = 'none';
+        cloudServices.style.display = 'none';
+    }
+}
+
+
+// handshake
+async function handle_cloud_handshake(provider) {
+    if (is_connecting_cloud) return;
+
+    is_connecting_cloud = true;
+    if (provider != 'nextcloud') {
+        document.body.style.cursor = 'wait';
+    }
+    
+    if (!crypto_key) {
+        is_connecting_cloud = false;
+        document.body.style.cursor = 'default';
+        set_cloud_card_state(provider, 'error', "Clé manquante");
+        return alert("Clé de chiffrement introuvable.");
+    }
+
+    let auth_data = {};
+
+    // nextcloud specific flow
+    if (provider === 'nextcloud') {
+        const creds = await prompt_nextcloud_creds();
+
+        if (!creds) {
+            is_connecting_cloud = false;
+            document.body.style.cursor = 'default';
+            set_cloud_card_state(provider, 'idle');
+            return;
+        }
+        auth_data = creds;
+    }
+
+    try {
+        // export key
+        const raw_key = await window.crypto.subtle.exportKey("raw", crypto_key);
+        const key_arr = Array.from(new Uint8Array(raw_key));
+
+        const body = {
+            roomCode: room_code,
+            provider: provider,
+            cryptoKey: key_arr,
+            ...auth_data
+        };
+
+        const res = await api_call('/api/cloud/handshake', 'POST', body);
+
+        if (res.redirectUrl) {
+            // redirect flow (google/onedrive)
+            window.open(res.redirectUrl, '_blank', 'width=500,height=600');
+        } else if (res.connected) {
+            alert('Connexion réussie !');
+        }
+    } catch (e) {
+        set_cloud_card_state(provider, 'error');
+        alert("Erreur connexion: " + e.message);
+    } finally {
+        is_connecting_cloud = false;
+        document.body.style.cursor = 'default';
+    }
+}
+
+// disconnect
+async function disconnect_cloud() {
+    if (!confirm("Arrêter la sauvegarde Cloud ?")) return;
+    try {
+        await api_call('/api/cloud/disconnect', 'POST', { roomCode: room_code });
+        render_cloud_settings();
+    } catch (e) {
+        alert("Erreur déconnexion");
+    }
+}
+
+// nextcloud modal helper
+function prompt_nextcloud_creds() {
+    return new Promise((resolve) => {
+
+        const overlay = create_tag('div', 'menu-overlay');
+        overlay.style.display = 'flex';
+
+        const box = create_tag('div', 'menu-box');
+
+        box.innerHTML = `
+            <h3>Connexion Nextcloud</h3>
+            <div class="nc-input-group">
+                <input type="text" id="ncUrl" placeholder="URL (ex: https://cloud.exemple.com)" />
+                <input type="text" id="ncUser" placeholder="Nom d'utilisateur" />
+                <input type="password" id="ncPass" placeholder="Mot de passe / App Password" />
+            </div>
+            <div class="overlay-footer" style="display:flex; justify-content:center; gap:10px;">
+            <a class="button-text" id='ncCancel' style="width: auto; padding: 0 30px; margin: 0; min-width: 140px;">
+                <img class="icon" src="./assets/icon/cross.png">
+                <span class="text">Annuler</span>
+            </a>
+            <a class="button-text" id='ncSubmit' style="width: auto; padding: 0 30px; margin: 0; min-width: 140px; background-color: #9ecaff;">
+                <img class="icon" src="./assets/icon/action.png">
+                <span class="text">Connecter</span>
+            </a>
+            </div>
+        `;
+
+        overlay.appendChild(box);
+        document.body.appendChild(overlay);
+
+        const closeAndResolve = (value) => {
+            overlay.remove();
+            resolve(value);
+        };
+
+        document.getElementById('ncCancel').onclick = () => {
+            closeAndResolve(null);
+        };
+
+        overlay.onclick = (e) => {
+            if (e.target === overlay) {
+                closeAndResolve(null);
+            }
+        };
+
+        document.getElementById('ncSubmit').onclick = () => {
+            const url = document.getElementById('ncUrl').value.trim();
+            const user = document.getElementById('ncUser').value.trim();
+            const pass = document.getElementById('ncPass').value.trim();
+
+            if (!url || !user || !pass) return alert("Tout les champs sont requis");
+
+            closeAndResolve({ ncUrl: url, ncUser: user, ncPass: pass });
+        };
+    });
+}
+
 // download modal logic
 function open_download_modal(deposit) {
     current_modal_deposit_id = deposit.id;
@@ -131,20 +417,20 @@ function open_download_modal(deposit) {
 
         files.forEach(file => {
             const size = (file.size / (1024 * 1024)).toFixed(2);
-            
+
             //custom name priority
             const original_name = file.originalName || file.name;
             const main_name = file.customName || original_name;
             const sub_info = file.customName ? `${original_name} • ${size} Mo` : `${size} Mo`;
 
             const li_style = {
-                display: 'flex', 
-                justifyContent: 'space-between', 
-                alignItems: 'center', 
-                padding: '10px 20px', 
-                borderRadius: '50px', 
-                marginBottom: '8px', 
-                border: '2px solid black', 
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                padding: '10px 20px',
+                borderRadius: '50px',
+                marginBottom: '8px',
+                border: '2px solid black',
                 background: '#fff'
             };
 
@@ -352,9 +638,13 @@ async function init_crypto(room_code_str) {
     const key_material = await window.crypto.subtle.importKey(
         "raw", enc.encode(room_code_str), "PBKDF2", false, ["deriveKey"]
     );
+
     crypto_key = await window.crypto.subtle.deriveKey(
         { name: "PBKDF2", salt: enc.encode("ticket-static-salt"), iterations: 100000, hash: "SHA-256" },
-        key_material, { name: "AES-GCM", length: 256 }, false, ["encrypt", "decrypt"]
+        key_material,
+        { name: "AES-GCM", length: 256 },
+        true,
+        ["encrypt", "decrypt"]
     );
     console.log('🔒 Crypto key ready');
 }
@@ -379,7 +669,7 @@ async function decrypt_blob(blob) {
 
 async function api_call(endpoint, method = "GET", body = null) {
     try {
-        const options = { method, headers: { "Content-Type": "application/json" } };
+        const options = { method, headers: { "Content-Type": "application/json" }, credentials: 'include' };
         if (body) options.body = JSON.stringify(body);
 
         const res = await fetch(`${api_url}${endpoint}`, options);
@@ -528,6 +818,8 @@ function show_connection_error() {
 
 async function init_app() {
     init_ui();
+    // resolve API (local first) so subsequent API calls use correct base
+    await resolveApiBase();
     const can_proceed = await load_resources();
 
     document.body.classList.add('loaded');
@@ -700,6 +992,7 @@ function setup_admin_type_listener() {
                 title.textContent = "Nouveau message";
                 fileUploadContainer.style.display = 'flex';
             }
+            update_cloud_ui();
         });
     });
 }
@@ -1134,14 +1427,15 @@ function render_deposit_ui() {
     }
 }
 
-async function create_deposit(name, color) {
+async function create_deposit(name, color, provider = null) {
     if (!name || !name.trim()) return alert('Nom requis');
     try {
         await api_call('/api/deposits', 'POST', {
             roomCode: room_code,
             userId: user_id,
             name: name.trim(),
-            color: color
+            color: color,
+            cloudProvider: provider
         });
         toggle_overlay('formOverlay', false);
     } catch (e) {
@@ -1253,7 +1547,7 @@ async function upload_deposit() {
         form.append('roomCode', room_code);
         form.append('customName', customName || '');
 
-        const res = await fetch(`${api_url}/api/deposits/${current_deposit_target.id}/upload`, { method: 'POST', body: form });
+        const res = await fetch(`${api_url}/api/deposits/${current_deposit_target.id}/upload`, { method: 'POST', body: form, credentials: 'include' });
 
         if (res.ok) {
             // reset ui
@@ -1393,7 +1687,27 @@ async function handle_form_submit() {
         // handle deposit creation
         if (adminType === 'depot') {
             if (!name) return alert('Nom du dépôt requis.');
-            await create_deposit(name, color);
+
+            let provider = null;
+            const cloudBox = document.getElementById('SaveToCloud');
+            const checkbox = cloudBox ? cloudBox.querySelector('.checkbox') : null;
+
+            // check if cloud enabled
+            if (checkbox && checkbox.classList.contains('checkbox-checked')) {
+                // get current session status
+                try {
+                    const status = await api_call(`/api/cloud/status?roomCode=${room_code}`);
+                    if (status.connected) {
+                        provider = status.provider;
+                    } else {
+                        return alert("Veuillez vous connecter au service Cloud avant de créer.");
+                    }
+                } catch (e) {
+                    console.error(e);
+                }
+            }
+
+            await create_deposit(name, color, provider);
             return;
         }
         if (!name && pending_files.length === 0) return alert("Message ou fichier requis.");
@@ -1461,6 +1775,7 @@ async function process_admin_upload(content, color) {
             const xhr = new XMLHttpRequest();
             current_xhr = xhr;
             xhr.open('POST', `${api_url}/api/announcements`, true);
+            xhr.withCredentials = true;
             stop_dots();
 
             xhr.upload.onprogress = (e) => {
@@ -1674,6 +1989,7 @@ function setup_event_listeners() {
                 fileUploadContainer.style.display = 'none';
             }
         }
+        if (is_admin) update_cloud_ui();
 
         toggle_overlay("formOverlay", true);
     };
@@ -1737,8 +2053,6 @@ function setup_event_listeners() {
             }
             close_all_overlays();
         });
-
-        
     });
 
     setup_download_modal_listeners();
@@ -1814,6 +2128,58 @@ function setup_event_listeners() {
     document.getElementById('sendBugReport')?.addEventListener('click', (e) => {
         e.preventDefault();
         submit_bug_report();
+    });
+
+    //cloud checkbox
+    const cloudBox = document.getElementById('SaveToCloud');
+    if (cloudBox) {
+        const checkbox = cloudBox.querySelector('.checkbox');
+        if (checkbox) {
+            checkbox.addEventListener('click', () => {
+                setTimeout(() => {
+                    const services = document.querySelector('.cloudservices');
+                    const isChecked = checkbox.classList.contains('checkbox-checked');
+                    if (services) services.style.display = isChecked ? 'flex' : 'none';
+                }, 50);
+            });
+        }
+    }
+
+    // cloud providers click handlers
+    document.getElementById('googleDriveButton')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        handle_cloud_handshake('google');
+    });
+
+    document.getElementById('onedriveButton')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        handle_cloud_handshake('onedrive');
+    });
+
+    document.getElementById('nextcloudButton')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        handle_cloud_handshake('nextcloud');
+    });
+
+    window.addEventListener('message', (event) => {
+        if (event.data && event.data.type === 'CLOUD_AUTH_RESULT') {
+            if (event.data.status === 'success') {
+                // refresh ui
+                update_cloud_ui();
+
+                // auto-check box
+                const cloudBox = document.getElementById('SaveToCloud');
+                const checkbox = cloudBox?.querySelector('.checkbox');
+                if (checkbox && !checkbox.classList.contains('checkbox-checked')) {
+                    checkbox.click();
+                }
+            } else {
+                // error feedback
+                alert("Erreur lors de la connexion au service Cloud.");
+                // Reset visuel des cartes en erreur
+                ['google', 'nextcloud', 'onedrive'].forEach(p => set_cloud_card_state(p, 'error'));
+            }
+        }
     });
 
     setup_drag_and_drop();

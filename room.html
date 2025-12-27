@@ -109,6 +109,45 @@
               <a class='color' style="background-color: #AEFFA6"></a>
             </div>
 
+            <div class="checkbox-container" id="SaveToCloud">
+              <div class="checkbox" onclick="this.classList.toggle('checkbox-checked')"></div>
+              <span style="margin-left: 15px;">Sauvegarder via un service cloud personnalisé</span>
+            </div>
+
+            <div class="cloudservices">
+
+              <div class="cloud-provider-card" id="googleDriveCard" onclick="handle_cloud_click('google')">
+                <div class="provider-icon-wrapper">
+                  <img class="icon" src="./assets/icon/gdrive.png" alt="Google Drive">
+                </div>
+                <div class="provider-info">
+                  <span class="provider-name">Google Drive</span>
+                  <span class="provider-status">Non connecté</span>
+                </div>
+              </div>
+
+              <div class="cloud-provider-card" id="nextcloudCard" onclick="handle_cloud_click('nextcloud')">
+                <div class="provider-icon-wrapper">
+                  <img class="icon" src="./assets/icon/nextcloud.png" alt="Nextcloud">
+                </div>
+                <div class="provider-info">
+                  <span class="provider-name">Nextcloud</span>
+                  <span class="provider-status">Non connecté</span>
+                </div>
+              </div>
+
+              <div class="cloud-provider-card" id="onedriveCard" onclick="handle_cloud_click('onedrive')">
+                <div class="provider-icon-wrapper">
+                  <img class="icon" src="./assets/icon/onedrive.png" alt="OneDrive">
+                </div>
+                <div class="provider-info">
+                  <span class="provider-name">OneDrive</span>
+                  <span class="provider-status">Non connecté</span>
+                </div>
+              </div>
+
+            </div>
+
             <div class="overlay-footer" style="display: flex; justify-content: center; gap: 15px; margin-top: 30px;">
 
               <a class="button-text" id='create' href='#'
@@ -346,7 +385,7 @@
             <h2 style="text-align: left; margin-top: 30px; font-size: 1.2rem;">Pourquoi votre ticket à été bloqué?</h2>
             <p style="margin: 30px 0; opacity: 0.7; text-align: left;">
               - Votre contenue est jugé inapproprié.<br><br>
-              Si votre ticket contient aucun contenue inapproprié alors veuillez le signaler
+              Si votre ticket contient aucun contenue inapproprié alors veuillez le signaler.
             </p>
 
             <div class="overlay-footer" style="display: flex; justify-content: center; gap: 15px; margin-top: 30px;">
