@@ -349,8 +349,14 @@ function prompt_nextcloud_creds() {
                 <input type="password" id="ncPass" placeholder="Mot de passe / App Password" />
             </div>
             <div class="overlay-footer" style="display:flex; justify-content:center; gap:10px;">
-                <a class="button-text" id="ncSubmit" style="background:#9ecaff; padding:0 20px;">Connecter</a>
-                <a class="button-text" id="ncCancel" style="background:#ff7070; padding:0 20px;">Annuler</a>
+            <a class="button-text" id='ncCancel' style="width: auto; padding: 0 30px; margin: 0; min-width: 140px;">
+                <img class="icon" src="./assets/icon/cross.png">
+                <span class="text">Annuler</span>
+            </a>
+            <a class="button-text" id='ncSubmit' style="width: auto; padding: 0 30px; margin: 0; min-width: 140px; background-color: #9ecaff;">
+                <img class="icon" src="./assets/icon/action.png">
+                <span class="text">Connecter</span>
+            </a>
             </div>
         `;
 

@@ -596,7 +596,7 @@ textarea:hover:not(:focus) {
 
 .slider-option input:checked~.dot {
     width: 28px;
-    background-color: #A6C5FF;
+    background-color: #9ecaff;
     border: 2px solid black;
     display: flex;
     justify-content: center;
@@ -604,7 +604,7 @@ textarea:hover:not(:focus) {
 }
 
 .slider-option input:checked + .label-text {
-    background-color: #A6C5FF;
+    background-color: #9ecaff;
     border: 2px solid black;
     height: calc(100% - 8px);
     margin: 0 4px;
@@ -677,7 +677,7 @@ textarea:hover:not(:focus) {
     position: absolute;
     width: 20px;
     height: 20px;
-    background: #a8c7ff;
+    background: #9ecaff;
     border-radius: 50%;
     top: 50%;
     left: 50%;
@@ -1089,7 +1089,7 @@ textarea:hover:not(:focus) {
     top: 0;
     height: 100%;
     width: 0%;
-    background-color: #a6c5ff;
+    background-color: #9ecaff;
     border-right: 2px solid black;
     transition: width 0.5s ease;
     z-index: 1;
@@ -1431,7 +1431,7 @@ textarea:hover:not(:focus) {
     left: 0;
     height: 100%;
     width: 0%;
-    background-color: #A6C5FF;
+    background-color: #9ecaff;
     transition: width 0.1s linear;
     z-index: 1;
 }
