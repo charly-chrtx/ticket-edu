@@ -145,52 +145,53 @@ async function update_cloud_ui() {
     const typeRadio = document.querySelector('input[name="AdminType"]:checked');
     const isDepositMode = typeRadio && typeRadio.value === 'depot';
 
-
+    // hide if not admin or not deposit mode
     if (!isAdmin || !isDepositMode) {
         cloudBox.style.display = 'none';
         cloudServices.style.display = 'none';
         return;
     }
 
-    // verify available services
     try {
-        const res = await api_call(`/api/cloud/status?roomCode=${room_code}`);
-        const providers = res.availableProviders || []; // ex: ['google', 'onedrive']
+        // fetch available providers from backend
+        const providers = await api_call('/api/cloud/config');
+
         const buttons = {
             'google': 'googleDriveButton',
             'nextcloud': 'nextcloudButton',
             'onedrive': 'onedriveButton'
         };
 
-        let hasAnyService = false;
+        let activeCount = 0;
+
+        // toggle buttons based on config
         for (const [provider, id] of Object.entries(buttons)) {
             const btn = document.getElementById(id);
             if (btn) {
                 if (providers.includes(provider)) {
-                    btn.style.display = 'flex'; 
-                    hasAnyService = true;
+                    btn.style.display = 'flex';
+                    activeCount++;
                 } else {
                     btn.style.display = 'none';
                 }
             }
         }
 
-        if (hasAnyService) {
-            // if at least one service available, show cloud box
+        // show container only if at least one provider is available
+        if (activeCount > 0) {
             cloudBox.style.display = 'flex';
 
+            // check checkbox state for services visibility
             const checkbox = cloudBox.querySelector('.checkbox');
             const isChecked = checkbox && checkbox.classList.contains('checkbox-checked');
-            
             cloudServices.style.display = isChecked ? 'flex' : 'none';
         } else {
-            // if no services available, hide everything
             cloudBox.style.display = 'none';
             cloudServices.style.display = 'none';
         }
 
     } catch (e) {
-        console.error("Erreur récupération status cloud:", e);
+        console.error("cloud config error", e);
         cloudBox.style.display = 'none';
         cloudServices.style.display = 'none';
     }
@@ -224,11 +225,11 @@ async function handle_cloud_handshake(provider) {
 
         const res = await api_call('/api/cloud/handshake', 'POST', body);
 
-        if (res.authUrl) {
+        if (res.redirectUrl) { 
             // redirect flow (google/onedrive)
-            window.open(res.authUrl, '_blank', 'width=500,height=600');
+            window.open(res.redirectUrl, '_blank', 'width=500,height=600');
         } else if (res.connected) {
-            alert('Connexion réussie !');;
+            alert('Connexion réussie !');
         }
     } catch (e) {
         alert("Erreur connexion: " + e.message);
@@ -493,9 +494,13 @@ async function init_crypto(room_code_str) {
     const key_material = await window.crypto.subtle.importKey(
         "raw", enc.encode(room_code_str), "PBKDF2", false, ["deriveKey"]
     );
+    
     crypto_key = await window.crypto.subtle.deriveKey(
         { name: "PBKDF2", salt: enc.encode("ticket-static-salt"), iterations: 100000, hash: "SHA-256" },
-        key_material, { name: "AES-GCM", length: 256 }, false, ["encrypt", "decrypt"]
+        key_material, 
+        { name: "AES-GCM", length: 256 }, 
+        true, 
+        ["encrypt", "decrypt"]
     );
     console.log('🔒 Crypto key ready');
 }
@@ -1871,22 +1876,38 @@ function setup_event_listeners() {
             close_all_overlays();
         });
 
-    //cloud checkbox
-    const cloudBox = document.getElementById('SaveToCloud');
-    if (cloudBox) {
-        const checkbox = cloudBox.querySelector('.checkbox');
-        if (checkbox) {
-            checkbox.addEventListener('click', () => {
-                setTimeout(() => {
-                    const services = document.querySelector('.cloudservices');
-                    const isChecked = checkbox.classList.contains('checkbox-checked');
-                    if (services) {
-                        services.style.display = isChecked ? 'flex' : 'none';
-                    }
-                }, 50);
-            });
+        // cloud checkbox listener
+        const cloudBox = document.getElementById('SaveToCloud');
+        if (cloudBox) {
+            const checkbox = cloudBox.querySelector('.checkbox');
+            if (checkbox) {
+                // handle click to toggle services visibility
+                checkbox.addEventListener('click', () => {
+                    // wait for class toggle (inline onclick)
+                    setTimeout(() => {
+                        const services = document.querySelector('.cloudservices');
+                        const isChecked = checkbox.classList.contains('checkbox-checked');
+                        if (services) services.style.display = isChecked ? 'flex' : 'none';
+                    }, 10);
+                });
+            }
         }
-    }
+
+        // cloud providers click handlers
+        document.getElementById('googleDriveButton')?.addEventListener('click', (e) => {
+            e.preventDefault();
+            handle_cloud_handshake('google');
+        });
+
+        document.getElementById('onedriveButton')?.addEventListener('click', (e) => {
+            e.preventDefault();
+            handle_cloud_handshake('onedrive');
+        });
+
+        document.getElementById('nextcloudButton')?.addEventListener('click', (e) => {
+            e.preventDefault();
+            handle_cloud_handshake('nextcloud');
+        });
 
 
     });
