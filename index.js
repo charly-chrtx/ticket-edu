@@ -30,6 +30,10 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+app.use(cors({
+  origin: true,
+  credentials: true 
+}));
 
 // public assets
 app.use(express.static('public'));
