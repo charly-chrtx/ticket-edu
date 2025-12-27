@@ -25,6 +25,11 @@ class CloudProvider {
   async uploadStream(fileStream, metadata, tokenOrCredentials) {
     throw new Error("method 'uploadStream' must be implemented");
   }
+
+  // delete file
+  async deleteFile(fileId, tokenOrCredentials) {
+    throw new Error("method 'deleteFile' must be implemented");
+  }
 }
 
 module.exports = CloudProvider;

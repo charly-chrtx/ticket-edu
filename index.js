@@ -39,7 +39,7 @@ const allowedOrigins = [
 app.use(cors({
   origin: (origin, callback) => {
     if (!origin) return callback(null, true);
-    
+
     if (allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
@@ -82,6 +82,14 @@ if (!fs.existsSync(PATH_DEP)) {
 }
 if (ENABLE_REPORT && !fs.existsSync(REPORT_DIR)) {
   fs.mkdirSync(REPORT_DIR);
+}
+
+// helper to clean names
+function normalize(str) {
+  return str.toLowerCase()
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]/g, "_")
+    .replace(/_+/g, "_");
 }
 
 // cloud status
@@ -164,7 +172,7 @@ app.get('/api/cloud/callback/:provider', async (req, res) => {
     let sessionId = req.cookies.sessionID;
     if (!sessionId) {
       sessionId = crypto.randomUUID();
-      res.cookie('sessionID', sessionId, { httpOnly: true });
+      res.cookie('sessionID', sessionId, { httpOnly: true, maxAge: 24 * 60 * 60 * 1000 });
     }
 
     cloudManager.setSession(sessionId, {
@@ -873,14 +881,12 @@ app.post('/api/deposits/:id/upload', upload.single('file'), async (req, res) => 
 
   if (!file) return res.status(400).json({ error: "no file" });
 
-  // fetch deposit info first to check cloud provider
-  db.get("SELECT cloudProvider FROM deposits WHERE id = ?", [depositId], async (err, deposit) => {
+  db.get("SELECT cloudProvider, name FROM deposits WHERE id = ?", [depositId], async (err, deposit) => {
     if (err || !deposit) {
       fs.unlinkSync(file.path);
       return res.status(404).json({ error: "deposit not found" });
     }
 
-    // existing db checks
     db.get("SELECT id FROM files WHERE depositId = ? AND userId = ?", [depositId, userId], async (err, existing) => {
       if (existing) {
         fs.unlinkSync(file.path);
@@ -906,46 +912,55 @@ app.post('/api/deposits/:id/upload', upload.single('file'), async (req, res) => 
         }
 
         const fileId = "fdep_" + Date.now();
+        let cloudFileId = null;
 
-        // db insert
-        db.run(`INSERT INTO files (id, originalName, encryptedName, mimeType, size, roomCode, userId, depositId)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-          [fileId, finalName, file.filename, file.mimetype, file.size, roomCode, userId, depositId],
-          async (err) => {
-            if (err) {
-              fs.unlinkSync(file.path);
-              return res.status(500).json({ error: err.message });
-            }
+        // cloud logic
+        const handleCloudUpload = async () => {
+          const sessionId = req.cookies.sessionID;
+          const session = cloudManager.getSession(sessionId);
 
-            // cloud logic
-            const sessionId = req.cookies.sessionID;
-            const session = cloudManager.getSession(sessionId);
+          if (deposit.cloudProvider && session && session.provider === deposit.cloudProvider) {
+            const roomKey = cloudManager.getRoomKey(roomCode);
+            if (roomKey) {
+              try {
+                const provider = cloudManager.getProvider(session.provider);
+                if (provider) {
+                  const decryptStream = await cloudManager.createDecryptedStream(file.path, roomKey);
+                  const folderPath = `Ticket-edu/dépot/${normalize(deposit.name)}-${roomCode}`;
 
-            // check if deposit wants cloud AND session matches
-            if (deposit.cloudProvider && session && session.provider === deposit.cloudProvider) {
-              const roomKey = cloudManager.getRoomKey(roomCode);
+                  const cloudMeta = {
+                    name: finalName,
+                    mimeType: file.mimetype,
+                    folderPath: folderPath,
+                    size: file.size
+                  };
 
-              if (roomKey) {
-                console.log("cloud upload triggered");
-                try {
-                  const provider = cloudManager.getProvider(session.provider);
-                  if (provider) {
-                    const decryptStream = await cloudManager.createDecryptedStream(file.path, roomKey);
-                    const cloudMeta = { name: finalName, mimeType: file.mimetype };
-
-                    await provider.uploadStream(decryptStream, cloudMeta, session.token);
-                    console.log("cloud upload success");
-                  }
-                } catch (cloudErr) {
-                  console.error("cloud upload failed (silent)", cloudErr);
+                  const result = await provider.uploadStream(decryptStream, cloudMeta, session.token);
+                  cloudFileId = result.id;
+                  console.log("cloud upload success, id:", cloudFileId);
                 }
+              } catch (cloudErr) {
+                console.error("cloud upload failed", cloudErr);
               }
             }
-
-            notifierClients(roomCode, 'updateDeposit');
-            res.status(201).json({ message: "uploaded" });
           }
-        );
+        };
+
+        handleCloudUpload().then(() => {
+          // db insert
+          db.run(`INSERT INTO files (id, originalName, encryptedName, mimeType, size, roomCode, userId, depositId, cloudId)
+                  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            [fileId, finalName, file.filename, file.mimetype, file.size, roomCode, userId, depositId, cloudFileId],
+            (err) => {
+              if (err) {
+                fs.unlinkSync(file.path);
+                return res.status(500).json({ error: err.message });
+              }
+              notifierClients(roomCode, 'updateDeposit');
+              res.status(201).json({ message: "uploaded" });
+            }
+          );
+        });
       });
     });
   });
@@ -1056,15 +1071,6 @@ app.post('/api/files', upload.single('file'), (req, res) => {
   });
 });
 
-//normalize file name
-function normalize(str) {
-  return str.toLowerCase()
-    .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^a-z0-z0-9]/g, "_")
-    .replace(/_+/g, "_");
-}
-
-
 // download file
 app.get('/api/files/download/:fileId', (req, res) => {
   db.get("SELECT * FROM files WHERE id = ?", [req.params.fileId], (err, file) => {
@@ -1090,34 +1096,60 @@ app.delete('/api/files/:fileId', (req, res) => {
   const { userId } = req.query;
   const fileId = req.params.fileId;
 
-  db.get("SELECT f.*, r.adminId as roomAdminId FROM files f LEFT JOIN rooms r ON f.roomCode = r.code WHERE f.id = ?",
-    [fileId],
-    (err, file) => {
-      if (!file) return res.status(404).json({ error: "file not found" });
+  const query = `
+    SELECT f.*, r.adminId as roomAdminId, d.cloudProvider 
+    FROM files f 
+    LEFT JOIN rooms r ON f.roomCode = r.code 
+    LEFT JOIN deposits d ON f.depositId = d.id
+    WHERE f.id = ?`;
 
-      const isOwner = file.userId === userId;
-      const isRoomAdmin = file.roomAdminId === userId;
+  db.get(query, [fileId], async (err, file) => {
+    if (!file) return res.status(404).json({ error: "file not found" });
 
-      if (!isOwner && !isRoomAdmin) {
-        return res.status(403).json({ error: "unauthorized" });
-      }
+    const isOwner = file.userId === userId;
+    const isRoomAdmin = file.roomAdminId === userId;
 
-      const filePath = path.join(UPLOAD_DIR, file.encryptedName);
-      if (fs.existsSync(filePath)) {
-        fs.unlinkSync(filePath);
-      }
+    if (!isOwner && !isRoomAdmin) {
+      return res.status(403).json({ error: "unauthorized" });
+    }
 
-      db.run("DELETE FROM files WHERE id = ?", [fileId], (err) => {
-        if (err) return res.status(500).json({ error: err.message });
-        updateRoomActivity(file.roomCode);
-        if (file.depositId) {
-          notifierClients(file.roomCode, 'updateDeposit');
-        } else {
-          notifierClients(file.roomCode, 'updateAnnonce');
+    // cloud delete
+    if (file.cloudId && file.cloudProvider) {
+      const sessionId = req.cookies.sessionID;
+      const session = cloudManager.getSession(sessionId);
+
+      if (session && session.provider === file.cloudProvider) {
+        const provider = cloudManager.getProvider(file.cloudProvider);
+        if (provider) {
+          console.log(`deleting cloud file ${file.cloudId}...`);
+          provider.deleteFile(file.cloudId, session.token).catch(e => console.error("cloud delete error:", e));
         }
-        res.json({ message: "file deleted" });
-      });
+      } else {
+        console.warn("cannot delete cloud file: user session not matching provider");
+      }
+    }
+
+    // local delete
+    let targetDir = UPLOAD_DIR;
+    if (file.depositId) targetDir = PATH_DEP;
+    else if (file.announcementId) targetDir = PATH_ANN;
+
+    const filePath = path.join(targetDir, file.encryptedName);
+    if (fs.existsSync(filePath)) {
+      fs.unlinkSync(filePath);
+    }
+
+    db.run("DELETE FROM files WHERE id = ?", [fileId], (err) => {
+      if (err) return res.status(500).json({ error: err.message });
+      updateRoomActivity(file.roomCode);
+      if (file.depositId) {
+        notifierClients(file.roomCode, 'updateDeposit');
+      } else {
+        notifierClients(file.roomCode, 'updateAnnonce');
+      }
+      res.json({ message: "file deleted" });
     });
+  });
 });
 
 // get announcement history
@@ -1269,7 +1301,7 @@ app.delete('/api/announcements/:id/files/:fileId', (req, res) => {
       return res.status(403).json({ error: "unauthorized" })
     }
 
-    const filePath = path.join(UPLOAD_DIR, data.encryptedName)
+    const filePath = path.join(PATH_ANN, data.encryptedName)
     if (fs.existsSync(filePath)) {
       fs.unlinkSync(filePath)
     }
@@ -1322,7 +1354,7 @@ app.delete('/api/announcements/:id', (req, res) => {
     db.all("SELECT * FROM files WHERE announcementId = ?", [id], (err, files) => {
       if (files) {
         files.forEach(f => {
-          const p = path.join(UPLOAD_DIR, f.encryptedName);
+          const p = path.join(PATH_ANN, f.encryptedName);
           if (fs.existsSync(p)) fs.unlinkSync(p);
         });
       }
@@ -1416,7 +1448,10 @@ function supprimerRoomsInactives() {
             db.all("SELECT * FROM files WHERE roomCode = ?", [room.code], (err, files) => {
               if (files) {
                 files.forEach(f => {
-                  const p = path.join(UPLOAD_DIR, f.encryptedName);
+                  let target = UPLOAD_DIR;
+                  if (f.depositId) target = PATH_DEP;
+                  else if (f.announcementId) target = PATH_ANN;
+                  const p = path.join(target, f.encryptedName);
                   if (fs.existsSync(p)) fs.unlinkSync(p);
                 });
                 db.run("DELETE FROM files WHERE roomCode = ?", [room.code]);
