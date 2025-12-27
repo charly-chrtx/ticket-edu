@@ -55,7 +55,7 @@ db.serialize(() => {
     announcementId TEXT,
     depositId TEXT,
     cloudId TEXT 
-  )`); 
+  )`);
 
   // deposits table
   db.run(`CREATE TABLE IF NOT EXISTS deposits (
@@ -70,19 +70,26 @@ db.serialize(() => {
   // update table
   db.serialize(() => {
     const cols = [
-        {table: 'files', col: 'depositId'},
-        {table: 'files', col: 'announcementId'},
-        {table: 'deposits', col: 'color'},
-        {table: 'deposits', col: 'cloudProvider'},
-        {table: 'files', col: 'cloudId'}
+      { table: 'files', col: 'depositId', type: 'TEXT' },
+      { table: 'files', col: 'announcementId', type: 'TEXT' },
+      { table: 'files', col: 'cloudId', type: 'TEXT' },
+      { table: 'deposits', col: 'color', type: 'TEXT' },
+      { table: 'deposits', col: 'cloudProvider', type: 'TEXT' },
+      { table: 'rooms', col: 'forceName', type: 'INTEGER DEFAULT 0' }
     ];
 
-    cols.forEach(item => {
-        db.run(`alter table ${item.table} add column ${item.col} text`, err => {
-            if (err && !err.message.includes("duplicate column")) console.error(err);
-        });
+    cols.forEach(({ table, col, type }) => {
+      db.run(
+        `ALTER TABLE ${table} ADD COLUMN ${col} ${type}`,
+        err => {
+          if (err && !err.message.includes('duplicate column')) {
+            console.error(err);
+          }
+        }
+      );
     });
   });
 });
+
 
 module.exports = db;
