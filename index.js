@@ -56,6 +56,7 @@ app.use(express.static('public'));
 // env config
 const MAX_GLOBAL_STORAGE = (parseInt(process.env.MAX_STORAGE_MO) || 10000) * 1024 * 1024;
 const DEPOT_EXPIRATION = (parseInt(process.env.DEPOT_FILE_EXPIRATION_HOURS) || 24) * 60 * 60 * 1000;
+const CLOUD_BASE_PATH = process.env.CLOUD_BASE_PATH || 'Ticket-Edu';
 
 // settings
 let globalSettings = {
@@ -106,7 +107,7 @@ app.get('/api/cloud/status', (req, res) => {
 
 // cloud handshake 
 app.post('/api/cloud/handshake', async (req, res) => {
-  const { roomCode, cryptoKey, provider, authData } = req.body;
+  const { roomCode, cryptoKey, provider, authData, basePath } = req.body;
 
   if (!roomCode || !cryptoKey || !provider) {
     return res.status(400).json({ error: "missing fields" });
@@ -141,7 +142,8 @@ app.post('/api/cloud/handshake', async (req, res) => {
       // save token for the room
       cloudManager.setRoomToken(roomCode, {
         provider: 'nextcloud',
-        token: authData
+        token: authData,
+        basePath: basePath
       });
 
       return res.json({ status: "connected" });
@@ -149,7 +151,7 @@ app.post('/api/cloud/handshake', async (req, res) => {
 
     // oauth flow (google)
     if (provider === 'google') {
-      const state = JSON.stringify({ roomCode });
+      const state = JSON.stringify({ roomCode, basePath });
       // callback url should be defined in env
       const callbackUrl = `${process.env.BASE_URL}/api/cloud/callback/google`;
       const url = providerInstance.getAuthUrl(callbackUrl, state);
@@ -174,10 +176,15 @@ app.get('/api/cloud/callback/:provider', async (req, res) => {
     const callbackUrl = `${process.env.BASE_URL}/api/cloud/callback/${providerName}`;
     const tokenData = await providerInstance.getTokenFromCode(code, callbackUrl);
 
-    // parse state to get roomCode
+    // parse state to get roomCode and basePath
     let roomCode = null;
+    let basePath = null;
     try {
-      if (state) roomCode = JSON.parse(state).roomCode;
+      if (state) {
+        const parsedState = JSON.parse(state);
+        roomCode = parsedState.roomCode;
+        basePath = parsedState.basePath;
+      }
     } catch (e) { }
 
     // create session
@@ -197,7 +204,8 @@ app.get('/api/cloud/callback/:provider', async (req, res) => {
     if (roomCode) {
       cloudManager.setRoomToken(roomCode, {
         provider: providerName,
-        token: tokenData
+        token: tokenData,
+        basePath: basePath
       });
     }
 
@@ -945,7 +953,10 @@ app.post('/api/deposits/:id/upload', upload.single('file'), async (req, res) => 
                 const provider = cloudManager.getProvider(session.provider);
                 if (provider) {
                   const decryptStream = await cloudManager.createDecryptedStream(file.path, roomKey);
-                  const folderPath = `Ticket-edu/dépot/${normalize(deposit.name)}-${roomCode}`;
+
+                  // use custom path or default from env
+                  const rootPath = session.basePath || CLOUD_BASE_PATH;
+                  const folderPath = `${rootPath}/dépots/${roomCode}/${normalize(deposit.name)}`;
 
                   const cloudMeta = {
                     name: finalName,
