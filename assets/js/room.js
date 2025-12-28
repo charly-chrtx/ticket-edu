@@ -171,7 +171,7 @@ function set_cloud_card_state(provider, state, msg = null) {
     const statusText = card.querySelector('.provider-status');
 
     // clear classes
-    card.classList.remove('connected', 'loading', 'error');
+    card.classList.remove('connected', 'loading', "error");
 
     switch (state) {
         case 'loading':
@@ -182,8 +182,8 @@ function set_cloud_card_state(provider, state, msg = null) {
             card.classList.add('connected');
             statusText.textContent = "Connecté & Prêt";
             break;
-        case 'error':
-            card.classList.add('error');
+        case "error":
+            card.classList.add("error");
             statusText.textContent = msg || "Erreur de connexion";
             break;
         case 'idle':
@@ -273,7 +273,7 @@ async function handle_cloud_handshake(provider) {
     if (!crypto_key) {
         is_connecting_cloud = false;
         document.body.style.cursor = 'default';
-        set_cloud_card_state(provider, 'error', "Clé manquante");
+        set_cloud_card_state(provider, "error", "Clé manquante");
         return alert("Clé de chiffrement introuvable.");
     }
 
@@ -313,7 +313,7 @@ async function handle_cloud_handshake(provider) {
             alert('Connexion réussie !');
         }
     } catch (e) {
-        set_cloud_card_state(provider, 'error');
+        set_cloud_card_state(provider, "error");
         alert("Erreur connexion: " + e.message);
     } finally {
         is_connecting_cloud = false;
@@ -539,7 +539,7 @@ function capture_log(type, args) {
 }
 
 console.log = (...args) => capture_log('log', args);
-console.error = (...args) => capture_log('error', args);
+console.error = (...args) => capture_log("error", args);
 console.warn = (...args) => capture_log('warn', args);
 
 window.onerror = (msg, source, lineno) => {
@@ -602,7 +602,7 @@ async function submit_bug_report() {
         });
 
         if (res.ok) {
-            alert('Signalement envoyé.');
+            notif('Signalement envoyé.', 'success');
             toggle_overlay('bugReportOverlay', false);
             if (desc) desc.value = '';
         } else {
@@ -610,7 +610,7 @@ async function submit_bug_report() {
         }
     } catch (err) {
         original_console.error('Report failed', err);
-        alert('Erreur envoi signalement.');
+        notif('Erreur envoi signalement.', "error");
     } finally {
         if (btn) btn.classList.remove('button-disabled');
     }
@@ -860,10 +860,14 @@ async function check_permissions() {
     const data = await api_call(`/api/rooms/${room_code}?userId=${user_id}`);
 
     if (!data || data.error || Array.isArray(data)) {
-        alert("Salle introuvable.");
+        alert("Salle introuvable.", "error");
         window.location.href = "/";
+        setTimeout(() => {
+            window.location.href = "/";
+        }, 500);
+
         return false;
-    }
+}
 
     report_enabled = data.reportEnabled || false;
     update_report_ui();
@@ -1496,11 +1500,11 @@ function setup_deposit_drag_drop() {
 }
 
 async function upload_deposit() {
-    if (!current_deposit_target) return alert('Dépôt introuvable');
-    if (!deposit_pending_file) return alert('Aucun fichier sélectionné');
+    if (!current_deposit_target) return notif('Dépôt introuvable',"error");
+    if (!deposit_pending_file) return notif('Aucun fichier sélectionné',"error");
 
     if (deposit_pending_file.size > 50 * 1024 * 1024) {
-        return alert("Fichier trop volumineux (max 50 Mo).");
+        return notif('Fichier trop volumineux (max 50 Mo).',"error");
     }
 
     const customNameEl = document.getElementById('depositCustomName');
@@ -1508,7 +1512,7 @@ async function upload_deposit() {
 
     // ia/local filter check
     if (!ai_enabled) {
-        if (banned_terms.some(term => new RegExp(`\\b${term.toLowerCase()}\\b`, 'i').test(customName))) return alert('Nom bloqué par le filtre local.');
+        if (banned_terms.some(term => new RegExp(`\\b${term.toLowerCase()}\\b`, 'i').test(customName))) return notif('Nom bloqué par le filtre local.');
     }
 
     // show loading state
@@ -1559,7 +1563,7 @@ async function upload_deposit() {
             // force update immediately
             await sync_deposits();
 
-            alert("Fichier envoyé avec succès !");
+            notif("Fichier envoyé avec succès !");
         } else {
             const data = await res.json().catch(() => ({}));
             throw new Error(data.error || 'Erreur serveur lors de l\'envoi');
@@ -1686,7 +1690,7 @@ async function handle_form_submit() {
         const adminType = document.querySelector('input[name="AdminType"]:checked')?.value || 'message';
         // handle deposit creation
         if (adminType === 'depot') {
-            if (!name) return alert('Nom du dépôt requis.');
+            if (!name) return notif('Nom du dépôt requis.', "error");
 
             let provider = null;
             const cloudBox = document.getElementById('SaveToCloud');
@@ -1700,7 +1704,7 @@ async function handle_form_submit() {
                     if (status.connected) {
                         provider = status.provider;
                     } else {
-                        return alert("Veuillez vous connecter au service Cloud avant de créer.");
+                        return notif('Veuillez vous connecter au service Cloud avant de créer.', "error");
                     }
                 } catch (e) {
                     console.error(e);
@@ -1710,7 +1714,7 @@ async function handle_form_submit() {
             await create_deposit(name, color, provider);
             return;
         }
-        if (!name && pending_files.length === 0) return alert("Message ou fichier requis.");
+        if (!name && pending_files.length === 0) return notif('Message ou fichier requis.', "error");
         await process_admin_upload(name, color);
         return;
     }
@@ -1719,8 +1723,8 @@ async function handle_form_submit() {
     const final_name = (csv_mode || force_name_mode) ? student_name : name;
 
     const active_tickets = tickets_list.filter(t => t.etat === "en cours" && t.userId === user_id);
-    if (active_tickets.length >= max_tickets) return alert("Limite atteinte.");
-    if (!final_name && !csv_mode && !force_name_mode) return alert("Nom requis.");
+    if (active_tickets.length >= max_tickets) return notif("Limite atteinte.", "error");
+    if (!final_name && !csv_mode && !force_name_mode) return notif("Nom requis.", "error");
     is_sending = true;
     if (create_btn) create_btn.classList.add('button-disabled');
 
@@ -1962,7 +1966,7 @@ function setup_csv_settings() {
 
                 setup_csv_settings();
             } else throw new Error();
-        } catch (e) { alert("Erreur upload"); setup_csv_settings(); }
+        } catch (e) { info('Erreur upload', "error"); setup_csv_settings(); }
         input.value = '';
     };
 }
@@ -2083,7 +2087,7 @@ function setup_event_listeners() {
     setup_deposit_drag_drop();
 
     if (els.aiToggle) els.aiToggle.addEventListener('change', async (e) => {
-        if (!is_admin) { e.preventDefault(); e.target.checked = ai_enabled; return alert("Vous n'avez pas la permission."); }
+        if (!is_admin) { e.preventDefault(); e.target.checked = ai_enabled; return notif("Vous n'avez pas la permission.", "error"); }
         const new_state = e.target.checked;
         try {
             await api_call(`/api/rooms/${room_code}`, "PUT", { aiEnabled: new_state });
@@ -2177,7 +2181,7 @@ function setup_event_listeners() {
                 // error feedback
                 alert("Erreur lors de la connexion au service Cloud.");
                 // Reset visuel des cartes en erreur
-                ['google', 'nextcloud', 'onedrive'].forEach(p => set_cloud_card_state(p, 'error'));
+                ['google', 'nextcloud', 'onedrive'].forEach(p => set_cloud_card_state(p, "error"));
             }
         }
     });
@@ -2209,3 +2213,56 @@ function add_files(files) {
 window.addEventListener('DOMContentLoaded', () => {
     init_app();
 });
+
+//notification
+
+function notif(message, type = 'info') {
+    
+    const styles = {
+        success: { 
+            icon: './assets/icon/success.png',
+        },
+        error: { 
+            icon: './assets/icon/error.png',
+        },
+        info: { 
+            icon: './assets/icon/icon thin.png',
+        }
+    };
+
+    const selectedStyle = styles[type] || styles['info'];
+
+    let container = document.getElementById('notif-container');
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'notif-container';
+        container.className = 'notif-container';
+        document.body.appendChild(container);
+    }
+
+    const notif = document.createElement('div');
+    notif.className = 'custom-notif';
+    
+    notif.innerHTML = `
+        <div class="notif-progress" style="background-color: ${selectedStyle.color};"></div>
+        <img src="${selectedStyle.icon}" class="notif-icon" onerror="this.src='./assets/icon/icon thin.png'">
+        <span class="notif-message">${message}</span>
+        <img src="./assets/icon/cross.png" class="notif-icon close-btn">
+    `;
+
+    notif.querySelector('.close-btn').onclick = () => notif.remove();
+    container.appendChild(notif);
+
+    setTimeout(() => {
+        const bar = notif.querySelector('.notif-progress');
+        if (bar) {
+            bar.style.transition = "width 2s linear";
+            bar.style.width = "0%";
+        }
+    }, 50);
+
+    setTimeout(() => {
+        notif.style.opacity = '0';
+        setTimeout(() => notif.remove(), 300);
+    }, 2500);
+}
