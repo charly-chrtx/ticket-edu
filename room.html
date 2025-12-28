@@ -147,14 +147,23 @@
               <a class='color' style="background-color: #A6FFF0"></a>
               <a class='color' style="background-color: #AEFFA6"></a>
             </div>
-
-            <div class="checkbox-container" id="SaveToCloud">
+            
+            <div class="checkbox-container" id="SaveToCloud" style="padding-top: 30px;">
               <div class="checkbox" onclick="this.classList.toggle('checkbox-checked')"></div>
               <span style="margin-left: 15px;">Sauvegarder via un service cloud personnalisé</span>
             </div>
 
             <div class="cloudservices">
 
+              <div class="cloud-provider-card" id="ticketcloudCard" onclick="handle_cloud_click('ticket')">
+                <div class="provider-icon-wrapper">
+                  <img class="icon" src="./assets/icon/ticketcloud.png" alt="Ticket Cloud">
+                </div>
+                <div class="provider-info">
+                  <span class="provider-name">Private Cloud</span>
+                </div>
+              </div>
+              
               <div class="cloud-provider-card" id="googleDriveCard" onclick="handle_cloud_click('google')">
                 <div class="provider-icon-wrapper">
                   <img class="icon" src="./assets/icon/gdrive.png" alt="Google Drive">
@@ -189,16 +198,16 @@
 
             <div class="overlay-footer" style="display: flex; justify-content: center; gap: 15px; margin-top: 30px;">
 
-              <a class="button-text" id='create' href='#'
+              <a class="button-text" id="cancelBugReport" href="#"
                 style="width: auto; padding: 0 30px; margin: 0; min-width: 140px;">
+                <img class="icon" src="./assets/icon/cross.png">
+                <span class="text">Annuler</span>
+              </a>
+              
+              <a class="button-text" id='create' href='#'
+                style="width: auto; padding: 0 30px; margin: 0; background-color: #9ecaff; min-width: 140px;">
                 <img class="icon" src="./assets/icon/add.png">
                 <span class="text">Créer</span>
-              </a>
-
-              <a class="button-text" id='deleteAnnonce' href='#'
-                style="width: auto; padding: 0 30px; margin: 0; background-color: #ff7070; display: none; min-width: 140px;">
-                <img class="icon" src="./assets/icon/delete.png">
-                <span class="text">Supprimer</span>
               </a>
 
             </div>
@@ -239,17 +248,17 @@
 
             <div style="padding-top: 20px; width: 100%; display: flex; flex-direction: row; flex-wrap: nowrap; justify-content: space-between; gap: 8px;">
               
-              <a class="button-text" href="#" style="min-height: 41px; padding: 0 40px; display: flex; align-items: center; gap: 8px; margin: 0; box-shadow: 0 3px 0px rgba(0, 0, 0, 0.2); pointer-events: none;">
+              <a class="button-text" href="#" style="min-height: 41px; padding: 0 40px; display: flex; align-items: center; gap: 8px; margin: 0; box-shadow: 0 4px 0px rgba(0, 0, 0, 0.2); pointer-events: none;">
                 <img class="icon" src="./assets/icon/person.png">
                 <span class="text">0</span>
               </a>
 
-              <a class="button-text" href="#" style="min-height: 41px; padding: 0 40px; display: flex; align-items: center; gap: 8px; margin: 0; box-shadow: 0 3px 0px rgba(0, 0, 0, 0.2); pointer-events: none;">
+              <a class="button-text" href="#" style="min-height: 41px; padding: 0 40px; display: flex; align-items: center; gap: 8px; margin: 0; box-shadow: 0 4px 0px rgba(0, 0, 0, 0.2); pointer-events: none;">
                 <img class="icon" src="./assets/icon/folder.png">
                 <span class="text">0 Go</span>
               </a>
 
-              <a class="button-text" href="#" style="min-height: 41px; padding: 0 40px; display: flex; align-items: center; gap: 8px; margin: 0; box-shadow: 0 3px 0px rgba(0, 0, 0, 0.2); pointer-events: none;">
+              <a class="button-text" href="#" style="min-height: 41px; padding: 0 40px; display: flex; align-items: center; gap: 8px; margin: 0; box-shadow: 0 4px 0px rgba(0, 0, 0, 0.2); pointer-events: none;">
                 <img class="icon" src="./assets/icon/timer.png">
                 <span class="text">00:00:00</span>
               </a>
