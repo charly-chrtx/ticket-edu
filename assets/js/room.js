@@ -2170,6 +2170,30 @@ function setup_event_listeners() {
         toggle_overlay('bugReportOverlay', false);
     });
 
+    document.getElementById('cancelCreate')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        close_all_overlays();
+
+        if (pending_files.length > 0 && confirm("Annuler et perdre les fichiers ?")) {
+             pending_files = [];
+             render_pending_files();
+        } else if (pending_files.length === 0) {
+
+        }
+    });
+
+
+    document.getElementById('closeBlocked')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        close_all_overlays();
+    });
+
+    document.getElementById('leaveClosed')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        localStorage.removeItem('last_room');
+        window.location.href = '/';
+    });
+
     document.getElementById('sendBugReport')?.addEventListener('click', (e) => {
         e.preventDefault();
         submit_bug_report();
