@@ -24,15 +24,6 @@ const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/
 const targetRoomFile = isMobile ? "room-phone.html" : "room.html";
 const targetIndexFile = "index-phone.html";
 
-if (isMobile) {
-  if (!window.location.href.includes("phone")) {
-    const currentParams = window.location.search;
-    window.location.href = targetIndexFile + currentParams;
-    throw new Error("Redirection vers la version mobile...");
-  }
-}
-
-
 // get user id
 let userId = localStorage.getItem('userId');
 if (!userId) {
@@ -51,7 +42,7 @@ async function tryAutoJoin() {
       const data = await res.json();
 
       if (data && !data.error) {
-        // room valid, redirect -> UTILISATION DE LA VARIABLE DYNAMIQUE
+        // room valid, redirect
         window.location.href = `${targetRoomFile}?room=${lastRoom}`;
       } else {
         // room invalid, clear storage

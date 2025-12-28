@@ -51,26 +51,26 @@ h1 {
         filter: blur(8px);
         transform: perspective(1000px) rotateX(-8deg) scale(0.9) translateY(15px);
     }
-    
+
     30% {
         filter: blur(2px);
     }
-    
+
     50% {
         opacity: 1;
         filter: blur(0.5px);
         transform: perspective(1000px) rotateX(1.5deg) scale(1.008) translateY(-2px);
     }
-    
+
     70% {
         filter: blur(0px);
         transform: perspective(1000px) rotateX(-0.5deg) scale(0.998) translateY(0.5px);
     }
-    
+
     90% {
         transform: perspective(1000px) rotateX(0.2deg) scale(1.001) translateY(-0.2px);
     }
-    
+
     100% {
         opacity: 1;
         filter: blur(0px);
@@ -81,62 +81,37 @@ h1 {
 @keyframes bounce-in {
     0% {
         opacity: 0;
-        transform: 
-            perspective(1500px)
-            rotateX(12deg)
-            rotateY(-3deg)
-            translateY(60px)
-            translateZ(-80px)
-            scale3d(0.88, 0.92, 1);
+        transform:
+            perspective(1500px) rotateX(12deg) rotateY(-3deg) translateY(60px) translateZ(-80px) scale3d(0.88, 0.92, 1);
         filter: blur(10px);
     }
+
     35% {
         opacity: 1;
-        transform: 
-            perspective(1500px)
-            rotateX(-3deg)
-            rotateY(1deg)
-            translateY(-8px)
-            translateZ(10px)
-            scale3d(1.02, 1.015, 1);
+        transform:
+            perspective(1500px) rotateX(-3deg) rotateY(1deg) translateY(-8px) translateZ(10px) scale3d(1.02, 1.015, 1);
         filter: blur(0);
     }
+
     55% {
-        transform: 
-            perspective(1500px)
-            rotateX(1.5deg)
-            rotateY(-0.5deg)
-            translateY(3px)
-            translateZ(-3px)
-            scale3d(0.992, 0.996, 1);
+        transform:
+            perspective(1500px) rotateX(1.5deg) rotateY(-0.5deg) translateY(3px) translateZ(-3px) scale3d(0.992, 0.996, 1);
     }
+
     70% {
-        transform: 
-            perspective(1500px)
-            rotateX(-0.5deg)
-            rotateY(0.2deg)
-            translateY(-1px)
-            translateZ(1px)
-            scale3d(1.003, 1.002, 1);
+        transform:
+            perspective(1500px) rotateX(-0.5deg) rotateY(0.2deg) translateY(-1px) translateZ(1px) scale3d(1.003, 1.002, 1);
     }
+
     85% {
-        transform: 
-            perspective(1500px)
-            rotateX(0.2deg)
-            rotateY(0deg)
-            translateY(0.5px)
-            translateZ(0px)
-            scale3d(0.999, 0.9995, 1);
+        transform:
+            perspective(1500px) rotateX(0.2deg) rotateY(0deg) translateY(0.5px) translateZ(0px) scale3d(0.999, 0.9995, 1);
     }
+
     100% {
         opacity: 1;
-        transform: 
-            perspective(1500px)
-            rotateX(0)
-            rotateY(0)
-            translateY(0)
-            translateZ(0)
-            scale3d(1, 1, 1);
+        transform:
+            perspective(1500px) rotateX(0) rotateY(0) translateY(0) translateZ(0) scale3d(1, 1, 1);
         filter: blur(0);
     }
 }
@@ -144,40 +119,27 @@ h1 {
 @keyframes bounce-in-entire {
     0% {
         opacity: 0;
-        transform: 
-            perspective(1500px)
-            rotateX(20deg)
-            translateY(50vh)
-            translateZ(-60px)
-            scale3d(0, 0, 0);
+        transform:
+            perspective(1500px) rotateX(20deg) translateY(50vh) translateZ(-60px) scale3d(0, 0, 0);
         filter: blur(8px);
     }
+
     40% {
         opacity: 1;
-        transform: 
-            perspective(1500px)
-            rotateX(1deg)
-            translateY(-6px)
-            translateZ(8px)
-            scale3d(1.04, 0.97, 1);
+        transform:
+            perspective(1500px) rotateX(1deg) translateY(-6px) translateZ(8px) scale3d(1.04, 0.97, 1);
         filter: blur(3px);
     }
+
     70% {
-        transform: 
-            perspective(1500px)
-            rotateX(-2deg)
-            translateY(1px)
-            translateZ(-1px)
-            scale3d(0.995, 1.001, 1);
+        transform:
+            perspective(1500px) rotateX(-2deg) translateY(1px) translateZ(-1px) scale3d(0.995, 1.001, 1);
     }
+
     100% {
         opacity: 1;
-        transform: 
-            perspective(1500px)
-            rotateX(0)
-            translateY(0)
-            translateZ(0)
-            scale3d(1, 1, 1);
+        transform:
+            perspective(1500px) rotateX(0) translateY(0) translateZ(0) scale3d(1, 1, 1);
         filter: blur(0);
     }
 }
@@ -223,7 +185,7 @@ h1 {
         opacity: 1;
         filter: blur(0px);
     }
-    
+
     100% {
         transform: translateX(-100px);
         opacity: 0;
@@ -495,6 +457,42 @@ textarea:hover:not(:focus) {
     box-shadow: 0px 5px 0px rgb(0, 0, 0, 0.2);
 }
 
+@keyframes csvslide {
+    0% {
+        opacity: 0;
+        transform: translateY(-30px) scale(0.9);
+        max-height: 0;
+        filter: blur(8px);
+    }
+
+    65% {
+        opacity: 1;
+        transform: translateY(0.5px) scale(1.01);
+        max-height: 100px;
+        filter: blur(1px);
+    }
+
+    100% {
+        transform: translateY(0px) scale(1);
+    }
+}
+
+.csv-anim-container {
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    transition: all 0.3s ease-in;
+    transform: translateY(-20px);
+}
+
+.csv-anim-container.open {
+    max-height: 80px;
+    opacity: 1;
+    scale: 0.98;
+    animation: csvslide 0.5s ease-in;
+    transform: translateY(0);
+}
+
 /* toggle switch */
 .toggle-checkbox {
     display: none;
@@ -558,7 +556,7 @@ textarea:hover:not(:focus) {
 
 .slider-option {
     position: relative;
-    flex: 1; 
+    flex: 1;
     height: 100%;
     display: flex;
     justify-content: center;
@@ -603,7 +601,7 @@ textarea:hover:not(:focus) {
     align-items: center;
 }
 
-.slider-option input:checked + .label-text {
+.slider-option input:checked+.label-text {
     background-color: #9ecaff;
     border: 2px solid black;
     height: calc(100% - 8px);
@@ -722,9 +720,9 @@ textarea:hover:not(:focus) {
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: 0; 
+    padding: 0;
     transition: all 0.3s ease;
-    overflow: hidden; 
+    overflow: hidden;
 }
 
 .qty-btn img {
@@ -832,7 +830,7 @@ textarea:hover:not(:focus) {
     border-radius: 12px;
     width: 90%;
     max-width: 500px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
     display: flex;
     flex-direction: column;
     overflow: hidden;
@@ -1261,8 +1259,11 @@ textarea:hover:not(:focus) {
 }
 
 /* button containers */
-.announcement-action-btn, .announcement-download, .announcement-delete, .announcement-delete-file {
-    width: 50px; 
+.announcement-action-btn,
+.announcement-download,
+.announcement-delete,
+.announcement-delete-file {
+    width: 50px;
     height: 50px;
     border-radius: 50%;
     border: 2px solid black;
@@ -1271,7 +1272,7 @@ textarea:hover:not(:focus) {
     justify-content: center;
     cursor: pointer;
     transition: all 0.2s;
-    flex-shrink: 0; 
+    flex-shrink: 0;
 }
 
 
@@ -1280,20 +1281,27 @@ textarea:hover:not(:focus) {
     box-shadow: 0 2px 0 #000;
 }
 
-.announcement-action-btn:hover, .announcement-delete:hover, .announcement-delete-file:hover, .announcement-download:hover {
+.announcement-action-btn:hover,
+.announcement-delete:hover,
+.announcement-delete-file:hover,
+.announcement-download:hover {
     transform: translateY(-2px);
     box-shadow: 0 4px 0 #000;
 }
 
 
-.announcement-action-btn img, .announcement-delete img, .announcement-download img, .announcement-delete-file img {
+.announcement-action-btn img,
+.announcement-delete img,
+.announcement-download img,
+.announcement-delete-file img {
     width: 16px;
     height: 16px;
     object-fit: contain;
 }
 
 
-.announcement-delete, .announcement-delete-file {
+.announcement-delete,
+.announcement-delete-file {
     background: #ff7070;
 }
 
@@ -1632,14 +1640,14 @@ body.dark-mode .qr-card::before {
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
-    z-index: -1; 
+    z-index: -1;
     transition: all 0.3s ease;
 }
 
 #qrcode-container {
     display: flex;
     justify-content: center;
-    padding: 20px; 
+    padding: 20px;
     width: 45%;
     max-width: 150px;
     aspect-ratio: 1/1 !important;
@@ -1657,7 +1665,7 @@ body.dark-mode #qrcode-container {
     display: flex;
     justify-content: center;
     padding-bottom: 20px;
-    
+
 }
 
 #SaveToCloud {
@@ -1665,7 +1673,7 @@ body.dark-mode #qrcode-container {
 }
 
 .cloudservices {
-    display: none; 
+    display: none;
     flex-direction: row;
     gap: 15px;
     width: 100%;
@@ -1745,7 +1753,7 @@ body.dark-mode #qrcode-container {
     height: 16px;
     border: 2px solid black;
     border-radius: 50%;
-    background-color: #e0e0e0; 
+    background-color: #e0e0e0;
     margin-right: 15px;
     transition: background-color 0.3s ease, transform 0.3s ease;
 }
@@ -1753,15 +1761,15 @@ body.dark-mode #qrcode-container {
 
 
 .cloud-provider-card.connected {
-    background-color: #e6fcf5; 
+    background-color: #e6fcf5;
     border-color: black;
-    box-shadow: inset 0 0 0 2px black; 
+    box-shadow: inset 0 0 0 2px black;
 }
 
 .cloud-provider-card.connected .status-indicator {
-    background-color: #AEFFA6; 
+    background-color: #AEFFA6;
     transform: scale(1.2);
-    box-shadow: 0 0 0 2px rgba(0,0,0,0.1);
+    box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
 }
 
 .cloud-provider-card.connected .provider-status {
@@ -1796,6 +1804,7 @@ body.dark-mode #qrcode-container {
     .cloud-provider-card {
         height: 60px;
     }
+
     .provider-name {
         font-size: 1rem;
     }
@@ -1835,7 +1844,7 @@ body.dark-mode #qrcode-container {
     border: 2px solid black;
     border-radius: 50px;
     box-shadow: 0 4px 0px rgba(0, 0, 0, 0.2);
-    
+
     overflow: hidden;
     animation: notifslide 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
@@ -1867,7 +1876,10 @@ body.dark-mode .notif-icon {
     opacity: 0.6;
     transition: opacity 0.2s;
 }
-.close-btn:hover { opacity: 1; }
+
+.close-btn:hover {
+    opacity: 1;
+}
 
 .notif-progress {
     position: absolute;
@@ -1884,8 +1896,7 @@ body.dark-mode .notif-icon {
     0% {
         opacity: 0;
         transform:
-            scale(0.8)
-            translateY(-50px);
+            scale(0.8) translateY(-50px);
         filter: blur(8px);
     }
 
@@ -1895,9 +1906,8 @@ body.dark-mode .notif-icon {
 
     100% {
         opacity: 1;
-        transform: 
-            scale(1)
-            translateY(0px);
+        transform:
+            scale(1) translateY(0px);
         filter: blur(0px);
     }
 }

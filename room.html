@@ -1,46 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
 
-<style>
-
-  @keyframes csvslide {
-    0% {
-      opacity: 0;
-      transform: translateY(-30px) scale(0.9);
-      max-height: 0;
-      filter: blur(8px);
-    }
-
-    65% {
-      opacity: 1;
-      transform: translateY(0.5px) scale(1.01);
-      max-height: 100px;
-      filter: blur(1px);
-    }
-
-    100% {
-      transform: translateY(0px) scale(1);
-    }
-  }
-  .csv-anim-container {
-    max-height: 0;
-    opacity: 0;
-    overflow: hidden;
-    transition: all 0.3s ease-in;
-    transform: translateY(-20px); 
-  }
-
-  .csv-anim-container.open {
-    max-height: 80px;
-    opacity: 1;
-    scale: 0.98;
-    animation: csvslide 0.5s ease-in;
-    transform: translateY(0);
-  }
-</style>
-
-
 <head>
+  <script>
+    if (screen.width <= 768 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+        window.location.href = "room-phone.html" + window.location.search;
+    }
+  </script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Ticket</title>
