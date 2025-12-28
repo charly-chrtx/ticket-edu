@@ -3,11 +3,12 @@
 
 <head>
     <script>
-        // check mobile
+        const currentVersion = "Pre-release V0.9.4";
         if (screen.width <= 768 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
             window.location.href = "index-phone.html";
         }
     </script>
+
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Ticket - Connexion</title>
@@ -82,11 +83,11 @@
             }
 
             .info-text {
-            position: absolute;
-            bottom: 60px;
-            font-size: 0.8rem;
-            font-family: 'Inconsolata', monospace;
-            color: #ff7070;
+                position: absolute;
+                bottom: 60px;
+                font-size: 0.8rem;
+                font-family: 'Inconsolata', monospace;
+                color: #ff7070;
             }
             
             &.dark-mode .version-text {
@@ -101,7 +102,6 @@
                 display: flex;
                 gap: 10px;
             }
-
         }
     </style>
 </head>
@@ -130,10 +130,9 @@
         </div>
 
         <p class="version-text">
-            version 
-            <span id="openChangelogBtn" style="text-decoration: underline wavy #9ecaff; cursor: pointer;">
-                Pre-release v0.9.4
-            </span>
+                <span id="openChangelogBtn" style="text-decoration: underline wavy #9ecaff; cursor: pointer;">
+                    <span class="version-number-display"></span>
+                </span>
         </p>
         <p class="info-text">[!] Version Developpeur. Signaler en cas de soucis </p>
         
@@ -146,8 +145,6 @@
                 <img class="icon" id="settingsIcon" src="./assets/icon/Settings.png" alt="Settings">
             </a>
         </div>
-        </div>
-
     </div>
 
     <div class="menu-overlay" id="joinOverlay" style="display: none;">
@@ -166,7 +163,7 @@
                 
                 <div class="overlay-footer" style="display: flex; justify-content: center; gap: 15px; margin-top: 30px;">
                     
-                    <a class="button-text" id="cancelJoin" href="#"
+                    <a class="button-text" id="cancelBugReport" href="#"
                         style="width: auto; padding: 0 30px; margin: 0; min-width: 140px;">
                         <img class="icon" src="./assets/icon/cross.png">
                         <span class="text">Annuler</span>
@@ -196,18 +193,18 @@
                         
                         <strong style="color: var(-text); display: block; margin-bottom: 5px;">Fonctionnalités</strong>
                         <ul style="margin: 0 0 10px 0; padding-left: 20px; color: #808080;">
-                            <li>Ajout du spport de la langue anglaise afin de satisfaire plus d'utilisateur.</li>
+                            <li>Ajout du support de la langue anglaise afin de satisfaire plus d'utilisateurs.</li>
                             <li>Ajout de notifications pour que cela ne bloque plus vos actions.</li>
-                            <li>Ajout d'informations dynamique pour le groupe dans l'overlay parametres.</li>
+                            <li>Ajout d'informations dynamiques pour le groupe dans l'overlay paramètres.</li>
                         </ul>
 
                         <strong style="color: var(-text); display: block; margin-bottom: 5px;">Interface (UI/UX)</strong>
                         <ul style="margin: 0 0 10px 0; padding-left: 20px; color: #808080;">
-                            <li>Ajout de shema pour illsutrer les overlays</li>
-                            <li>Modfication de l'accebilité du paramètre "require un nom".</li>
-                            <li>Modification des bouttons de selection pour la solution de stockage cloud.</li> 
+                            <li>Ajout de schéma pour illustrer les overlays.</li>
+                            <li>Modification de l'accessibilité du paramètre "requérir un nom".</li>
+                            <li>Modification des boutons de sélection pour la solution de stockage cloud.</li> 
                             <li>Modification du design de l'overlay "Nouveau message".</li> 
-                            <li>Supression de la section "room" des paramètres. Le bouton à été déplacé vers la section QR-Code.</li>
+                            <li>Suppression de la section "room" des paramètres. Le bouton a été déplacé vers la section QR-Code.</li>
                         </ul>
 
                         <strong style="color: var(-text); display: block; margin-bottom: 5px;">Divers</strong>
@@ -223,9 +220,9 @@
                         
                         <strong style="color: var(-text); display: block; margin-bottom: 5px;">Fonctionnalités</strong>
                         <ul style="margin: 0 0 10px 0; padding-left: 20px; color: #808080;">
-                            <li>Ajout des dépôts pour rendre des fihciers.</li>
+                            <li>Ajout des dépôts pour rendre des fichiers.</li>
                             <li>Ajout des signalements pour des problèmes rencontrés.</li>
-                            <li>Ajout d'un nom sans verification</li>
+                            <li>Ajout d'un nom sans vérification.</li>
                         </ul>
 
                         <strong style="color: var(-text); display: block; margin-bottom: 5px;">Interface (UI/UX)</strong>
@@ -233,18 +230,17 @@
                             <li>Nouvelles animations de chargement des pages.</li>
                             <li>Nouvelle animation d'apparition des overlays.</li>
                             <li>Nouvelle animation de validation des tickets.</li>
-                            <li>Nouvelle animation d'ouverture du tirroir de fichier.</li>
+                            <li>Nouvelle animation d'ouverture du tiroir de fichier.</li>
                         </ul>
 
                         <strong style="color: var(-text); display: block; margin-bottom: 5px;">Divers</strong>
                         <ul style="margin: 0; padding-left: 20px; color: #808080;">
                             <li>Correction de l'affichage intempestif de la barre de menus.</li>
                             <li>Correction de l'activation du fichier CSV.</li>
-                            <li>Correction de l'envoi simultané de tickets</li>
+                            <li>Correction de l'envoi simultané de tickets.</li>
                             <li>Correction du menu des téléchargements.</li>
                             <li>Correction de l'overlay de connexion pour entrer avec un nom.</li>
                             <li>Diverses améliorations mineures.</li>
-
                         </ul>
                         
                         <hr style="border: 0; border-top: 1px solid #e0e0e0; margin: 30px 0;">
@@ -277,7 +273,7 @@
 
                         <strong style="color: var(-text); display: block; margin-bottom: 5px;">Fonctionnalités</strong>
                         <ul style="margin: 0 0 10px 0; padding-left: 20px; color: #808080;">
-                            <li>Ajout d'un suivi de mise à jour pour comprendre les nouveautées.</li>
+                            <li>Ajout d'un suivi de mise à jour pour comprendre les nouveautés.</li>
                         </ul>
 
                         <strong style="color: var(-text); display: block; margin-bottom: 5px;">Interface (UI/UX)</strong>
@@ -308,7 +304,6 @@
                             <li>Corrections de sécurité.</li>
                             <li>Diverses améliorations mineures.</li>
                         </ul>
-
                     </div>
 
                 </div>
@@ -332,7 +327,7 @@
             <h2 style="text-align: left; margin-top: 30px; font-size: 1.2rem;">Apparence</h2>
 
             <div style="display: flex; justify-content: space-between; align-items: center; margin: 15px 0;">
-              <span>Mode Sombre (Betâ)</span>
+              <span>Mode Sombre (Bêta)</span>
               <label>
                 <input type="checkbox" class="toggle-checkbox" id="darkModeToggle">
                 <span class="toggle-slider"></span>
@@ -378,6 +373,8 @@
       </div>
 
     <script>
+
+        const storedVersion = localStorage.getItem('ticket_version_seen');
         const canvas = document.getElementById('bgCanvas');
         const ctx = canvas.getContext('2d');
 
@@ -385,6 +382,7 @@
         let increment = 0;
         let startTime = null;
 
+        // Configuration des vagues
         const waves = [
             { y: 0.60, length: 0.006, amplitude: 50, speed: -0.0007, offset: 0, delay: 0 }, 
             { y: 0.72, length: 0.004, amplitude: 40, speed: 0.0009, offset: 2, delay: 100 },
@@ -440,8 +438,6 @@
                 const currentBaseY = startY - ((startY - targetY) * easedProgress);
 
                 let alpha = isDark ? 1 : 1;
-                if (progress < 1) {
-                }
 
                 if (isDark) {
                     ctx.fillStyle = `rgba(45, 45, 45, ${alpha})`;
@@ -453,7 +449,6 @@
                 
                 for (let i = 0; i < width; i++) {
                     const dynamicAmp = wave.amplitude * (1 + (1 - easedProgress) * 0.5);
-                    
                     const y = currentBaseY + Math.sin(i * wave.length + increment * wave.speed + wave.offset) * dynamicAmp;
                     ctx.lineTo(i, y);
                 }
@@ -469,6 +464,8 @@
         }
         
         requestAnimationFrame(animate);
+
+        // --- Gestion des Overlays et Boutons ---
 
         const settingsBtn = document.getElementById('settingsBtn');
         const settingsOverlay = document.getElementById('settingsOverlay');
@@ -519,11 +516,13 @@
             });
         }
 
+        // --- Système de Notifications ---
+
         function notif(message, type = 'info') {
             const styles = {
-                success: { icon: './assets/icon/success.png'},
-                error: { icon: './assets/icon/error.png'},
-                info: { icon: './assets/icon/icon thin.png'}
+                success: { icon: './assets/icon/success.png', color: '#9ecaff'},
+                error: { icon: './assets/icon/error.png', color: '#9ecaff'},
+                info: { icon: './assets/icon/info.png', color: '#9ecaff'}
             };
 
             const selectedStyle = styles[type] || styles['info'];
@@ -540,7 +539,7 @@
             notif.className = 'custom-notif';
             
             notif.innerHTML = `
-                <div class="notif-progress" style="background-color: ${selectedStyle.color};"></div>
+                <div class="notif-progress" style="background-color: ${selectedStyle.color || '#ccc'};"></div>
                 <img src="${selectedStyle.icon}" class="notif-icon" onerror="this.src='./assets/icon/icon thin.png'">
                 <span class="notif-message">${message}</span>
                 <img src="./assets/icon/cross.png" class="notif-icon close-btn">
@@ -552,7 +551,7 @@
             setTimeout(() => {
                 const bar = notif.querySelector('.notif-progress');
                 if (bar) {
-                    bar.style.transition = "width 2s linear";
+                    bar.style.transition = "width 7s linear";
                     bar.style.width = "0%";
                 }
             }, 50);
@@ -560,18 +559,44 @@
             setTimeout(() => {
                 notif.style.opacity = '0';
                 setTimeout(() => notif.remove(), 300);
-            }, 2500);
+            }, 7000);
         }
 
         window.addEventListener('DOMContentLoaded', () => {
             const urlParams = new URLSearchParams(window.location.search);
+            
+            document.querySelectorAll('.version-number-display').forEach(el => {
+                el.textContent = currentVersion;
+            });
             
             if (urlParams.get('error') === 'notfound') {
                 notif("Salle introuvable.", "error");
                 const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
                 window.history.replaceState({path:newUrl}, '', newUrl);
             }
+
+            if (storedVersion !== currentVersion) {
+                
+                setTimeout(() => {
+                    
+                    const messageHTML = `
+                        <span>Nouvelle version de Ticket
+                            <span style="cursor: pointer; text-decoration: underline wavy #9ecaff; font-weight: bold;" 
+                                    onclick="document.getElementById('changelogOverlay').style.display='flex'">
+                                ${currentVersion}
+                            </span> !
+                        </span>
+                    `;
+                    
+                    notif(messageHTML, 'info');
+
+                    localStorage.setItem('ticket_version_seen', currentVersion);
+
+                }, 1000); 
+            }
         });
+
+    
     </script>
 
     <script src="./assets/js/index.js"></script>
