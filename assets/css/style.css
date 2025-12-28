@@ -748,6 +748,13 @@ textarea:hover:not(:focus) {
 
 /* overlays & modals */
 
+.banner {
+    display: block;
+    width: 100%;
+    border-radius: 8px;
+    object-fit: cover;
+}
+
 .menu-overlay {
     display: flex;
     position: fixed;

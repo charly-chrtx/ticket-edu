@@ -11,11 +11,15 @@
       filter: blur(8px);
     }
 
-    100% {
+    65% {
       opacity: 1;
-      transform: translateY(0px) scale(1);
+      transform: translateY(0.5px) scale(1.01);
       max-height: 100px;
-      filter: blur(0px);
+      filter: blur(1px);
+    }
+
+    100% {
+      transform: translateY(0px) scale(1);
     }
   }
   .csv-anim-container {
@@ -30,7 +34,7 @@
     max-height: 80px;
     opacity: 1;
     scale: 0.98;
-    animation: csvslide 0.4s ease-in;
+    animation: csvslide 0.5s ease-in;
     transform: translateY(0);
   }
 </style>
@@ -504,6 +508,39 @@
                 style="width: auto; padding: 0 30px; margin: 0; background-color: #9ecaff; min-width: 140px;">
                 <img class="icon" src="./assets/icon/send.png">
                 <span class="text">Envoyer</span>
+              </a>
+
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="menu-overlay" id="noFoundOverlay" style="display: none;">
+        <div class="menu-box">
+          <div class="input" style="padding-bottom: 0;">
+
+            <h1>Groupe femré</h1>
+
+            <img class="banner" src="./assets/banner/nofound.png" alt="Bannière Groupe Fermé">
+
+            <h2 style="text-align: left; margin-top: 30px; font-size: 1.2rem;">Pourquoi votre groupe est fermé?</h2>
+            <p style="margin: 30px 0; opacity: 0.7; text-align: left;">
+              - Verifier votre connexion<br>
+              - Verifier avec le proprietaire du groupe pour lui demander si il a fermé le groupe
+            </p>
+
+            <div class="overlay-footer" style="display: flex; justify-content: center; gap: 15px; margin-top: 30px;">
+
+              <a class="button-text" id="retryConect" href="#"
+                style="width: auto; padding: 0 30px; margin: 0; min-width: 140px;">
+                <img class="icon" src="./assets/icon/reload.png" alt="">
+                <span class="text">Réessayer</span>
+              </a>
+
+              <a class="button-text" id="cancelLogout" href="#" onclick="envoyerSignalement()"
+                style="width: auto; padding: 0 30px; margin: 0; min-width: 140px; background-color: #ff7070;">
+                <img class="icon" src="./assets/icon/logout.png" alt="">
+                <span class="text">Quitter</span>
               </a>
 
             </div>
