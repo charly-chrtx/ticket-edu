@@ -93,6 +93,52 @@ if (!room_code) {
     localStorage.setItem('last_room', room_code);
 }
 
+//notification
+
+function notif(message, type = 'info') {
+    
+    const styles = {
+        success: { icon: './assets/icon/success.png'},
+        error: { icon: './assets/icon/error.png'},
+        info: { icon: './assets/icon/info.png'}
+    };
+
+    const selectedStyle = styles[type] || styles['info'];
+
+    let container = document.getElementById('notif-container');
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'notif-container';
+        container.className = 'notif-container';
+        document.body.appendChild(container);
+    }
+
+    const notif = document.createElement('div');
+    notif.className = 'custom-notif';
+    
+    notif.innerHTML = `
+        <div class="notif-progress" style="background-color: ${selectedStyle.color};"></div>
+        <img src="${selectedStyle.icon}" class="notif-icon" onerror="this.src='./assets/icon/icon thin.png'">
+        <span class="notif-message">${message}</span>
+        <img src="./assets/icon/cross.png" class="notif-icon close-btn">
+    `;
+
+    notif.querySelector('.close-btn').onclick = () => notif.remove();
+    container.appendChild(notif);
+
+    setTimeout(() => {
+        const bar = notif.querySelector('.notif-progress');
+        if (bar) {
+            bar.style.transition = "width 2s linear";
+            bar.style.width = "0%";
+        }
+    }, 50);
+
+    setTimeout(() => {
+        notif.style.opacity = '0';
+        setTimeout(() => notif.remove(), 300);
+    }, 2500);
+}
 
 // utils
 
@@ -2209,49 +2255,3 @@ window.addEventListener('DOMContentLoaded', () => {
     init_app();
 });
 
-//notification
-
-function notif(message, type = 'info') {
-    
-    const styles = {
-        success: { icon: './assets/icon/success.png'},
-        error: { icon: './assets/icon/error.png'},
-        info: { icon: './assets/icon/info.png'}
-    };
-
-    const selectedStyle = styles[type] || styles['info'];
-
-    let container = document.getElementById('notif-container');
-    if (!container) {
-        container = document.createElement('div');
-        container.id = 'notif-container';
-        container.className = 'notif-container';
-        document.body.appendChild(container);
-    }
-
-    const notif = document.createElement('div');
-    notif.className = 'custom-notif';
-    
-    notif.innerHTML = `
-        <div class="notif-progress" style="background-color: ${selectedStyle.color};"></div>
-        <img src="${selectedStyle.icon}" class="notif-icon" onerror="this.src='./assets/icon/icon thin.png'">
-        <span class="notif-message">${message}</span>
-        <img src="./assets/icon/cross.png" class="notif-icon close-btn">
-    `;
-
-    notif.querySelector('.close-btn').onclick = () => notif.remove();
-    container.appendChild(notif);
-
-    setTimeout(() => {
-        const bar = notif.querySelector('.notif-progress');
-        if (bar) {
-            bar.style.transition = "width 2s linear";
-            bar.style.width = "0%";
-        }
-    }, 50);
-
-    setTimeout(() => {
-        notif.style.opacity = '0';
-        setTimeout(() => notif.remove(), 300);
-    }, 2500);
-}
