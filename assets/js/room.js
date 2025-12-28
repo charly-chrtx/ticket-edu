@@ -860,14 +860,9 @@ async function check_permissions() {
     const data = await api_call(`/api/rooms/${room_code}?userId=${user_id}`);
 
     if (!data || data.error || Array.isArray(data)) {
-        alert("Salle introuvable.", "error");
-        window.location.href = "/";
-        setTimeout(() => {
-            window.location.href = "/";
-        }, 500);
-
+        window.location.href = "/?error=notfound";
         return false;
-}
+    }
 
     report_enabled = data.reportEnabled || false;
     update_report_ui();
@@ -2219,15 +2214,9 @@ window.addEventListener('DOMContentLoaded', () => {
 function notif(message, type = 'info') {
     
     const styles = {
-        success: { 
-            icon: './assets/icon/success.png',
-        },
-        error: { 
-            icon: './assets/icon/error.png',
-        },
-        info: { 
-            icon: './assets/icon/icon thin.png',
-        }
+        success: { icon: './assets/icon/success.png'},
+        error: { icon: './assets/icon/error.png'},
+        info: { icon: './assets/icon/info.png'}
     };
 
     const selectedStyle = styles[type] || styles['info'];

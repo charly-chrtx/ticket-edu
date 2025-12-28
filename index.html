@@ -512,6 +512,60 @@
                 }
             });
         }
+
+        function notif(message, type = 'info') {
+            const styles = {
+                success: { icon: './assets/icon/success.png'},
+                error: { icon: './assets/icon/error.png'},
+                info: { icon: './assets/icon/icon thin.png'}
+            };
+
+            const selectedStyle = styles[type] || styles['info'];
+
+            let container = document.getElementById('notif-container');
+            if (!container) {
+                container = document.createElement('div');
+                container.id = 'notif-container';
+                container.className = 'notif-container';
+                document.body.appendChild(container);
+            }
+
+            const notif = document.createElement('div');
+            notif.className = 'custom-notif';
+            
+            notif.innerHTML = `
+                <div class="notif-progress" style="background-color: ${selectedStyle.color};"></div>
+                <img src="${selectedStyle.icon}" class="notif-icon" onerror="this.src='./assets/icon/icon thin.png'">
+                <span class="notif-message">${message}</span>
+                <img src="./assets/icon/cross.png" class="notif-icon close-btn">
+            `;
+
+            notif.querySelector('.close-btn').onclick = () => notif.remove();
+            container.appendChild(notif);
+
+            setTimeout(() => {
+                const bar = notif.querySelector('.notif-progress');
+                if (bar) {
+                    bar.style.transition = "width 2s linear";
+                    bar.style.width = "0%";
+                }
+            }, 50);
+
+            setTimeout(() => {
+                notif.style.opacity = '0';
+                setTimeout(() => notif.remove(), 300);
+            }, 2500);
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            
+            if (urlParams.get('error') === 'notfound') {
+                notif("Salle introuvable.", "error");
+                const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
+                window.history.replaceState({path:newUrl}, '', newUrl);
+            }
+        });
     </script>
 
     <script src="./assets/js/index.js"></script>
