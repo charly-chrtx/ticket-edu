@@ -557,7 +557,7 @@ textarea:hover:not(:focus) {
 .slider-option {
     position: relative;
     flex: 1;
-    height: 100%;
+    height: 36px;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -605,7 +605,7 @@ textarea:hover:not(:focus) {
     background-color: #9ecaff;
     border: 2px solid black;
     height: calc(100% - 8px);
-    margin: 0 4px;
+    margin: 6px;
 }
 
 .slider-option input:checked~.dot::after {

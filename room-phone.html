@@ -850,14 +850,24 @@
           </div>
         </div>
 
-        <h2 style="text-align: left;">Apparence</h2>
+        <h2 style="text-align: left; margin-top: 30px; font-size: 1.2rem;">Apparence</h2>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin: 15px 0; gap: 10px;">
+          <span style="text-align: left;">Mode sombre (beta)</span>
 
-        <div class="setting-row">
-          <span>Mode Sombre (Bêta)</span>
-          <label>
-            <input type="checkbox" class="toggle-checkbox" id="darkModeToggle">
-            <span class="toggle-slider"></span>
-          </label>
+          <div class="slider-selector" style="width: 200px;">
+            <label class="slider-option">
+              <input type="radio" name="ThemeOption" value="light" checked>
+              <span class="label-text" data-val="light" style="color: var(--text-color)">Light</span>
+            </label>
+            <label class="slider-option">
+              <input type="radio" name="ThemeOption" value="auto">
+              <span class="label-text" data-val="auto" style="color: var(--text-color)">Auto</span>
+            </label>
+            <label class="slider-option">
+              <input type="radio" name="ThemeOption" value="dark">
+              <span class="label-text" data-val="dark" style="color: var(--text-color)">Dark</span>
+            </label>
+          </div>
         </div>
 
         <div class="setting-row">
