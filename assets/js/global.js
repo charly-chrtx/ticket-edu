@@ -86,12 +86,39 @@ window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e)
 
 function notif(message, type = 'info') {
     const styles = {
-        success: { icon: './assets/icon/success.png', color: '#9ecaff'},
-        error: { icon: './assets/icon/error.png', color: '#9ecaff'},
-        info: { icon: './assets/icon/info.png', color: '#9ecaff'}
+        success: { 
+            icon: './assets/icon/success.png',
+            sound: './assets/sound/success.mp3',
+            color: '#9ecaff'
+        },
+        error: { 
+            icon: './assets/icon/error.png',
+            sound: './assets/sound/error.mp3',
+            color: '#9ecaff'
+        },
+        info: { 
+            icon: './assets/icon/info.png',
+            sound: './assets/sound/success.mp3',
+            color: '#9ecaff'
+        }
     };
 
     const selectedStyle = styles[type] || styles['info'];
+
+    if (selectedStyle.sound) {
+        const audio = new Audio(selectedStyle.sound);
+        const savedVolume = localStorage.getItem('savedVolume');
+
+        if (savedVolume !== null) {
+            audio.volume = parseInt(savedVolume) / 100;
+        } else {
+            audio.volume = 0.5;
+        }
+
+        audio.play().catch(error => {
+            console.warn("Impossible de jouer le son de notification :", error);
+        });
+    }
 
     let container = document.getElementById('notif-container');
     if (!container) {
