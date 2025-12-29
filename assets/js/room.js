@@ -739,7 +739,7 @@ async function api_call(endpoint, method = "GET", body = null) {
         const res = await fetch(`${api_url}${endpoint}`, options);
         if (!res.ok) {
             const data = await res.json().catch(() => ({}));
-            if (data.error) throw new Error(data.error);
+            throw new Error(data.error || `Erreur serveur (${res.status})`);
         }
         if (method === "DELETE") return res.ok;
         return await res.json();
@@ -2064,6 +2064,11 @@ function setup_event_listeners() {
     document.getElementById("setting")?.addEventListener('click', (e) => {
         e.preventDefault();
         toggle_overlay("settingsOverlay", true);
+
+        if (typeof is_admin !== 'undefined' && is_admin) {
+             update_cloud_ui(); 
+        }
+
         const radio = document.querySelector(`input[name="SliderCount"][value="${max_tickets}"]`);
         if (radio) radio.checked = true;
     });
