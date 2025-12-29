@@ -198,6 +198,7 @@
                         <strong style="color: var(-text); display: block; margin-bottom: 5px;">Fonctionnalités</strong>
                         <ul style="margin: 0 0 10px 0; padding-left: 20px; color: #808080;">
                             <li>Ajout du support de la langue anglaise afin de satisfaire plus d'utilisateurs.</li>
+                            <li>Ajout du theme couleur automatique.</li>
                             <li>Ajout de notifications pour que cela ne bloque plus vos actions.</li>
                             <li>Ajout d'informations dynamiques pour le groupe dans l'overlay paramètres.</li>
                             <li>Ajout de sons dynamiques pour améliorer l'experiance utilisateur.</li>
@@ -350,13 +351,24 @@
                 </div>
             
             <h2 style="text-align: left; margin-top: 30px; font-size: 1.2rem;">Apparence</h2>
+            
+            <div style="display: flex; justify-content: space-between; align-items: center; margin: 15px 0; gap: 10px;">
+              <span style="text-align: left;">Mode sombre (beta)</span>
 
-            <div style="display: flex; justify-content: space-between; align-items: center; margin: 15px 0;">
-              <span>Mode Sombre (Bêta)</span>
-              <label>
-                <input type="checkbox" class="toggle-checkbox" id="darkModeToggle">
-                <span class="toggle-slider"></span>
-              </label>
+              <div class="slider-selector" style="width: 200px;">
+                <label class="slider-option">
+                  <input type="radio" name="ThemeOption" value="light" checked>
+                  <span class="label-text" data-val="light" style="color: var(--text-color)">Light</span>
+                </label>
+                <label class="slider-option">
+                  <input type="radio" name="ThemeOption" value="auto">
+                  <span class="label-text" data-val="auto" style="color: var(--text-color)">Auto</span>
+                </label>
+                <label class="slider-option">
+                  <input type="radio" name="ThemeOption" value="dark">
+                  <span class="label-text" data-val="dark" style="color: var(--text-color)">Dark</span>
+                </label>
+              </div>
             </div>
 
             <div style="display: flex; justify-content: space-between; align-items: center; margin: 15px 0;">

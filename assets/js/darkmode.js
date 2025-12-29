@@ -1,57 +1,81 @@
-// check local storage
-const isDarkMode = localStorage.getItem('dark_mode') === 'true';
+const ICON_PATHS = {
+  'light': './assets/icon/lightmod.png',
+  'auto': './assets/icon/automod.png',
+  'dark': './assets/icon/darkmod.png'
+};
 
-// elements from room page (checkbox)
-const darkToggle = document.getElementById('darkModeToggle');
-
-// elements from index page (button)
+const themeRadios = document.querySelectorAll('input[name="ThemeOption"]');
 const indexThemeBtn = document.getElementById('indexThemeToggle');
 const themeIcon = document.getElementById('themeIcon');
+const savedTheme = localStorage.getItem('theme_preference') || 'auto';
 
-// apply theme on load
-if (isDarkMode) {
-  document.body.classList.add('dark-mode');
-} else {
-  document.body.classList.remove('dark-mode');
-}
+/**
+ * Applique le thème visuellement et met à jour tous les contrôles (radios et icône toggle)
+ * @param {string} theme - 'light', 'dark', ou 'auto'
+ */
+function applyTheme(theme) {
 
-// function to update ui
-function updateThemeUI(isDark) {
-  // update body
-  if (isDark) document.body.classList.add('dark-mode');
-  else document.body.classList.remove('dark-mode');
-  
-  // save to storage
-  localStorage.setItem('dark_mode', isDark);
+  localStorage.setItem('theme_preference', theme);
 
-  // update room checkbox if exists
-  if (darkToggle) {
-    darkToggle.checked = isDark;
+  if (themeRadios.length > 0) {
+      const radioToSelect = document.querySelector(`input[name="ThemeOption"][value="${theme}"]`);
+      if (radioToSelect) radioToSelect.checked = true;
   }
 
-  // update index icon if exists
-  if (themeIcon) {
-    // if dark mode, show light icon to switch back
-    themeIcon.src = isDark ? "./assets/icon/lightmod.png" : "./assets/icon/darkmod.png";
+  if (themeIcon && ICON_PATHS[theme]) {
+    themeIcon.src = ICON_PATHS[theme];
+    themeIcon.alt = "Mode actuel : " + theme;
+  }
+
+  if (theme === 'dark') {
+    document.body.classList.add('dark-mode');
+  } else if (theme === 'light') {
+    document.body.classList.remove('dark-mode');
+  } else if (theme === 'auto') {
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      document.body.classList.add('dark-mode');
+    } else {
+      document.body.classList.remove('dark-mode');
+    }
   }
 }
 
-// init ui state
-updateThemeUI(document.body.classList.contains('dark-mode'));
+/**
+ * Cycle à travers les modes : Light -> Auto -> Dark -> Light ...
+ */
+function cycleNextTheme() {
+  const currentTheme = localStorage.getItem('theme_preference') || 'auto';
+  let nextTheme;
 
-// event listener for room page (checkbox)
-if (darkToggle) {
-  darkToggle.addEventListener('change', (e) => {
-    updateThemeUI(e.target.checked);
+  if (currentTheme === 'light') {
+    nextTheme = 'auto';
+  } else if (currentTheme === 'auto') {
+    nextTheme = 'dark';
+  } else {
+    nextTheme = 'light';
+  }
+
+  applyTheme(nextTheme);
+}
+
+applyTheme(savedTheme);
+
+themeRadios.forEach(radio => {
+  radio.addEventListener('change', (e) => {
+    applyTheme(e.target.value);
   });
-}
+});
 
-// event listener for index page (button)
 if (indexThemeBtn) {
   indexThemeBtn.addEventListener('click', (e) => {
     e.preventDefault();
-    const currentIsDark = document.body.classList.contains('dark-mode');
-    // toggle state
-    updateThemeUI(!currentIsDark);
+    cycleNextTheme();
   });
 }
+
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+  const currentTheme = localStorage.getItem('theme_preference');
+  if (currentTheme === 'auto') {
+    applyTheme('auto');
+  }
+});
