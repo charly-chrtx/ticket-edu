@@ -616,6 +616,79 @@ textarea:hover:not(:focus) {
     color: black;
 }
 
+.native-input {
+    width: 273px;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    opacity: 0;
+    cursor: pointer;
+    margin: 0;
+    z-index: 10;
+  }
+
+.slider-body {
+    width: 300px;
+    height: 31px;
+    display: flex;
+    align-items: center;
+    border: 2px solid #000;
+    padding: 5px;
+    border-radius: 100px;
+    position: relative;
+    left: auto;
+    box-shadow: 0px 2px 0px #000000;
+    transition: all 0.2s ease;
+}
+
+.slider-body:hover {
+    transform: translateY(-3px);
+    box-shadow: 0px 5px 0px rgb(0, 0, 0);
+}
+.slider-container {
+    width: 260px;
+    height: 100%;
+    background-color: #fff;
+    border: #000 2px solid;
+    border-radius: 999px;
+    position: relative;
+    padding: 0;
+    box-sizing: border-box;
+    overflow: hidden;
+    transition: all ease 2s;
+}
+
+.slider-fill {
+    height: 100%;
+    width: 65%;
+    background-color: #a0c4ff;
+    border-radius: 999px 0 0 999px;
+    position: relative;
+    box-sizing: border-box;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+}
+
+.slider-handle {
+    height: 31px;
+    width: 15px;
+    background-color: #fff;
+    border-radius: 20px;
+    box-sizing: border-box;
+    border: 2px #000 solid;
+    margin-right: -10px;
+    z-index: 2;
+}
+
+.slider-icon {
+    width: 23px;
+    aspect-ratio: 1/1;
+    position: relative;
+    right: -7px;
+}
+
 /* color picker */
 .colorbox {
     display: flex;
