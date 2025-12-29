@@ -57,6 +57,10 @@ function getRoomToken(roomCode) {
   return roomTokenMap.get(roomCode);
 }
 
+function deleteRoomToken(roomCode) {
+  roomTokenMap.delete(roomCode);
+}
+
 // decryption stream helper
 async function createDecryptedStream(filePath, key) {
   const stats = await fs.promises.stat(filePath);
@@ -99,5 +103,6 @@ module.exports = {
   deleteRoomKey,
   createDecryptedStream,
   setRoomToken,
-  getRoomToken
+  getRoomToken,
+  deleteRoomToken
 };

@@ -98,10 +98,16 @@ function normalize(str) {
 // cloud status
 app.get('/api/cloud/status', (req, res) => {
   const sessionId = req.cookies.sessionID;
-  const session = cloudManager.getSession(sessionId);
+  const roomCode = req.query.roomCode;
 
-  if (session) {
-    res.json({ connected: true, provider: session.provider });
+  const userSession = cloudManager.getSession(sessionId);
+  
+  const roomSession = roomCode ? cloudManager.getRoomToken(roomCode) : null;
+
+  const activeSession = roomSession || userSession;
+
+  if (activeSession) {
+    res.json({ connected: true, provider: activeSession.provider });
   } else {
     res.json({ connected: false });
   }
@@ -216,6 +222,25 @@ app.get('/api/cloud/callback/:provider', async (req, res) => {
     console.error("callback error", e);
     res.redirect('/?error=cloud_auth_failed');
   }
+});
+
+// cloud disconnect
+app.post('/api/cloud/disconnect', (req, res) => {
+  const { roomCode } = req.body;
+  
+  if (roomCode) {
+    // delete room data
+    cloudManager.deleteRoomKey(roomCode);
+    cloudManager.deleteRoomToken(roomCode);
+  }
+
+  const sessionId = req.cookies.sessionID;
+  if (sessionId) {
+    cloudManager.deleteSession(sessionId);
+    res.clearCookie('sessionID');
+  }
+
+  res.json({ message: "Cloud disconnected" });
 });
 
 // helper to get providers
