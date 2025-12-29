@@ -98,12 +98,30 @@ if (!room_code) {
 function notif(message, type = 'info') {
     
     const styles = {
-        success: { icon: './assets/icon/success.png'},
-        error: { icon: './assets/icon/error.png'},
-        info: { icon: './assets/icon/info.png'}
+        success: { 
+            icon: './assets/icon/success.png',
+            sound: './assets/sound/success.mp3'
+        },
+        error: { 
+            icon: './assets/icon/error.png',
+            sound: './assets/sound/error.mp3'
+        },
+        info: { 
+            icon: './assets/icon/info.png',
+            sound: './assets/sound/success.mp3'
+        }
     };
 
     const selectedStyle = styles[type] || styles['info'];
+
+    if (selectedStyle.sound) {
+        const notifSound = new Audio(selectedStyle.sound);
+        const savedVolume = localStorage.getItem('savedVolume');
+        notifSound.volume = savedVolume ? parseInt(savedVolume) / 100 : 0.5;
+        notifSound.play().catch(error => {
+            console.warn("Impossible de jouer le son de notification:", error);
+        });
+    }
 
     let container = document.getElementById('notif-container');
     if (!container) {
