@@ -649,7 +649,7 @@ textarea:hover:not(:focus) {
 .slider-container {
     width: 260px;
     height: 100%;
-    background-color: #fff;
+    background-color: var(--background-color);
     border: #000 2px solid;
     border-radius: 999px;
     position: relative;
@@ -678,7 +678,7 @@ textarea:hover:not(:focus) {
     border-radius: 20px;
     box-sizing: border-box;
     border: 2px #000 solid;
-    margin-right: -10px;
+    margin-right: -8px;
     z-index: 2;
 }
 
@@ -687,6 +687,11 @@ textarea:hover:not(:focus) {
     aspect-ratio: 1/1;
     position: relative;
     right: -7px;
+    filter: var(--icon-filter);
+}
+
+.slider-icon.dark-mode {
+    filter: invert(1);
 }
 
 /* color picker */
