@@ -16,7 +16,8 @@
     <link rel="icon" type="image/png" href="./assets/icon/favicon.png">
 
     <style>
-        body, html {
+        body,
+        html {
             margin: 0;
             padding: 0;
             width: 100%;
@@ -69,7 +70,7 @@
                 width: 100%;
                 max-width: 380px;
                 position: relative;
-                z-index: 2; 
+                z-index: 2;
                 animation: div 0.75s cubic-bezier(0.25, 0.46, 0.45, 1.94) forwards;
                 animation-delay: 50ms;
             }
@@ -89,7 +90,7 @@
                 font-family: 'Inconsolata', monospace;
                 color: #ff7070;
             }
-            
+
             &.dark-mode .version-text {
                 color: #ffffff40;
             }
@@ -119,28 +120,28 @@
             <a href="#" class="button-text">
                 <img class="icon" src="./assets/icon/search.png" alt="Search"
                     onerror="this.src='./assets/icon/icon thin.png'">
-                <span class="text">Rejoindre un groupe</span>
+                <span class="text" data-i18n="landing.join_group">Rejoindre un groupe</span>
             </a>
 
             <a href="#" class="button-text">
                 <img class="icon" src="./assets/icon/add.png" alt="Add">
-                <span class="text">Créer un groupe</span>
+                <span class="text" data-i18n="landing.create_group">Créer un groupe</span>
             </a>
 
         </div>
 
         <p class="version-text">
-                <span id="openChangelogBtn" style="text-decoration: underline wavy #9ecaff; cursor: pointer;">
-                    <span class="version-number-display"></span>
-                </span>
+            <span id="openChangelogBtn" style="text-decoration: underline wavy #9ecaff; cursor: pointer;">
+                <span class="version-number-display"></span>
+            </span>
         </p>
-        <p class="info-text">[!] Version Developpeur. Signaler en cas de soucis </p>
-        
-        <div class="toggles-container"> 
+        <p class="info-text" data-i18n="landing.version_dev">[!] Version Developpeur. Signaler en cas de soucis </p>
+
+        <div class="toggles-container">
             <a href="#" class="button-simple" id="indexSoundToggle">
                 <img class="icon" id="volumebutton" src="./assets/icon/volume_high.png" alt="Sound">
             </a>
-            
+
             <a href="#" class="button-simple" id="indexThemeToggle">
                 <img class="icon" id="themeIcon" src="./assets/icon/darkmod.png" alt="Theme">
             </a>
@@ -154,28 +155,31 @@
     <div class="menu-overlay" id="joinOverlay" style="display: none;">
         <div class="menu-box" style="max-width: 550px;">
             <div class="input" style="padding-bottom: 0;">
-                
-                <h1>Rejoindre un groupe</h1>
-                
-                <p style="margin: 20px 0; opacity: 0.7; text-align: center;">
+
+                <h1 data-i18n="overlays.join.title">Rejoindre un groupe</h1>
+
+                <p style="margin: 20px 0; opacity: 0.7; text-align: center;" data-i18n="overlays.join.instruction">
                     Entrez le code d'accès pour rejoindre un groupe.
                 </p>
 
                 <div style="margin: 30px 0;">
-                    <input type="text" id="joinCodeInput" placeholder="Code (ex: 45A2F)" style="text-transform: uppercase;" autocomplete="off" />
+                    <input type="text" id="joinCodeInput" placeholder="Code (ex: 45A2F)"
+                        data-i18n="overlays.join.placeholder" style="text-transform: uppercase;" autocomplete="off" />
                 </div>
-                
-                <div class="overlay-footer" style="display: flex; justify-content: center; gap: 15px; margin-top: 30px;">
-                    
+
+                <div class="overlay-footer"
+                    style="display: flex; justify-content: center; gap: 15px; margin-top: 30px;">
+
                     <a class="button-text" id="cancelJoin" href="#"
                         style="width: auto; padding: 0 30px; margin: 0; min-width: 140px;">
                         <img class="icon" src="./assets/icon/cross.png">
-                        <span class="text">Annuler</span>
+                        <span class="text" data-i18n="common.cancel">Annuler</span>
                     </a>
 
-                    <a class="button-text" id="confirmJoin" href="#" style="width: auto; background-color: #9ecaff; padding: 0 30px; margin: 0; min-width: 140px;">
+                    <a class="button-text" id="confirmJoin" href="#"
+                        style="width: auto; background-color: #9ecaff; padding: 0 30px; margin: 0; min-width: 140px;">
                         <img class="icon" src="./assets/icon/action.png" alt="">
-                        <span class="text">Rejoindre</span>
+                        <span class="text" data-i18n="overlays.join.validate">Rejoindre</span>
                     </a>
 
                 </div>
@@ -185,17 +189,18 @@
 
     <div class="menu-overlay" id="changelogOverlay" style="display: none;">
         <div class="menu-box">
-            
+
             <div class="input" style="padding-bottom: 0;">
-                
-                <h1>Changelogs</h1>
+
+                <h1 data-i18n="landing.changelogs.title">Changelogs</h1>
 
                 <div style="margin-bottom: 20px; text-align: left;">
-                    
+
                     <div class="changelog-entry" style="margin-bottom: 20px;">
                         <h2 style="margin-bottom: 15px; color: var(-text);">Pre-release v0.9.4</h2>
-                        
-                        <strong style="color: var(-text); display: block; margin-bottom: 5px;">Fonctionnalités</strong>
+
+                        <strong style="color: var(-text); display: block; margin-bottom: 5px;"
+                            data-i18n="landing.changelogs.features">Fonctionnalités</strong>
                         <ul style="margin: 0 0 10px 0; padding-left: 20px; color: #808080;">
                             <li>Ajout du support de la langue anglaise afin de satisfaire plus d'utilisateurs.</li>
                             <li>Ajout du theme couleur automatique.</li>
@@ -204,34 +209,39 @@
                             <li>Ajout de sons dynamiques pour améliorer l'experiance utilisateur.</li>
                         </ul>
 
-                        <strong style="color: var(-text); display: block; margin-bottom: 5px;">Interface (UI/UX)</strong>
+                        <strong style="color: var(-text); display: block; margin-bottom: 5px;"
+                            data-i18n="landing.changelogs.ui_ux">Interface (UI/UX)</strong>
                         <ul style="margin: 0 0 10px 0; padding-left: 20px; color: #808080;">
                             <li>Ajout de schéma pour illustrer les overlays.</li>
                             <li>Modification de l'accessibilité du paramètre "requérir un nom".</li>
-                            <li>Modification des boutons de sélection pour la solution de stockage cloud.</li> 
-                            <li>Modification du design de l'overlay "Nouveau message".</li> 
-                            <li>Suppression de la section "room" des paramètres. Le bouton a été déplacé vers la section QR-Code.</li>
+                            <li>Modification des boutons de sélection pour la solution de stockage cloud.</li>
+                            <li>Modification du design de l'overlay "Nouveau message".</li>
+                            <li>Suppression de la section "room" des paramètres. Le bouton a été déplacé vers la section
+                                QR-Code.</li>
                         </ul>
 
-                        <strong style="color: var(-text); display: block; margin-bottom: 5px;">Divers</strong>
+                        <strong style="color: var(-text); display: block; margin-bottom: 5px;"
+                            data-i18n="landing.changelogs.misc">Divers</strong>
                         <ul style="margin: 0; padding-left: 20px; color: #808080;">
                             <li>Diverses améliorations mineures.</li>
                         </ul>
-                        
+
                         <hr style="border: 0; border-top: 1px solid #e0e0e0; margin: 30px 0;">
                     </div>
-                    
+
                     <div class="changelog-entry" style="margin-bottom: 20px;">
                         <h2 style="margin-bottom: 15px; color: var(-text);">Pre-release v0.9.3</h2>
-                        
-                        <strong style="color: var(-text); display: block; margin-bottom: 5px;">Fonctionnalités</strong>
+
+                        <strong style="color: var(-text); display: block; margin-bottom: 5px;"
+                            data-i18n="landing.changelogs.features">Fonctionnalités</strong>
                         <ul style="margin: 0 0 10px 0; padding-left: 20px; color: #808080;">
                             <li>Ajout des dépôts pour rendre des fichiers.</li>
                             <li>Ajout des signalements pour des problèmes rencontrés.</li>
                             <li>Ajout d'un nom sans vérification.</li>
                         </ul>
 
-                        <strong style="color: var(-text); display: block; margin-bottom: 5px;">Interface (UI/UX)</strong>
+                        <strong style="color: var(-text); display: block; margin-bottom: 5px;"
+                            data-i18n="landing.changelogs.ui_ux">Interface (UI/UX)</strong>
                         <ul style="margin: 0 0 10px 0; padding-left: 20px; color: #808080;">
                             <li>Nouvelles animations de chargement des pages.</li>
                             <li>Nouvelle animation d'apparition des overlays.</li>
@@ -239,7 +249,8 @@
                             <li>Nouvelle animation d'ouverture du tiroir de fichier.</li>
                         </ul>
 
-                        <strong style="color: var(-text); display: block; margin-bottom: 5px;">Divers</strong>
+                        <strong style="color: var(-text); display: block; margin-bottom: 5px;"
+                            data-i18n="landing.changelogs.misc">Divers</strong>
                         <ul style="margin: 0; padding-left: 20px; color: #808080;">
                             <li>Correction de l'affichage intempestif de la barre de menus.</li>
                             <li>Correction de l'activation du fichier CSV.</li>
@@ -248,47 +259,53 @@
                             <li>Correction de l'overlay de connexion pour entrer avec un nom.</li>
                             <li>Diverses améliorations mineures.</li>
                         </ul>
-                        
+
                         <hr style="border: 0; border-top: 1px solid #e0e0e0; margin: 30px 0;">
                     </div>
-                    
+
                     <div class="changelog-entry" style="margin-bottom: 20px;">
                         <h2 style="margin-bottom: 15px; color: var(-text);">Pre-release v0.9.2</h2>
-                        
-                        <strong style="color: var(-text); display: block; margin-bottom: 5px;">Fonctionnalités</strong>
+
+                        <strong style="color: var(-text); display: block; margin-bottom: 5px;"
+                            data-i18n="landing.changelogs.features">Fonctionnalités</strong>
                         <ul style="margin: 0 0 10px 0; padding-left: 20px; color: #808080;">
                             <li>Ajout des QR-Codes pour rejoindre vos groupes plus facilement.</li>
                         </ul>
 
-                        <strong style="color: var(-text); display: block; margin-bottom: 5px;">Interface (UI/UX)</strong>
+                        <strong style="color: var(-text); display: block; margin-bottom: 5px;"
+                            data-i18n="landing.changelogs.ui_ux">Interface (UI/UX)</strong>
                         <ul style="margin: 0 0 10px 0; padding-left: 20px; color: #808080;">
                             <li>Amélioration visuelle du menu Changelogs.</li>
                         </ul>
 
-                        <strong style="color: var(-text); display: block; margin-bottom: 5px;">Divers</strong>
+                        <strong style="color: var(-text); display: block; margin-bottom: 5px;"
+                            data-i18n="landing.changelogs.misc">Divers</strong>
                         <ul style="margin: 0; padding-left: 20px; color: #808080;">
                             <li>Correction du bug concernant le stockage des fichiers.</li>
                             <li>Diverses améliorations mineures.</li>
                         </ul>
-                        
+
                         <hr style="border: 0; border-top: 1px solid #e0e0e0; margin: 30px 0;">
                     </div>
-                    
+
                     <div class="changelog-entry" style="margin-bottom: 20px;">
                         <h2 style="margin-bottom: 15px; color: var(-text);">Pre-release v0.9.1</h2>
 
-                        <strong style="color: var(-text); display: block; margin-bottom: 5px;">Fonctionnalités</strong>
+                        <strong style="color: var(-text); display: block; margin-bottom: 5px;"
+                            data-i18n="landing.changelogs.features">Fonctionnalités</strong>
                         <ul style="margin: 0 0 10px 0; padding-left: 20px; color: #808080;">
                             <li>Ajout d'un suivi de mise à jour pour comprendre les nouveautés.</li>
                         </ul>
 
-                        <strong style="color: var(-text); display: block; margin-bottom: 5px;">Interface (UI/UX)</strong>
+                        <strong style="color: var(-text); display: block; margin-bottom: 5px;"
+                            data-i18n="landing.changelogs.ui_ux">Interface (UI/UX)</strong>
                         <ul style="margin: 0 0 10px 0; padding-left: 20px; color: #808080;">
                             <li>Refonte visuelle du bouton CSV.</li>
                             <li>Optimisation de l'affichage mobile.</li>
                         </ul>
 
-                        <strong style="color: var(-text); display: block; margin-bottom: 5px;">Divers</strong>
+                        <strong style="color: var(-text); display: block; margin-bottom: 5px;"
+                            data-i18n="landing.changelogs.misc">Divers</strong>
                         <ul style="margin: 0; padding-left: 20px; color: #808080;">
                             <li>Diverses améliorations mineures.</li>
                         </ul>
@@ -299,12 +316,14 @@
                     <div class="changelog-entry" style="margin-bottom: 20px;">
                         <h2 style="margin-bottom: 15px; color: var(-text);">Pre-release v0.9.0</h2>
 
-                        <strong style="color: var(-text); display: block; margin-bottom: 5px;">Fonctionnalités</strong>
+                        <strong style="color: var(-text); display: block; margin-bottom: 5px;"
+                            data-i18n="landing.changelogs.features">Fonctionnalités</strong>
                         <ul style="margin: 0 0 10px 0; padding-left: 20px; color: #808080;">
                             <li>Implémentation d'un modèle IA pour le traitement des tickets.</li>
                         </ul>
 
-                        <strong style="color: var(-text); display: block; margin-bottom: 5px;">Divers</strong>
+                        <strong style="color: var(-text); display: block; margin-bottom: 5px;"
+                            data-i18n="landing.changelogs.misc">Divers</strong>
                         <ul style="margin: 0; padding-left: 20px; color: #808080;">
                             <li>Amélioration du temps de réponse de l'IA.</li>
                             <li>Corrections de sécurité.</li>
@@ -313,101 +332,108 @@
                     </div>
 
                 </div>
-                
+
                 <div class="overlay-footer">
-                    <a class="button-text" id="confirmLogs" href="#" style="width: auto; padding: 0 30px; margin: 0; min-width: 140px;">
+                    <a class="button-text" id="confirmLogs" href="#"
+                        style="width: auto; padding: 0 30px; margin: 0; min-width: 140px;">
                         <img class="icon" src="./assets/icon/check.png" alt="">
-                        <span class="text">Ok</span>
+                        <span class="text" data-i18n="common.ok">Ok</span>
                     </a>
                 </div>
 
             </div>
         </div>
     </div>
-    
+
     <div class="menu-overlay" id="settingsOverlay" style="display: none;">
         <div class="menu-box">
-          <div class="input" style="padding-bottom: 0;">
-            <h1>Paramètres</h1>
-            
-            <h2 style="text-align: left; margin-top: 30px; font-size: 1.2rem;">Son</h2>
+            <div class="input" style="padding-bottom: 0;">
+                <h1 data-i18n="overlays.settings.title">Paramètres</h1>
 
-                <div style="display: flex; justify-content: space-between; align-items: center; margin: 15px 0; font-family: sans-serif;">
-                <span>Volume général </span>
+                <h2 style="text-align: left; margin-top: 30px; font-size: 1.2rem;">Son</h2>
 
-                <div class="slider-body">
-                    
-                    <input type="range" min="0" max="100" value="50" class="native-input" id="rangeInput">
-                    
-                    <div class="slider-container">
-                    <div class="slider-fill" id="sliderFill">
-                        <div class="slider-handle"></div>
+                <div
+                    style="display: flex; justify-content: space-between; align-items: center; margin: 15px 0; font-family: sans-serif;">
+                    <span>Volume général </span>
+
+                    <div class="slider-body">
+
+                        <input type="range" min="0" max="100" value="50" class="native-input" id="rangeInput">
+
+                        <div class="slider-container">
+                            <div class="slider-fill" id="sliderFill">
+                                <div class="slider-handle"></div>
+                            </div>
+                        </div>
+
+                        <img class="slider-icon" src="./assets/icon/volume_off.png">
+
                     </div>
+                </div>
+
+                <h2 style="text-align: left; margin-top: 30px; font-size: 1.2rem;" data-i18n="room.appearance_section">
+                    Apparence</h2>
+
+                <div
+                    style="display: flex; justify-content: space-between; align-items: center; margin: 15px 0; gap: 10px;">
+                    <span style="text-align: left;" data-i18n="overlays.settings.dark_mode">Mode sombre (beta)</span>
+
+                    <div class="slider-selector" style="width: 200px;">
+                        <label class="slider-option">
+                            <input type="radio" name="ThemeOption" value="light" checked>
+                            <span class="label-text" data-val="light" style="color: var(--text-color)">Light</span>
+                        </label>
+                        <label class="slider-option">
+                            <input type="radio" name="ThemeOption" value="auto">
+                            <span class="label-text" data-val="auto" style="color: var(--text-color)">Auto</span>
+                        </label>
+                        <label class="slider-option">
+                            <input type="radio" name="ThemeOption" value="dark">
+                            <span class="label-text" data-val="dark" style="color: var(--text-color)">Dark</span>
+                        </label>
                     </div>
-
-                    <img class="slider-icon" src="./assets/icon/volume_off.png">
-                    
                 </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; margin: 15px 0;">
+                    <span data-i18n="overlays.settings.language"> Langue (Français uniquement pour l'instant)</span>
+                    <a class="button-text" href="#" id="langToggle"
+                        style="min-height: 41px; width: auto; padding: 0 20px; flex: unset; min-width: 80px; opacity: 30%; pointer-events: none;">
+                        <span class="text" style="font-size: 14px;">FR</span>
+                    </a>
                 </div>
-            
-            <h2 style="text-align: left; margin-top: 30px; font-size: 1.2rem;">Apparence</h2>
-            
-            <div style="display: flex; justify-content: space-between; align-items: center; margin: 15px 0; gap: 10px;">
-              <span style="text-align: left;">Mode sombre (beta)</span>
 
-              <div class="slider-selector" style="width: 200px;">
-                <label class="slider-option">
-                  <input type="radio" name="ThemeOption" value="light" checked>
-                  <span class="label-text" data-val="light" style="color: var(--text-color)">Light</span>
-                </label>
-                <label class="slider-option">
-                  <input type="radio" name="ThemeOption" value="auto">
-                  <span class="label-text" data-val="auto" style="color: var(--text-color)">Auto</span>
-                </label>
-                <label class="slider-option">
-                  <input type="radio" name="ThemeOption" value="dark">
-                  <span class="label-text" data-val="dark" style="color: var(--text-color)">Dark</span>
-                </label>
-              </div>
+                <h2 style="text-align: left; margin-top: 30px; font-size: 1.2rem;" data-i18n="room.github_section">
+                    Github</h2>
+
+                <div
+                    style="display: flex; justify-content: space-between; align-items: center; margin: 15px 0; flex-wrap: wrap; gap: 10px;">
+                    <span data-i18n="overlays.settings.project_opensource">Projet open-source Github</span>
+                    <a class="button-text" href="https://github.com/charly-chrtx/ticket-edu" target="_blank"
+                        style="min-height: 41px; padding: 0 20px; flex: unset; width: 100%; max-width: 200px; margin: 0;">
+                        <img class="icon" src="./assets/icon/github.png">
+                        <span class="text" style="font-size: 14px;" data-i18n="overlays.settings.view_project">Voir le
+                            projet</span>
+                    </a>
+                </div>
+
+                <p data-i18n="overlays.settings.rgpd">
+                    <br>
+                    <br>
+                    ( RGPD ) Toutes les données échangées sont chiffrées et définitivement supprimées à la fin de la
+                    session,
+                    sans aucune autre utilisation commerciale.
+                </p>
+
+                <div class="overlay-footer">
+                    <a class="button-text" id="closeSettings" href="#" style="width: auto; padding: 0 40px; margin: 0;">
+                        <img class="icon" src="./assets/icon/check.png" alt="">
+                        <span class="text" data-i18n="common.save">Sauvegarder</span>
+                    </a>
+                </div>
+
             </div>
-
-            <div style="display: flex; justify-content: space-between; align-items: center; margin: 15px 0;">
-              <span> Langue (Français uniquement pour l'instant)</span>
-              <a class="button-text" href="#"
-                style="min-height: 41px; width: auto; padding: 0 20px; flex: unset; min-width: 80px; opacity: 30%; pointer-events: none;">
-                <span class="text" style="font-size: 14px;">FR</span>
-              </a>
-            </div>
-
-            <h2 style="text-align: left; margin-top: 30px; font-size: 1.2rem;">Github</h2>
-
-            <div
-              style="display: flex; justify-content: space-between; align-items: center; margin: 15px 0; flex-wrap: wrap; gap: 10px;">
-              <span>Projet open-source Github</span>
-              <a class="button-text" href="https://github.com/charly-chrtx/ticket-edu" target="_blank"
-                style="min-height: 41px; padding: 0 20px; flex: unset; width: 100%; max-width: 200px; margin: 0;">
-                <img class="icon" src="./assets/icon/github.png">
-                <span class="text" style="font-size: 14px;">Voir le projet</span>
-              </a>
-            </div>
-
-            <p>
-              <br>
-              <br>
-              ( RGPD ) Toutes les données échangées sont chiffrées et définitivement supprimées à la fin de la session,
-              sans aucune autre utilisation commerciale.
-            </p>
-
-            <div class="overlay-footer">
-              <a class="button-text" id="closeSettings" href="#" style="width: auto; padding: 0 40px; margin: 0;">
-                <img class="icon" src="./assets/icon/check.png" alt="">
-                <span class="text">Sauvegarder</span>
-              </a>
-            </div>
-
-          </div>
         </div>
-      </div>
+    </div>
 
     <script>
 
@@ -421,7 +447,7 @@
 
         // Configuration des vagues
         const waves = [
-            { y: 0.60, length: 0.006, amplitude: 50, speed: -0.0007, offset: 0, delay: 0 }, 
+            { y: 0.60, length: 0.006, amplitude: 50, speed: -0.0007, offset: 0, delay: 0 },
             { y: 0.72, length: 0.004, amplitude: 40, speed: 0.0009, offset: 2, delay: 100 },
             { y: 0.82, length: 0.003, amplitude: 30, speed: -0.0011, offset: 4, delay: 200 }
         ];
@@ -444,19 +470,19 @@
             const runtime = timestamp - startTime;
 
             requestAnimationFrame(animate);
-            
+
             const isDark = document.body.classList.contains('dark-mode');
             const gradient = ctx.createLinearGradient(0, 0, 0, height);
 
             if (isDark) {
-                gradient.addColorStop(0, '#1a1a1a'); 
+                gradient.addColorStop(0, '#1a1a1a');
                 gradient.addColorStop(1, '#2d2d2d');
                 ctx.fillStyle = gradient;
                 ctx.fillRect(0, 0, width, height);
                 ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
             } else {
-                gradient.addColorStop(0, '#FFF8E7'); 
-                gradient.addColorStop(1, '#FFFFFF'); 
+                gradient.addColorStop(0, '#FFF8E7');
+                gradient.addColorStop(1, '#FFFFFF');
                 ctx.fillStyle = gradient;
                 ctx.fillRect(0, 0, width, height);
                 ctx.strokeStyle = 'rgba(0, 0, 0, 0.8)';
@@ -465,12 +491,12 @@
             waves.forEach((wave, index) => {
                 ctx.beginPath();
                 ctx.lineWidth = 1;
-                
-                const introDuration = 1500; 
+
+                const introDuration = 1500;
                 let progress = (runtime - wave.delay) / introDuration;
                 progress = Math.max(0, Math.min(progress, 1));
                 const easedProgress = easeOutCubic(progress);
-                const startY = height + 150; 
+                const startY = height + 150;
                 const targetY = height * wave.y;
                 const currentBaseY = startY - ((startY - targetY) * easedProgress);
 
@@ -483,7 +509,7 @@
                 }
 
                 ctx.moveTo(0, height);
-                
+
                 for (let i = 0; i < width; i++) {
                     const dynamicAmp = wave.amplitude * (1 + (1 - easedProgress) * 0.5);
                     const y = currentBaseY + Math.sin(i * wave.length + increment * wave.speed + wave.offset) * dynamicAmp;
@@ -499,7 +525,7 @@
 
             increment += 1;
         }
-        
+
         requestAnimationFrame(animate);
 
         // --- Gestion des Overlays et Boutons ---
@@ -523,8 +549,8 @@
         }
 
         if (settingsOverlay) {
-            settingsOverlay.addEventListener('click', (e) => { 
-                if (e.target === settingsOverlay) settingsOverlay.style.display = 'none'; 
+            settingsOverlay.addEventListener('click', (e) => {
+                if (e.target === settingsOverlay) settingsOverlay.style.display = 'none';
             });
         }
 
@@ -552,44 +578,47 @@
                 }
             });
         }
-        
-        window.addEventListener('DOMContentLoaded', () => {
+
+        // wait for i18n loaded to display text
+        window.addEventListener('i18nLoaded', () => {
             const urlParams = new URLSearchParams(window.location.search);
-            
+
             document.querySelectorAll('.version-number-display').forEach(el => {
                 el.textContent = currentVersion;
             });
-            
+
             if (urlParams.get('error') === 'notfound') {
-                notif("Salle introuvable.", "error");
+                notif(window.localeManager.translate('notifications.room_not_found'), "error");
                 const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
-                window.history.replaceState({path:newUrl}, '', newUrl);
+                window.history.replaceState({ path: newUrl }, '', newUrl);
             }
 
             if (storedVersion !== currentVersion) {
-                
+
                 setTimeout(() => {
-                    
+                    const msg = window.localeManager.translate('landing.new_version_msg');
                     const messageHTML = `
-                        <span>Nouvelle version de Ticket
+                        <span>${msg}
                             <span style="cursor: pointer; text-decoration: underline wavy #9ecaff; font-weight: bold;" 
                                     onclick="document.getElementById('changelogOverlay').style.display='flex'">
                                 ${currentVersion}
                             </span> !
                         </span>
                     `;
-                    
+
                     notif(messageHTML, 'info');
 
                     localStorage.setItem('ticket_version_seen', currentVersion);
 
-                }, 1000); 
+                }, 1000);
             }
         });
-    
+
     </script>
 
+    <script src="./assets/js/localization.js"></script>
     <script src="./assets/js/index.js"></script>
-<script src="./assets/js/global.js"></script>
+    <script src="./assets/js/global.js"></script>
 </body>
+
 </html>

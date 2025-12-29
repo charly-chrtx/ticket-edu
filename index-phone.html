@@ -9,9 +9,8 @@
     <link rel="icon" type="image/png" href="./assets/icon/favicon.png">
     
     <style>
-
         * {
-        -webkit-tap-highlight-color: transparent;
+            -webkit-tap-highlight-color: transparent;
         }
         
         body, html {
@@ -88,15 +87,68 @@
             height: 100%;
             z-index: -1;
         }
+
+        /* slider styles adapted for mobile */
+        .slider-body {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            position: relative;
+            width: 60%;
+        }
+        
+        .native-input {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+            z-index: 2;
+            margin: 0;
+        }
+
+        .slider-container {
+            width: 100%;
+            height: 6px;
+            background: rgba(0,0,0,0.1);
+            border-radius: 3px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .dark-mode .slider-container {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .slider-fill {
+            height: 100%;
+            background-color: #9ecaff;
+            width: 50%;
+            border-radius: 3px;
+            position: relative;
+        }
+
+        .slider-icon {
+            width: 20px;
+            height: 20px;
+            opacity: 0.7;
+        }
+
+        .changelog-entry h2 { margin-bottom: 15px; font-size: 1.1rem; }
+        .changelog-entry ul { margin-bottom: 15px; }
+        .changelog-entry li { font-size: 0.9rem; margin-bottom: 5px; }
     </style>
 </head>
 <body>
     
     <script>window.isMobile = true;</script>
-
+    <audio id="startinMusic" src="./assets/sound/starting.mp3"></audio>
     <canvas id="bgCanvas"></canvas>
 
     <div class="floating-buttons">
+        <a href="#" class="button-simple" id="indexSoundToggle" style="min-width: 65px; height: 65px;">
+            <img class="icon" id="volumebutton" src="./assets/icon/volume_high.png" alt="Theme" style="width: 25px; height: 25px;">
+        </a>
         <a href="#" class="button-simple" id="indexThemeToggle" style="min-width: 65px; height: 65px;">
             <img class="icon" id="themeIcon" src="./assets/icon/darkmod.png" alt="Theme" style="width: 25px; height: 25px;">
         </a>
@@ -112,112 +164,190 @@
         <div class="mobile-actions action-buttons">
             <a href="#" class="button-text">
                 <img class="icon" src="./assets/icon/search.png" alt="Search">
-                <span class="text">Rejoindre</span>
+                <span class="text" data-i18n="landing.join_group">Rejoindre</span>
             </a>
 
             <a href="#" class="button-text">
                 <img class="icon" src="./assets/icon/add.png" alt="Add">
-                <span class="text">Créer un groupe</span>
+                <span class="text" data-i18n="landing.create_group">Créer un groupe</span>
             </a>
         </div>
 
-        <p class="info-tag">[!] Version Developper. Signaler en cas de soucis</p>
-        <p class="version-tag">version Pre-release 0.9.1</p>
+        <p class="info-tag" data-i18n="landing.version_dev">[!] Version Developpeur. Signaler en cas de soucis</p>
+        <p class="version-tag">
+            <span id="openChangelogBtn" style="text-decoration: underline wavy #9ecaff; cursor: pointer;">
+                <span class="version-number-display"></span>
+            </span>
+        </p>
     </div>
 
     <div class="menu-overlay" id="joinOverlay" style="display: none;">
         <div class="menu-box" style="margin: 0px 20px;">
             <div class="input" style="padding-bottom: 0;">
                 
-                <h1 style="margin-top: 0;">Code d'accès</h1>
+                <h1 style="margin-top: 0;" data-i18n="overlays.join.title">Code d'accès</h1>
                 
-                <p style="margin: 20px 0; opacity: 0.7; text-align: center; font-size: 0.9rem;">
+                <p style="margin: 20px 0; opacity: 0.7; text-align: center; font-size: 0.9rem;" data-i18n="overlays.join.instruction">
                     Entrez le code pour rejoindre la salle.
                 </p>
 
                 <div style="margin: 30px 0;">
-                    <input type="text" id="joinCodeInput" placeholder="ex: 45A2F" style="text-transform: uppercase; text-align: center; font-size: 0.9rem; letter-spacing: 5px;" autocomplete="off" />
+                    <input type="text" id="joinCodeInput" placeholder="ex: 45A2F" data-i18n="overlays.join.placeholder" style="text-transform: uppercase; text-align: center; font-size: 0.9rem; letter-spacing: 5px;" autocomplete="off" />
                 </div>
                 
                 <div class="overlay-footer" style="display: flex; flex-direction: column; gap: 15px; padding-bottom: 20px; margin: 0;">
                     
                     <a class="button-text" id="confirmJoin" href="#" style="width: 100%; padding: 0;">
                         <img class="icon" src="./assets/icon/check.png" alt="">
-                        <span class="text">Valider</span>
+                        <span class="text" data-i18n="overlays.join.validate">Valider</span>
                     </a>
 
                     <a class="button-text" id="cancelJoin" href="#" style="width: 100%; padding: 0; background-color: #ff7070;">
                         <img class="icon" src="./assets/icon/cross.png" alt="">
-                        <span class="text">Annuler</span>
+                        <span class="text" data-i18n="common.cancel">Annuler</span>
                     </a>
 
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="menu-overlay" id="changelogOverlay" style="display: none;">
+        <div class="menu-box" style="margin: 0px 20px; max-height: 80vh; overflow-y: auto;">
+            <div class="input" style="padding-bottom: 0;">
+
+                <h1 data-i18n="landing.changelogs.title">Changelogs</h1>
+
+                <div style="margin-bottom: 20px; text-align: left;">
+                    
+                    <div class="changelog-entry" style="margin-bottom: 20px;">
+                        <h2 style="color: var(--text-color);">Pre-release v0.9.4</h2>
+                        <strong style="display: block; margin-bottom: 5px;" data-i18n="landing.changelogs.features">Fonctionnalités</strong>
+                        <ul style="margin: 0 0 10px 0; padding-left: 20px; color: #808080;">
+                            <li>Ajout du support de la langue anglaise.</li>
+                            <li>Ajout du theme couleur automatique.</li>
+                            <li>Ajout de notifications.</li>
+                            <li>Informations dynamiques de groupe.</li>
+                            <li>Sons dynamiques.</li>
+                        </ul>
+                    </div>
+
+                    </div>
+
+                <div class="overlay-footer" style="padding-bottom: 20px;">
+                    <a class="button-text" id="confirmLogs" href="#" style="width: 100%; padding: 0;">
+                        <img class="icon" src="./assets/icon/check.png" alt="">
+                        <span class="text" data-i18n="common.ok">Ok</span>
+                    </a>
                 </div>
             </div>
         </div>
     </div>
 
     <div class="menu-overlay" id="settingsOverlay" style="display: none;">
-        <div class="menu-box" style="margin: 0px 20px;">
+        <div class="menu-box">
             <div class="input" style="padding-bottom: 0;">
-                <h1>Paramètres</h1>
-                
-                <h2 style="text-align: left; margin-top: 30px; font-size: 1.2rem;">Apparence</h2>
+                <h1 data-i18n="overlays.settings.title">Paramètres</h1>
+
+                <h2 style="text-align: left; margin-top: 30px; font-size: 1.2rem;">Son</h2>
+
+                <div
+                    style="display: flex; justify-content: space-between; align-items: center; margin: 15px 0; font-family: sans-serif;">
+                    <span>Volume général </span>
+
+                    <div class="slider-body">
+
+                        <input type="range" min="0" max="100" value="50" class="native-input" id="rangeInput">
+
+                        <div class="slider-container">
+                            <div class="slider-fill" id="sliderFill">
+                                <div class="slider-handle"></div>
+                            </div>
+                        </div>
+
+                        <img class="slider-icon" src="./assets/icon/volume_off.png">
+
+                    </div>
+                </div>
+
+                <h2 style="text-align: left; margin-top: 30px; font-size: 1.2rem;" data-i18n="room.appearance_section">
+                    Apparence</h2>
+
+                <div
+                    style="display: flex; justify-content: space-between; align-items: center; margin: 15px 0; gap: 10px;">
+                    <span style="text-align: left;" data-i18n="overlays.settings.dark_mode">Mode sombre (beta)</span>
+
+                    <div class="slider-selector" style="width: 200px;">
+                        <label class="slider-option">
+                            <input type="radio" name="ThemeOption" value="light" checked>
+                            <span class="label-text" data-val="light" style="color: var(--text-color)">Light</span>
+                        </label>
+                        <label class="slider-option">
+                            <input type="radio" name="ThemeOption" value="auto">
+                            <span class="label-text" data-val="auto" style="color: var(--text-color)">Auto</span>
+                        </label>
+                        <label class="slider-option">
+                            <input type="radio" name="ThemeOption" value="dark">
+                            <span class="label-text" data-val="dark" style="color: var(--text-color)">Dark</span>
+                        </label>
+                    </div>
+                </div>
 
                 <div style="display: flex; justify-content: space-between; align-items: center; margin: 15px 0;">
-                    <span>Mode Sombre (Bêta)</span>
-                    <label>
-                        <input type="checkbox" class="toggle-checkbox" id="darkModeToggle">
-                        <span class="toggle-slider"></span>
-                    </label>
-                </div>
-
-                <h2 style="text-align: left; margin-top: 30px; font-size: 1.2rem;">Github</h2>
-
-                <div style="display: flex; justify-content: space-between; align-items: center; margin: 15px 0; flex-wrap: wrap; gap: 10px;">
-                    <span>Projet open-source Github</span>
-                    <a class="button-text" href="https://github.com/charly-chrtx/ticket-edu" target="_blank" style="min-height: 41px; padding: 0 20px; flex: unset; width: 100%; margin: 0;">
-                        <img class="icon" src="./assets/icon/icon thin.png">
-                        <span class="text" style="font-size: 14px;">lien Github</span>
+                    <span data-i18n="overlays.settings.language"> Langue (Français uniquement pour l'instant)</span>
+                    <a class="button-text" href="#" id="langToggle"
+                        style="min-height: 41px; width: auto; padding: 0 20px; flex: unset; min-width: 80px; opacity: 30%; pointer-events: none;">
+                        <span class="text" style="font-size: 14px;">FR</span>
                     </a>
                 </div>
+
+                <h2 style="text-align: left; margin-top: 30px; font-size: 1.2rem;" data-i18n="room.github_section">
+                    Github</h2>
 
                 <div
                     style="display: flex; justify-content: space-between; align-items: center; margin: 15px 0; flex-wrap: wrap; gap: 10px;">
-                    <span>Veuillez nous rapporter les problèmes ou bugs constatés.</span>
-                    <a class="button-text" target="_blank"
-                        style="min-height: 41px; padding: 0 20px; flex: unset; width: 100%; max-width: 200px; margin: 0; opacity: 30%; pointer-events: none;">
-                        <img class="icon" src="./assets/icon/report.png">
-                        <span class="text" style="font-size: 14px;">Signaler un problème</span>
+                    <span data-i18n="overlays.settings.project_opensource">Projet open-source Github</span>
+                    <a class="button-text" href="https://github.com/charly-chrtx/ticket-edu" target="_blank"
+                        style="min-height: 41px; padding: 0 20px; flex: unset; width: 100%; max-width: 200px; margin: 0;">
+                        <img class="icon" src="./assets/icon/github.png">
+                        <span class="text" style="font-size: 14px;" data-i18n="overlays.settings.view_project">Voir le
+                            projet</span>
                     </a>
                 </div>
 
-                <p style="font-size: 0.85rem; opacity: 0.7; text-align: center; margin-top: 20px;">
+                <p data-i18n="overlays.settings.rgpd">
                     <br>
                     <br>
-                    ( RGPD ) Toutes les données échangées sont chiffrées et définitivement supprimées à la fin de la session.
+                    ( RGPD ) Toutes les données échangées sont chiffrées et définitivement supprimées à la fin de la
+                    session,
+                    sans aucune autre utilisation commerciale.
                 </p>
 
                 <div class="overlay-footer">
-                    <a class="button-text" id="closeSettings" href="#" style="width: 100%; padding: 0 40px; margin: 0;">
+                    <a class="button-text" id="closeSettings" href="#" style="width: auto; padding: 0 40px; margin: 0;">
                         <img class="icon" src="./assets/icon/check.png" alt="">
-                        <span class="text">Sauvegarder</span>
+                        <span class="text" data-i18n="common.save">Sauvegarder</span>
                     </a>
                 </div>
+
             </div>
         </div>
     </div>
 
-    <!-- Scripts -->
-    
     <script>
+        // version config
+        const currentVersion = "Pre-release V0.9.4";
+        const storedVersion = localStorage.getItem('ticket_version_seen');
         const canvas = document.getElementById('bgCanvas');
         const ctx = canvas.getContext('2d');
         let width, height, increment = 0;
+        let startTime = null;
 
+        // wave config
         const waves = [
-            { y: 0.60, length: 0.007, amplitude: 30, speed: -0.002, offset: 0 },
-            { y: 0.70, length: 0.005, amplitude: 25, speed: 0.006, offset: 2 },
-            { y: 0.80, length: 0.004, amplitude: 20, speed: -0.004, offset: 4 }
+            { y: 0.60, length: 0.007, amplitude: 30, speed: -0.002, offset: 0, delay: 0 },
+            { y: 0.70, length: 0.005, amplitude: 25, speed: 0.006, offset: 2, delay: 100 },
+            { y: 0.80, length: 0.004, amplitude: 20, speed: -0.004, offset: 4, delay: 200 }
         ];
 
         function resize() {
@@ -229,7 +359,15 @@
         window.addEventListener('resize', resize);
         resize();
 
-        function animate() {
+        // easing for intro
+        function easeOutCubic(t) {
+            return 1 - Math.pow(1 - t, 3);
+        }
+
+        function animate(timestamp) {
+            if (!startTime) startTime = timestamp;
+            const runtime = timestamp - startTime;
+
             requestAnimationFrame(animate);
             const isDark = document.body.classList.contains('dark-mode');
             const gradient = ctx.createLinearGradient(0, 0, 0, height);
@@ -253,9 +391,21 @@
             waves.forEach((wave) => {
                 ctx.beginPath();
                 ctx.lineWidth = 1;
+
+                // intro animation
+                const introDuration = 1500;
+                let progress = (runtime - wave.delay) / introDuration;
+                progress = Math.max(0, Math.min(progress, 1));
+                const easedProgress = easeOutCubic(progress);
+                
+                // mobile specific start pos
+                const startY = height + 50; 
+                const targetY = height * wave.y;
+                const currentBaseY = startY - ((startY - targetY) * easedProgress);
+
                 ctx.moveTo(0, height);
                 for (let i = 0; i < width; i++) {
-                    const y = height * wave.y + Math.sin(i * wave.length + increment * wave.speed + wave.offset) * wave.amplitude;
+                    const y = currentBaseY + Math.sin(i * wave.length + increment * wave.speed + wave.offset) * wave.amplitude;
                     ctx.lineTo(i, y);
                 }
                 ctx.lineTo(width, height);
@@ -266,8 +416,9 @@
             });
             increment += 1;
         }
-        animate();
+        requestAnimationFrame(animate);
 
+        // overlays management
         const settingsBtn = document.getElementById('settingsBtn');
         const settingsOverlay = document.getElementById('settingsOverlay');
         const closeSettings = document.getElementById('closeSettings');
@@ -292,9 +443,62 @@
             });
         }
 
+        // changelog logic
+        const openChangelogBtn = document.getElementById('openChangelogBtn');
+        const changelogOverlay = document.getElementById('changelogOverlay');
+        const confirmLogsBtn = document.getElementById('confirmLogs');
+
+        if (openChangelogBtn && changelogOverlay) {
+            openChangelogBtn.addEventListener('click', () => {
+                changelogOverlay.style.display = 'flex';
+            });
+        }
+
+        if (confirmLogsBtn && changelogOverlay) {
+            confirmLogsBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                changelogOverlay.style.display = 'none';
+            });
+        }
+
+        // init logic
+        window.addEventListener('i18nLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+
+            document.querySelectorAll('.version-number-display').forEach(el => {
+                el.textContent = currentVersion;
+            });
+
+            if (urlParams.get('error') === 'notfound') {
+                notif(window.localeManager.translate('notifications.room_not_found'), "error");
+                const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
+                window.history.replaceState({ path: newUrl }, '', newUrl);
+            }
+
+            if (storedVersion !== currentVersion) {
+                setTimeout(() => {
+                    const msg = window.localeManager.translate('landing.new_version_msg');
+                    const messageHTML = `
+                        <span>${msg}
+                            <span style="cursor: pointer; text-decoration: underline wavy #9ecaff; font-weight: bold;" 
+                                    onclick="document.getElementById('changelogOverlay').style.display='flex'">
+                                ${currentVersion}
+                            </span> !
+                        </span>
+                    `;
+                    notif(messageHTML, 'info');
+                    localStorage.setItem('ticket_version_seen', currentVersion);
+                }, 1000);
+            }
+        });
+
     </script>
 
+    <script src="./assets/js/localization.js"></script>
     <script src="./assets/js/index.js"></script>
-        <script src="./assets/js/global.js"></script>
+    <script src="./assets/js/global.js"></script>
 </body>
 </html>
+
+
+

@@ -1273,3 +1273,203 @@ body .theme-toggle-container {
     justify-content: center;
     padding: 20px;
 }
+/* toggle switch */
+.toggle-checkbox {
+    display: none;
+}
+
+.toggle-slider {
+    position: relative;
+    display: inline-block;
+    width: 80px;
+    height: 41px;
+    background-color: var(--bg-card);
+    border-radius: 100px;
+    border: 2px solid black;
+    box-shadow: 0px 2px 0px #000000;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    align-items: center;
+}
+
+.toggle-slider::before {
+    content: '';
+    position: absolute;
+    height: 26px;
+    width: 26px;
+    border-radius: 50%;
+    background-color: var(--bg-card);
+    border: 2px solid black;
+    top: 5px;
+    left: 6px;
+    transition: transform 0.3s cubic-bezier(0.68, -0.55, 0.27, 1.55), background-color 0.3s;
+}
+
+.toggle-checkbox:checked+.toggle-slider::before {
+    transform: translateX(38px);
+    background-color: #9ecaff;
+}
+
+.toggle-slider:hover {
+    transform: translateY(-3px);
+    box-shadow: 0px 5px 0px #000000;
+}
+
+/* slider selector */
+.slider-selector {
+    display: flex;
+    align-items: center;
+    border: 2px solid black;
+    border-radius: 50px;
+    width: 215px;
+    height: 41px;
+    background: var(--card-bg);
+    box-shadow: 0px 2px 0px #000000;
+    transition: all 0.3s ease;
+    overflow: hidden;
+}
+
+.slider-selector:hover {
+    transform: translateY(-3px);
+    box-shadow: 0px 5px 0px #000000;
+}
+
+.slider-option {
+    position: relative;
+    flex: 1;
+    height: 36px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+}
+
+.slider-option input {
+    display: none;
+}
+
+
+.label-text {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: 'Inconsolata', monospace;
+    font-weight: 600;
+    font-size: 16px;
+    color: black;
+    transition: all 0.3s ease;
+    border-radius: 40px;
+    margin: 2px;
+}
+
+.slider-option .dot {
+    width: 6px;
+    aspect-ratio: 1/1;
+    background-color: black;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+}
+
+.slider-option input:checked~.dot {
+    width: 28px;
+    background-color: #9ecaff;
+    border: 2px solid black;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.slider-option input:checked+.label-text {
+    background-color: #9ecaff;
+    border: 2px solid black;
+    height: calc(100% - 8px);
+    margin: 6px;
+}
+
+.slider-option input:checked~.dot::after {
+    content: attr(data-val);
+    font-family: 'Inconsolata', monospace;
+    font-weight: 600;
+    font-size: 16px;
+    color: black;
+}
+
+.native-input {
+    width: 273px;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    opacity: 0;
+    cursor: pointer;
+    margin: 0;
+    z-index: 10;
+  }
+
+.slider-body {
+    width: 300px;
+    height: 31px;
+    display: flex;
+    align-items: center;
+    border: 2px solid #000;
+    padding: 5px;
+    border-radius: 100px;
+    position: relative;
+    left: auto;
+    box-shadow: 0px 2px 0px #000000;
+    transition: all 0.2s ease;
+}
+
+.slider-body:hover {
+    transform: translateY(-3px);
+    box-shadow: 0px 5px 0px rgb(0, 0, 0);
+}
+.slider-container {
+    width: 260px;
+    height: 100%;
+    background-color: var(--background-color);
+    border: #000 2px solid;
+    border-radius: 999px;
+    position: relative;
+    padding: 0;
+    box-sizing: border-box;
+    overflow: hidden;
+    transition: all ease 2s;
+}
+
+.slider-fill {
+    height: 100%;
+    width: 65%;
+    background-color: #a0c4ff;
+    border-radius: 999px 0 0 999px;
+    position: relative;
+    box-sizing: border-box;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+}
+
+.slider-handle {
+    height: 31px;
+    width: 15px;
+    background-color: #fff;
+    border-radius: 20px;
+    box-sizing: border-box;
+    border: 2px #000 solid;
+    margin-right: -8px;
+    z-index: 2;
+}
+
+.slider-icon {
+    width: 23px;
+    aspect-ratio: 1/1;
+    position: relative;
+    right: -7px;
+    filter: var(--icon-filter);
+}
+
+.slider-icon.dark-mode {
+    filter: invert(1);
+}
