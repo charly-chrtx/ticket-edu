@@ -1,0 +1,208 @@
+{
+  "meta": {
+    "lang": "fr",
+    "name": "Français"
+  },
+  "common": {
+    "cancel": "Annuler",
+    "confirm": "Confirmer",
+    "save": "Enregistrer",
+    "send": "Envoyer",
+    "delete": "Supprimer",
+    "download": "Télécharger",
+    "ok": "Ok",
+    "close": "Fermer",
+    "back": "Retour",
+    "loading": "Chargement...",
+    "error": "Erreur",
+    "success": "Succès",
+    "search": "Rechercher",
+    "add": "Ajouter",
+    "report": "Signaler",
+    "copy": "Copier",
+    "copied": "Copié !"
+  },
+  "landing": {
+    "title_desktop": "Ticket - Connexion",
+    "title_mobile": "Ticket - Mobile",
+    "join_group": "Rejoindre un groupe",
+    "create_group": "Créer un groupe",
+    "join_short": "Rejoindre",
+    "version_dev": "[!] Version Développeur. Signalez les problèmes",
+    "new_version_msg": "Nouvelle version de Ticket",
+    "changelogs": {
+      "title": "Notes de version",
+      "features": "Fonctionnalités",
+      "ui_ux": "Interface (UI/UX)",
+      "misc": "Divers"
+    }
+  },
+  "room": {
+    "title": "Ticket",
+    "new_ticket": "Nouveau ticket",
+    "new_message": "Nouveau message",
+    "new_deposit": "Nouveau dépôt",
+    "code_placeholder": "*****",
+    "scan_join": "Scannez pour nous rejoindre.",
+    "copy_link": "Copier le lien du groupe",
+    "invite_room": "Inviter dans la salle",
+    "storage_limit": "fichiers partagés",
+    "ongoing": "En cours",
+    "history": "Historique",
+    "active_tickets": "Tickets actifs",
+    "empty_active": "<Aucun ticket actif>",
+    "empty_history": "<Aucun ticket fermé>",
+    "admin_section": "Admin",
+    "appearance_section": "Apparence",
+    "github_section": "Github",
+    "share_section": "Partager",
+    "info_section": "Info"
+  },
+  "overlays": {
+    "join": {
+      "title": "Rejoindre un groupe",
+      "title_mobile": "Code d'accès",
+      "instruction": "Entrez le code d'accès pour rejoindre un groupe.",
+      "placeholder": "Code (ex: 45A2F)",
+      "placeholder_mobile": "ex: 45A2F",
+      "validate": "Rejoindre"
+    },
+    "create_ticket": {
+      "title": "Nouveau ticket",
+      "name_placeholder": "Nom",
+      "message_placeholder": "Message",
+      "desc_placeholder": "Description (optionnel)",
+      "add_file": "+ Ajouter un fichier",
+      "exporting": "Exportation...",
+      "colors": "Couleurs",
+      "save_cloud": "Sauvegarder via un cloud personnalisé",
+      "create_btn": "Créer"
+    },
+    "deposit": {
+      "title": "Dépôt",
+      "instruction": "Un seul fichier est autorisé.",
+      "instruction_mobile": "Déposez votre fichier ici. Un seul fichier autorisé.",
+      "file_name_placeholder": "Nom du fichier (sans extension)",
+      "drop_text": "+ Glissez ou cliquez pour ajouter"
+    },
+    "settings": {
+      "title": "Paramètres",
+      "dark_mode": "Mode Sombre (Bêta)",
+      "language": "Langue",
+      "project_opensource": "Projet Github Open-source",
+      "view_project": "Voir le projet",
+      "report_bug": "Signaler un problème",
+      "report_bug_mobile": "Merci de signaler les bugs trouvés.",
+      "rgpd": "( RGPD ) Toutes les données échangées sont chiffrées et supprimées définitivement à la fin de la session, sans usage commercial.",
+      "rgpd_mobile": "( RGPD ) Données chiffrées et supprimées définitivement à la fin de la session.",
+      "ticket_per_user": "Tickets par utilisateur",
+      "max_users": "Max utilisateurs dans le groupe",
+      "req_name": "Nom requis pour rejoindre",
+      "req_name_mobile": "Nom requis pour entrer",
+      "csv_check": "➤ Vérification nom via",
+      "csv_check_mobile": "Vérification CSV",
+      "csv_file": "Fichier CSV",
+      "ai_filter": "Filtrage IA des tickets",
+      "ai_filter_mobile": "Filtrage IA",
+      "source_code": "Code source"
+    },
+    "logout": {
+      "title": "Déconnexion ?",
+      "message": "Vous devrez entrer le code de la salle pour revenir.",
+      "yes": "Oui, quitter",
+      "no": "Non, rester"
+    },
+    "blocked": {
+      "title": "Ticket bloqué",
+      "subtitle": "Pourquoi votre ticket a été bloqué ?",
+      "reason": "- Votre contenu est jugé inapproprié.\n\nSi votre ticket ne contient aucun contenu inapproprié, veuillez le signaler."
+    },
+    "login": {
+      "title": "Identification",
+      "message": "Ce groupe nécessite une identification.",
+      "placeholder": "Votre Prénom",
+      "enter": "Entrer"
+    },
+    "multi_profile": {
+      "title": "Profils multiples",
+      "message": "Plusieurs profils ont le même nom. Veuillez choisir."
+    },
+    "bug_report": {
+      "title": "Signaler un problème",
+      "message": "Les logs de la console seront envoyés automatiquement.",
+      "placeholder": "Décrivez le problème (optionnel)..."
+    },
+    "closed_group": {
+      "title": "Groupe Fermé",
+      "banner_alt": "Bannière Groupe Fermé",
+      "subtitle": "Pourquoi votre groupe est-il fermé ?",
+      "reasons": "- Vérifiez votre connexion\n- Vérifiez avec le propriétaire du groupe s'il a fermé le groupe",
+      "retry": "Réessayer",
+      "leave": "Quitter"
+    },
+    "download_modal": {
+      "title": "Fichiers déposés",
+      "download_all": "Tout télécharger .zip"
+    }
+  },
+  "cloud": {
+    "private": "Cloud Privé",
+    "google": "Google Drive",
+    "nextcloud": "Nextcloud",
+    "onedrive": "OneDrive",
+    "not_connected": "Non connecté",
+    "connected": "Connecté & Prêt",
+    "connecting": "Connexion...",
+    "error_key": "Clé manquante",
+    "error_conn": "Erreur de connexion",
+    "disconnect_confirm": "Arrêter la sauvegarde Cloud ?",
+    "disconnect_error": "Erreur de déconnexion",
+    "login_nextcloud": "Connexion Nextcloud",
+    "url_placeholder": "URL (ex: https://cloud.exemple.com)",
+    "user_placeholder": "Nom d'utilisateur",
+    "pass_placeholder": "Mot de passe / Mot de passe d'app",
+    "success": "Connexion réussie !",
+    "popup_success": "Connexion réussie ! Vous pouvez fermer cette fenêtre."
+  },
+  "notifications": {
+    "room_not_found": "Salle introuvable.",
+    "file_sent": "Fichier envoyé avec succès !",
+    "file_too_large": "Fichier trop volumineux (max 50 Mo).",
+    "upload_error": "Erreur d'envoi",
+    "upload_processing": "Traitement...",
+    "upload_crypto": "Chiffrement...",
+    "upload_done": "Terminé",
+    "report_sent": "Signalement envoyé.",
+    "report_error": "Erreur lors de l'envoi du signalement.",
+    "name_too_short": "Nom trop court.",
+    "name_not_found": "Nom introuvable dans la liste.",
+    "check_error": "Erreur de vérification",
+    "limit_reached": "Limite atteinte.",
+    "name_required": "Nom requis.",
+    "content_required": "Message ou fichier requis.",
+    "forbidden_word": "Mot interdit détecté (filtre local).",
+    "deposit_name_req": "Nom du dépôt requis.",
+    "cloud_req": "Veuillez vous connecter au service Cloud avant de créer.",
+    "already_deposited": "Vous avez déjà déposé un fichier pour cette tâche.",
+    "zip_error": "Erreur lors de la création du ZIP via le navigateur."
+  },
+  "js_dynamic": {
+    "ai_active": "IA active et opérationnelle",
+    "ai_disabled": "IA désactivée ou indisponible (filtre local actif)",
+    "processing": "traitement",
+    "csv_managed": "Géré par fichier CSV",
+    "file_shared": "fichier partagé",
+    "files_shared": "fichiers partagés",
+    "file_sent_by": "Fichier envoyé : ",
+    "deposit_open": "Dépôt ouvert",
+    "delete_deposit_confirm": "Attention !\nCe dépôt contient {count} fichier(s).\n\nVoulez-vous vraiment le supprimer définitivement ?",
+    "delete_confirm": "Supprimer ?",
+    "connection_failed_title": "Impossible de se connecter",
+    "connection_failed_msg": "La connexion au serveur a échoué.\nPatientez ou quittez la salle."
+  },
+  "time": {
+    "days": "j",
+    "hours": "h",
+    "mins": "min"
+  }
+}

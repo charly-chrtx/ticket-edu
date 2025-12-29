@@ -1,0 +1,208 @@
+{
+  "meta": {
+    "lang": "en",
+    "name": "English"
+  },
+  "common": {
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "save": "Save",
+    "send": "Send",
+    "delete": "Delete",
+    "download": "Download",
+    "ok": "Ok",
+    "close": "Close",
+    "back": "Back",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "search": "Search",
+    "add": "Add",
+    "report": "Report",
+    "copy": "Copy",
+    "copied": "Copied!"
+  },
+  "landing": {
+    "title_desktop": "Ticket - Login",
+    "title_mobile": "Ticket - Mobile",
+    "join_group": "Join a group",
+    "create_group": "Create a group",
+    "join_short": "Join",
+    "version_dev": "[!] Developer Version. Report any issues",
+    "new_version_msg": "New version of Ticket",
+    "changelogs": {
+      "title": "Changelogs",
+      "features": "Features",
+      "ui_ux": "Interface (UI/UX)",
+      "misc": "Misc"
+    }
+  },
+  "room": {
+    "title": "Ticket",
+    "new_ticket": "New ticket",
+    "new_message": "New message",
+    "new_deposit": "New deposit",
+    "code_placeholder": "*****",
+    "scan_join": "Scan to join us.",
+    "copy_link": "Copy group link",
+    "invite_room": "Invite to room",
+    "storage_limit": "shared files",
+    "ongoing": "Ongoing",
+    "history": "History",
+    "active_tickets": "Active tickets",
+    "empty_active": "<No active tickets>",
+    "empty_history": "<No closed tickets>",
+    "admin_section": "Admin",
+    "appearance_section": "Appearance",
+    "github_section": "Github",
+    "share_section": "Share",
+    "info_section": "Info"
+  },
+  "overlays": {
+    "join": {
+      "title": "Join a group",
+      "title_mobile": "Access Code",
+      "instruction": "Enter the access code to join a group.",
+      "placeholder": "Code (ex: 45A2F)",
+      "placeholder_mobile": "ex: 45A2F",
+      "validate": "Join"
+    },
+    "create_ticket": {
+      "title": "New ticket",
+      "name_placeholder": "Name",
+      "message_placeholder": "Message",
+      "desc_placeholder": "Description (optional)",
+      "add_file": "+ Add a file",
+      "exporting": "Exporting...",
+      "colors": "Colors",
+      "save_cloud": "Save via a custom cloud service",
+      "create_btn": "Create"
+    },
+    "deposit": {
+      "title": "Deposit",
+      "instruction": "Only one file is allowed.",
+      "instruction_mobile": "Drop your file here. Only one file is allowed.",
+      "file_name_placeholder": "File name (without extension)",
+      "drop_text": "+ Drag or click to add a file"
+    },
+    "settings": {
+      "title": "Settings",
+      "dark_mode": "Dark Mode (Beta)",
+      "language": "Language",
+      "project_opensource": "Open-source Github project",
+      "view_project": "View project",
+      "report_bug": "Report an issue",
+      "report_bug_mobile": "Please report any issues or bugs found.",
+      "rgpd": "( GDPR ) All exchanged data is encrypted and permanently deleted at the end of the session, without any other commercial use.",
+      "rgpd_mobile": "( GDPR ) Data encrypted and permanently deleted at the end of the session.",
+      "ticket_per_user": "Tickets per user",
+      "max_users": "Max users in group",
+      "req_name": "Name required to join group",
+      "req_name_mobile": "Name required to enter room",
+      "csv_check": "➤ Name verification via a",
+      "csv_check_mobile": "CSV Verification",
+      "csv_file": "CSV file",
+      "ai_filter": "AI ticket filtering",
+      "ai_filter_mobile": "AI Filtering",
+      "source_code": "Source code"
+    },
+    "logout": {
+      "title": "Logout?",
+      "message": "You will have to enter the room code to return.",
+      "yes": "Yes, leave",
+      "no": "No, stay"
+    },
+    "blocked": {
+      "title": "Ticket blocked",
+      "subtitle": "Why was your ticket blocked?",
+      "reason": "- Your content is deemed inappropriate.\n\nIf your ticket contains no inappropriate content please report it."
+    },
+    "login": {
+      "title": "Identification",
+      "message": "This group requires identification.",
+      "placeholder": "Your First Name",
+      "enter": "Enter"
+    },
+    "multi_profile": {
+      "title": "Multiple profiles",
+      "message": "Several profiles have the same name. Please choose."
+    },
+    "bug_report": {
+      "title": "Report a problem",
+      "message": "Console logs will be sent automatically.",
+      "placeholder": "Describe the problem (optional)..."
+    },
+    "closed_group": {
+      "title": "Closed Group",
+      "banner_alt": "Closed Group Banner",
+      "subtitle": "Why is your group closed?",
+      "reasons": "- Check your connection\n- Check with the group owner to see if they closed the group",
+      "retry": "Retry",
+      "leave": "Leave"
+    },
+    "download_modal": {
+      "title": "Deposit files",
+      "download_all": "Download all .zip"
+    }
+  },
+  "cloud": {
+    "private": "Private Cloud",
+    "google": "Google Drive",
+    "nextcloud": "Nextcloud",
+    "onedrive": "OneDrive",
+    "not_connected": "Not connected",
+    "connected": "Connected & Ready",
+    "connecting": "Connecting...",
+    "error_key": "Missing key",
+    "error_conn": "Connection error",
+    "disconnect_confirm": "Stop Cloud backup?",
+    "disconnect_error": "Disconnection error",
+    "login_nextcloud": "Nextcloud Login",
+    "url_placeholder": "URL (ex: https://cloud.example.com)",
+    "user_placeholder": "Username",
+    "pass_placeholder": "Password / App Password",
+    "success": "Connection successful!",
+    "popup_success": "Connection successful! You can close this window."
+  },
+  "notifications": {
+    "room_not_found": "Room not found.",
+    "file_sent": "File sent successfully!",
+    "file_too_large": "File too large (max 50 MB).",
+    "upload_error": "Upload error",
+    "upload_processing": "Processing...",
+    "upload_crypto": "Encrypting...",
+    "upload_done": "Done",
+    "report_sent": "Report sent.",
+    "report_error": "Error sending report.",
+    "name_too_short": "Name too short.",
+    "name_not_found": "Name not found in list.",
+    "check_error": "Verification error",
+    "limit_reached": "Limit reached.",
+    "name_required": "Name required.",
+    "content_required": "Message or file required.",
+    "forbidden_word": "Forbidden word detected (local filter).",
+    "deposit_name_req": "Deposit name required.",
+    "cloud_req": "Please connect to Cloud service before creating.",
+    "already_deposited": "You have already deposited a file for this assignment.",
+    "zip_error": "Error creating ZIP via browser."
+  },
+  "js_dynamic": {
+    "ai_active": "AI active and operational",
+    "ai_disabled": "AI disabled or unavailable (local filter active)",
+    "processing": "processing",
+    "csv_managed": "Managed by CSV file",
+    "file_shared": "shared file",
+    "files_shared": "shared files",
+    "file_sent_by": "File sent: ",
+    "deposit_open": "Deposit open",
+    "delete_deposit_confirm": "Warning!\nThis deposit contains {count} file(s).\n\nDo you really want to delete it permanently?",
+    "delete_confirm": "Delete?",
+    "connection_failed_title": "Unable to connect",
+    "connection_failed_msg": "Connection to server failed.\nWait or leave the room."
+  },
+  "time": {
+    "days": "d",
+    "hours": "h",
+    "mins": "mins"
+  }
+}

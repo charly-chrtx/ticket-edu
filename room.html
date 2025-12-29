@@ -4,7 +4,7 @@
 <head>
   <script>
     if (screen.width <= 768 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
-        window.location.href = "room-phone.html" + window.location.search;
+      window.location.href = "room-phone.html" + window.location.search;
     }
   </script>
   <meta charset="UTF-8" />
@@ -113,7 +113,7 @@
               <a class='color' style="background-color: #A6FFF0"></a>
               <a class='color' style="background-color: #AEFFA6"></a>
             </div>
-            
+
             <div class="checkbox-container" id="SaveToCloud" style="padding-top: 30px;">
               <div class="checkbox" onclick="this.classList.toggle('checkbox-checked')"></div>
               <span style="margin-left: 15px;">Sauvegarder via un service cloud personnalisé</span>
@@ -129,7 +129,7 @@
                   <span class="provider-name">Private Cloud</span>
                 </div>
               </div>
-              
+
               <div class="cloud-provider-card" id="googleDriveCard" onclick="handle_cloud_click('google')">
                 <div class="provider-icon-wrapper">
                   <img class="icon" src="./assets/icon/gdrive.png" alt="Google Drive">
@@ -169,7 +169,7 @@
                 <img class="icon" src="./assets/icon/cross.png">
                 <span class="text">Annuler</span>
               </a>
-              
+
               <a class="button-text" id='create' href='#'
                 style="width: auto; padding: 0 30px; margin: 0; background-color: #9ecaff; min-width: 140px;">
                 <img class="icon" src="./assets/icon/add.png">
@@ -212,19 +212,23 @@
 
             </div>
 
-            <div style="padding-top: 20px; width: 100%; display: flex; flex-direction: row; flex-wrap: nowrap; justify-content: space-between; gap: 8px;">
-              
-              <a class="button-text" href="#" style="min-height: 41px; padding: 0 40px; display: flex; align-items: center; gap: 8px; margin: 0; box-shadow: 0 4px 0px rgba(0, 0, 0, 0.2); pointer-events: none;">
+            <div
+              style="padding-top: 20px; width: 100%; display: flex; flex-direction: row; flex-wrap: nowrap; justify-content: space-between; gap: 8px;">
+
+              <a class="button-text" href="#"
+                style="min-height: 41px; padding: 0 40px; display: flex; align-items: center; gap: 8px; margin: 0; box-shadow: 0 4px 0px rgba(0, 0, 0, 0.2); pointer-events: none;">
                 <img class="icon" src="./assets/icon/person.png">
                 <span class="text">0</span>
               </a>
 
-              <a class="button-text" href="#" style="min-height: 41px; padding: 0 40px; display: flex; align-items: center; gap: 8px; margin: 0; box-shadow: 0 4px 0px rgba(0, 0, 0, 0.2); pointer-events: none;">
+              <a class="button-text" href="#"
+                style="min-height: 41px; padding: 0 40px; display: flex; align-items: center; gap: 8px; margin: 0; box-shadow: 0 4px 0px rgba(0, 0, 0, 0.2); pointer-events: none;">
                 <img class="icon" src="./assets/icon/folder.png">
                 <span class="text">0 Go</span>
               </a>
 
-              <a class="button-text" href="#" style="min-height: 41px; padding: 0 40px; display: flex; align-items: center; gap: 8px; margin: 0; box-shadow: 0 4px 0px rgba(0, 0, 0, 0.2); pointer-events: none;">
+              <a class="button-text" href="#"
+                style="min-height: 41px; padding: 0 40px; display: flex; align-items: center; gap: 8px; margin: 0; box-shadow: 0 4px 0px rgba(0, 0, 0, 0.2); pointer-events: none;">
                 <img class="icon" src="./assets/icon/timer.png">
                 <span class="text">00:00:00</span>
               </a>
@@ -279,16 +283,12 @@
 
                 </div>
               </div>
-              
+
               <div style="display: flex; justify-content: space-between; align-items: center; margin: 15px 0;">
                 <span>Nom requis pour entrer dans le groupe</span>
                 <label>
-                  <input 
-                    type="checkbox" 
-                    class="toggle-checkbox" 
-                    id="forceNameToggle"
-                    onchange="document.getElementById('csvWrapper').classList.toggle('open', this.checked)"
-                  >
+                  <input type="checkbox" class="toggle-checkbox" id="forceNameToggle"
+                    onchange="document.getElementById('csvWrapper').classList.toggle('open', this.checked)">
                   <span class="toggle-slider"></span>
                 </label>
               </div>
@@ -331,8 +331,8 @@
             </div>
 
             <div style="display: flex; justify-content: space-between; align-items: center; margin: 15px 0;">
-              <span> Langue (Français uniquement pour l'instant)</span>
-              <a class="button-text" href="#"
+              <span> Langue</span>
+              <a class="button-text" id="langToggle" href="#"
                 style="min-height: 41px; width: auto; padding: 0 20px; flex: unset; min-width: 80px; opacity: 30%; pointer-events: none;">
                 <span class="text" style="font-size: 14px;">FR</span>
               </a>
@@ -616,19 +616,19 @@
         </div>
 
         <div class="overlay-footer" style="display: flex; justify-content: center; gap: 15px; margin-top: 30px;">
-          
+
           <a class="button-text" id="depositCancel" href="#"
             style="width: auto; padding: 0 30px; margin: 0; min-width: 140px;">
             <img class="icon" src="./assets/icon/cross.png">
             <span class="text">Annuler</span>
           </a>
-          
+
           <a class="button-text" id="depositSend" href="#"
             style="width: auto; padding: 0 30px; margin: 0; min-width: 140px; background-color: #A6C5FF;">
             <img class="icon" src="./assets/icon/send.png">
             <span class="text">Envoyer</span>
           </a>
-          
+
         </div>
       </div>
     </div>
