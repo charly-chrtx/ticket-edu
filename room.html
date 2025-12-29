@@ -328,17 +328,17 @@
               <span>Volume général </span>
 
               <div class="slider-body">
-                
-                <input type="range" min="0" max="100" value="50" class="native-input" id="rangeInput">
-                
-                <div class="slider-container">
+                  
+                  <input type="range" min="0" max="100" value="50" class="native-input" id="rangeInput">
+                  
+                  <div class="slider-container">
                   <div class="slider-fill" id="sliderFill">
-                    <div class="slider-handle"></div>
+                      <div class="slider-handle"></div>
                   </div>
-                </div>
+                  </div>
 
-                <img class="slider-icon " src="./assets/icon/volume_off.png">
-                
+                  <img class="slider-icon" src="./assets/icon/volume_off.png">
+                  
               </div>
             </div>
 
@@ -606,7 +606,6 @@
     </div>
   </div>
 
-  <script src="./assets/js/darkmode.js"></script>
   <script>
     document.getElementById("default").classList.add('selected');
     document.querySelectorAll('.colorbox .color').forEach(a => {
@@ -623,86 +622,6 @@
       }
     }
 
-// --- Gestion des sons ---
-
-const rangeInput = document.getElementById('rangeInput');
-const sliderFill = document.getElementById('sliderFill');
-const volumeIcon = document.querySelector('.slider-icon');
-const tickSound = new Audio('./assets/sound/volume.mp3');
-const startingMusic = document.getElementById("startinMusic");
-const icons = {
-  mute: './assets/icon/volume_off.png',
-  low: './assets/icon/volume_low.png',
-  mid: './assets/icon/volume_mid.png',
-  high: './assets/icon/volume_high.png'
-};
-
-const savedVolume = localStorage.getItem('savedVolume');
-
-if (savedVolume !== null) {
-    rangeInput.value = savedVolume;
-} else {
-    rangeInput.value = 50; 
-}
-
-let previousValue = rangeInput.value;
-let lastStep = Math.floor(rangeInput.value / 15);
-
-function updateSlider() {
-  const val = parseInt(rangeInput.value);
-  const currentStep = Math.floor(val / 15);
-
-  /*Sound Level*/
-  const volumeLevel = val / 100;
-  tickSound.volume = volumeLevel;
-  startingMusic.volume = volumeLevel;
-
-  if (currentStep !== lastStep) {
-    tickSound.currentTime = 0;
-    tickSound.play();
-    lastStep = currentStep;
-  }
-  sliderFill.style.width = val + '%';
-  
-  if (val === 0) {
-    volumeIcon.src = icons.mute;
-  } else if (val > 0 && val <= 33) {
-    volumeIcon.src = icons.low;
-  } else if (val > 33 && val <= 66) {
-    volumeIcon.src = icons.mid;
-  } else {
-    volumeIcon.src = icons.high;
-  }
-
-  localStorage.setItem('savedVolume', val);
-}
-
-volumeIcon.addEventListener('click', () => {
-  if (parseInt(rangeInput.value) > 0) {
-    previousValue = rangeInput.value;
-    rangeInput.value = 0;
-  } else {
-    rangeInput.value = previousValue > 0 ? previousValue : 50;
-  }
-
-  updateSlider();
-});
-
-window.addEventListener('load', function() {
-    const audio = document.getElementById("startinMusic");
-    
-
-    updateSlider();
-    
-    setTimeout(function() {
-        audio.play().catch(error => {
-            console.warn("Le navigateur a bloqué l'autoplay audio :", error);
-        });
-    }, 1800); 
-});
-
-  rangeInput.addEventListener('input', updateSlider);
-  updateSlider();
   </script>
   <script type="text/javascript" src="https://unpkg.com/qr-code-styling@1.5.0/lib/qr-code-styling.js"></script>
 
@@ -769,5 +688,6 @@ window.addEventListener('load', function() {
   </div>
 
   <script src="./assets/js/room.js"></script>
+  <script src="./assets/js/global.js"></script>
 
 </html>

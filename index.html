@@ -552,187 +552,44 @@
                 }
             });
         }
-
-        // --- Système de Notifications ---
-
-        function notif(message, type = 'info') {
-            const styles = {
-                success: { icon: './assets/icon/success.png', color: '#9ecaff'},
-                error: { icon: './assets/icon/error.png', color: '#9ecaff'},
-                info: { icon: './assets/icon/info.png', color: '#9ecaff'}
-            };
-
-            const selectedStyle = styles[type] || styles['info'];
-
-            let container = document.getElementById('notif-container');
-            if (!container) {
-                container = document.createElement('div');
-                container.id = 'notif-container';
-                container.className = 'notif-container';
-                document.body.appendChild(container);
+        
+        window.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            
+            document.querySelectorAll('.version-number-display').forEach(el => {
+                el.textContent = currentVersion;
+            });
+            
+            if (urlParams.get('error') === 'notfound') {
+                notif("Salle introuvable.", "error");
+                const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
+                window.history.replaceState({path:newUrl}, '', newUrl);
             }
 
-            const notif = document.createElement('div');
-            notif.className = 'custom-notif';
-            
-            notif.innerHTML = `
-                <div class="notif-progress" style="background-color: ${selectedStyle.color || '#ccc'};"></div>
-                <img src="${selectedStyle.icon}" class="notif-icon" onerror="this.src='./assets/icon/icon thin.png'">
-                <span class="notif-message">${message}</span>
-                <img src="./assets/icon/cross.png" class="notif-icon close-btn">
-            `;
-
-            notif.querySelector('.close-btn').onclick = () => notif.remove();
-            container.appendChild(notif);
-
-            setTimeout(() => {
-                const bar = notif.querySelector('.notif-progress');
-                if (bar) {
-                    bar.style.transition = "width 7s linear";
-                    bar.style.width = "0%";
-                }
-            }, 50);
-
-            setTimeout(() => {
-                notif.style.opacity = '0';
-                setTimeout(() => notif.remove(), 300);
-            }, 7000);
-        }
-
-        // --- Gestion des sons ---
-
-        const rangeInput = document.getElementById('rangeInput');
-        const sliderFill = document.getElementById('sliderFill');
-        const volumebutton = document.getElementById('volumebutton'); // L'icône du bouton principal
-        const volumeIcon = document.querySelector('.slider-icon'); // L'icône du slider dans les paramètres
-        const tickSound = new Audio('./assets/sound/volume.mp3');
-        const startingMusic = document.getElementById("startinMusic");
-        const muteButton = document.getElementById('indexSoundToggle');
-
-        const icons = {
-        mute: './assets/icon/volume_off.png',
-        low: './assets/icon/volume_low.png',
-        mid: './assets/icon/volume_mid.png',
-        high: './assets/icon/volume_high.png'
-        };
-
-        const savedVolume = localStorage.getItem('savedVolume');
-
-        if (savedVolume !== null) {
-            rangeInput.value = savedVolume;
-        } else {
-            rangeInput.value = 50; 
-        }
-
-        let previousValue = rangeInput.value;
-        let lastStep = Math.floor(rangeInput.value / 15);
-
-        function updateSlider() {
-        const val = parseInt(rangeInput.value);
-        const currentStep = Math.floor(val / 15);
-
-        /*Sound Level*/
-        const volumeLevel = val / 100;
-        tickSound.volume = volumeLevel;
-        startingMusic.volume = volumeLevel;
-
-        if (currentStep !== lastStep) {
-            tickSound.currentTime = 0;
-            tickSound.play();
-            lastStep = currentStep;
-        }
-        sliderFill.style.width = val + '%';
-        
-        // Mettre à jour TOUTES les icônes de volume
-        if (val === 0) {
-            volumeIcon.src = icons.mute;
-            volumebutton.src = icons.mute; // Ajouter cette ligne
-        } else if (val > 0 && val <= 33) {
-            volumeIcon.src = icons.low;
-            volumebutton.src = icons.low; // Ajouter cette ligne
-        } else if (val > 33 && val <= 66) {
-            volumeIcon.src = icons.mid;
-            volumebutton.src = icons.mid; // Ajouter cette ligne
-        } else {
-            volumeIcon.src = icons.high;
-            volumebutton.src = icons.high; // Ajouter cette ligne
-        }
-
-        localStorage.setItem('savedVolume', val);
-        }
-
-        function toggleMute() {
-        if (parseInt(rangeInput.value) > 0) {
-            previousValue = rangeInput.value;
-            rangeInput.value = 0;
-        } else {
-            rangeInput.value = previousValue > 0 ? previousValue : 50;
-        }
-        updateSlider();
-        }
-
-        volumeIcon.addEventListener('click', toggleMute);
-
-        muteButton.addEventListener('click', (e) => {
-        e.preventDefault();
-        toggleMute();
-        });
-
-        /*Playing sounds*/
-        window.addEventListener('load', function() {
-            const audio = document.getElementById("startinMusic");
-            
-            updateSlider();
-            audio.play().catch(error => {
-                console.warn("Le navigateur a bloqué l'autoplay audio :", error);
-            });
-        });
-
-        rangeInput.addEventListener('input', updateSlider);
-        updateSlider();
-
-        rangeInput.addEventListener('input', updateSlider);
-        updateSlider();
-
-
-            window.addEventListener('DOMContentLoaded', () => {
-                const urlParams = new URLSearchParams(window.location.search);
+            if (storedVersion !== currentVersion) {
                 
-                document.querySelectorAll('.version-number-display').forEach(el => {
-                    el.textContent = currentVersion;
-                });
-                
-                if (urlParams.get('error') === 'notfound') {
-                    notif("Salle introuvable.", "error");
-                    const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
-                    window.history.replaceState({path:newUrl}, '', newUrl);
-                }
-
-                if (storedVersion !== currentVersion) {
+                setTimeout(() => {
                     
-                    setTimeout(() => {
-                        
-                        const messageHTML = `
-                            <span>Nouvelle version de Ticket
-                                <span style="cursor: pointer; text-decoration: underline wavy #9ecaff; font-weight: bold;" 
-                                        onclick="document.getElementById('changelogOverlay').style.display='flex'">
-                                    ${currentVersion}
-                                </span> !
-                            </span>
-                        `;
-                        
-                        notif(messageHTML, 'info');
+                    const messageHTML = `
+                        <span>Nouvelle version de Ticket
+                            <span style="cursor: pointer; text-decoration: underline wavy #9ecaff; font-weight: bold;" 
+                                    onclick="document.getElementById('changelogOverlay').style.display='flex'">
+                                ${currentVersion}
+                            </span> !
+                        </span>
+                    `;
+                    
+                    notif(messageHTML, 'info');
 
-                        localStorage.setItem('ticket_version_seen', currentVersion);
+                    localStorage.setItem('ticket_version_seen', currentVersion);
 
-                    }, 1000); 
-                }
-            });
-
+                }, 1000); 
+            }
+        });
     
     </script>
 
     <script src="./assets/js/index.js"></script>
-<script src="./assets/js/darkmode.js"></script>
+<script src="./assets/js/global.js"></script>
 </body>
 </html>
