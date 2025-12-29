@@ -88,6 +88,8 @@
     "settings": {
       "title": "Settings",
       "dark_mode": "Dark Mode (Beta)",
+      "sound_label": "Sound",
+      "volume_label": "Master volume",
       "language": "Language",
       "project_opensource": "Open-source Github project",
       "view_project": "View project",

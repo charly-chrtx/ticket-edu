@@ -1,6 +1,6 @@
 class LocalizationManager {
     constructor() {
-        this.supportedLanguages = ['fr', 'en']; 
+        this.supportedLanguages = ['fr', 'en'];
         this.defaultLang = 'fr';
         this.currentLang = this.detectInitialLanguage();
         this.translations = {};
@@ -31,10 +31,10 @@ class LocalizationManager {
         try {
             const response = await fetch(`./assets/lang/${lang}.json`);
             if (!response.ok) throw new Error(`file not found ${lang}`);
-            
+
             this.translations = await response.json();
             this.applyTranslations();
-            
+
             // dispatch event when loaded so js can update dynamic content
             window.dispatchEvent(new Event('i18nLoaded'));
         } catch (error) {
@@ -59,10 +59,16 @@ class LocalizationManager {
                     // preserve icon if present
                     const icon = element.querySelector('.icon');
                     if (icon) {
-                        // find text node
-                        const textNode = Array.from(element.childNodes).find(node => node.nodeType === 3 || (node.nodeType === 1 && node.classList.contains('text')));
-                        if (textNode) textNode.textContent = translation;
-                        else element.innerHTML = translation; // fallback
+                        // Prefer an element child with class 'text' when present (avoids matching whitespace text nodes)
+                        const textElem = element.querySelector('.text');
+                        if (textElem) {
+                            textElem.textContent = translation;
+                        } else {
+                            // Fallback: find first non-empty text node
+                            const textNode = Array.from(element.childNodes).find(node => node.nodeType === 3 && node.textContent.trim());
+                            if (textNode) textNode.textContent = translation;
+                            else element.innerHTML = translation; // last resort
+                        }
                     } else {
                         element.innerHTML = translation;
                     }
@@ -76,7 +82,7 @@ class LocalizationManager {
         if (!key) return '';
         const keys = key.split('.');
         let value = this.translations;
-        
+
         for (const k of keys) {
             value = value ? value[k] : null;
         }
@@ -93,10 +99,10 @@ class LocalizationManager {
     setupLanguageSwitcher() {
         let btn = document.getElementById('langToggle');
 
+        // fallback if id not found
         if (!btn) {
             const links = document.querySelectorAll('#settingsOverlay a.button-text');
             for (const link of links) {
-                // On repère le bouton qui est "grisé/désactivé"
                 if (link.style.opacity === '0.3' || link.style.pointerEvents === 'none') {
                     btn = link;
                     break;
@@ -105,13 +111,22 @@ class LocalizationManager {
         }
 
         if (btn) {
+            // enable button
             btn.style.opacity = '1';
             btn.style.pointerEvents = 'auto';
             btn.style.cursor = 'pointer';
 
+            // update button text (fr/en)
             const textSpan = btn.querySelector('.text');
             if (textSpan) textSpan.textContent = this.currentLang.toUpperCase();
 
+            // translate label span (match key used in HTML)
+            const label = btn.previousElementSibling;
+            if (label && label.tagName === 'SPAN') {
+                label.textContent = this.translate('overlays.settings.language');
+            }
+
+            // click handler
             btn.onclick = (e) => {
                 e.preventDefault();
                 this.cycleLanguage();

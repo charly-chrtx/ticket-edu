@@ -88,6 +88,8 @@
     "settings": {
       "title": "Paramètres",
       "dark_mode": "Mode Sombre (Bêta)",
+      "sound_label": "Son",
+      "volume_label": "Volume général",
       "language": "Langue",
       "project_opensource": "Projet Github Open-source",
       "view_project": "Voir le projet",
