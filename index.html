@@ -552,7 +552,40 @@
                 }
             });
         }
+        
+        window.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            
+            document.querySelectorAll('.version-number-display').forEach(el => {
+                el.textContent = currentVersion;
+            });
+            
+            if (urlParams.get('error') === 'notfound') {
+                notif("Salle introuvable.", "error");
+                const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
+                window.history.replaceState({path:newUrl}, '', newUrl);
+            }
 
+            if (storedVersion !== currentVersion) {
+                
+                setTimeout(() => {
+                    
+                    const messageHTML = `
+                        <span>Nouvelle version de Ticket
+                            <span style="cursor: pointer; text-decoration: underline wavy #9ecaff; font-weight: bold;" 
+                                    onclick="document.getElementById('changelogOverlay').style.display='flex'">
+                                ${currentVersion}
+                            </span> !
+                        </span>
+                    `;
+                    
+                    notif(messageHTML, 'info');
+
+                    localStorage.setItem('ticket_version_seen', currentVersion);
+
+                }, 1000); 
+            }
+        });
     
     </script>
 
