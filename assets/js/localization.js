@@ -56,18 +56,15 @@ class LocalizationManager {
                 if (element.tagName === 'INPUT' || element.tagName === 'TEXTAREA') {
                     element.placeholder = translation;
                 } else {
-                    // preserve icon if present
                     const icon = element.querySelector('.icon');
                     if (icon) {
-                        // Prefer an element child with class 'text' when present (avoids matching whitespace text nodes)
                         const textElem = element.querySelector('.text');
                         if (textElem) {
                             textElem.textContent = translation;
                         } else {
-                            // Fallback: find first non-empty text node
                             const textNode = Array.from(element.childNodes).find(node => node.nodeType === 3 && node.textContent.trim());
                             if (textNode) textNode.textContent = translation;
-                            else element.innerHTML = translation; // last resort
+                            else element.innerHTML = translation;
                         }
                     } else {
                         element.innerHTML = translation;
@@ -77,7 +74,6 @@ class LocalizationManager {
         });
     }
 
-    // get translation string with optional params substitution
     translate(key, params = {}) {
         if (!key) return '';
         const keys = key.split('.');
@@ -87,7 +83,7 @@ class LocalizationManager {
             value = value ? value[k] : null;
         }
 
-        if (!value) return key; // return key if missing
+        if (!value) return key;
 
         Object.keys(params).forEach(p => {
             value = value.replace(`{${p}}`, params[p]);
@@ -96,10 +92,9 @@ class LocalizationManager {
         return value;
     }
 
-    setupLanguageSwitcher() {
+setupLanguageSwitcher() {
         let btn = document.getElementById('langToggle');
 
-        // fallback if id not found
         if (!btn) {
             const links = document.querySelectorAll('#settingsOverlay a.button-text');
             for (const link of links) {
@@ -111,36 +106,48 @@ class LocalizationManager {
         }
 
         if (btn) {
-            // enable button
             btn.style.opacity = '1';
             btn.style.pointerEvents = 'auto';
             btn.style.cursor = 'pointer';
-
-            // update button text (fr/en)
             const textSpan = btn.querySelector('.text');
             if (textSpan) textSpan.textContent = this.currentLang.toUpperCase();
-
-            // translate label span (match key used in HTML)
-            const label = btn.previousElementSibling;
-            if (label && label.tagName === 'SPAN') {
-                label.textContent = this.translate('overlays.settings.language');
-            }
-
-            // click handler
+            
             btn.onclick = (e) => {
                 e.preventDefault();
-                this.cycleLanguage();
+                
+                const langOverlay = document.getElementById('languageOverlay');
+                const settingsOverlay = document.getElementById('settingsOverlay');
+                
+                if (langOverlay) {
+                    if(settingsOverlay) settingsOverlay.style.display = 'none';
+                    langOverlay.style.display = 'flex';
+                } else {
+                    this.cycleLanguage();
+                }
             };
+        }
+    }
+
+    // Nouvelle fonction appelée par les boutons de l'overlay
+    changeLanguage(newLang) {
+        if (this.supportedLanguages.includes(newLang)) {
+            if (this.currentLang !== newLang) {
+                localStorage.setItem('ticket_lang', newLang);
+                location.reload();
+            } else {
+                const langOverlay = document.getElementById('languageOverlay');
+                const settingsOverlay = document.getElementById('settingsOverlay');
+                
+                if (langOverlay) langOverlay.style.display = 'none';
+                if (settingsOverlay) settingsOverlay.style.display = 'flex';
+            }
         }
     }
 
     cycleLanguage() {
         const currentIndex = this.supportedLanguages.indexOf(this.currentLang);
         const nextIndex = (currentIndex + 1) % this.supportedLanguages.length;
-        const newLang = this.supportedLanguages[nextIndex];
-
-        localStorage.setItem('ticket_lang', newLang);
-        location.reload();
+        this.changeLanguage(this.supportedLanguages[nextIndex]);
     }
 }
 
