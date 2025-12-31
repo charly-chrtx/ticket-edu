@@ -117,7 +117,7 @@
 
         <div class="action-buttons">
 
-            <a href="#" class="button-text">
+            <a href="#" class="button-text" data-open="joinOverlay">
                 <img class="icon" src="./assets/icon/search.png" alt="Search"
                     onerror="this.src='./assets/icon/icon thin.png'">
                 <span class="text" data-i18n="landing.join_group">Rejoindre un groupe</span>
@@ -131,10 +131,11 @@
         </div>
 
         <p class="version-text">
-            <span id="openChangelogBtn" style="text-decoration: underline wavy #9ecaff; cursor: pointer;">
+            <span data-open="changelogOverlay" style="text-decoration: underline wavy #9ecaff; cursor: pointer;">
                 <span class="version-number-display"></span>
             </span>
         </p>
+        
         <p class="info-text" data-i18n="landing.version_dev">[!] Version Developpeur. Signaler en cas de soucis </p>
 
         <div class="toggles-container">
@@ -146,8 +147,8 @@
                 <img class="icon" id="themeIcon" src="./assets/icon/darkmod.png" alt="Theme">
             </a>
 
-            <a href="#" class="button-simple" id="settingsBtn">
-                <img class="icon" id="settingsIcon" src="./assets/icon/Settings.png" alt="Settings">
+            <a href="#" class="button-simple" data-open="settingsOverlay">
+                <img class="icon" src="./assets/icon/Settings.png" alt="Settings">
             </a>
         </div>
     </div>
@@ -170,7 +171,7 @@
                 <div class="overlay-footer"
                     style="display: flex; justify-content: center; gap: 15px; margin-top: 30px;">
 
-                    <a class="button-text" id="cancelJoin" href="#"
+                    <a class="button-text" data-close href="#"
                         style="width: auto; padding: 0 30px; margin: 0; min-width: 140px;">
                         <img class="icon" src="./assets/icon/cross.png">
                         <span class="text" data-i18n="common.cancel">Annuler</span>
@@ -334,7 +335,7 @@
                 </div>
 
                 <div class="overlay-footer">
-                    <a class="button-text" id="confirmLogs" href="#"
+                    <a class="button-text" data-close href="#"
                         style="width: auto; padding: 0 30px; margin: 0; min-width: 140px;">
                         <img class="icon" src="./assets/icon/check.png" alt="">
                         <span class="text" data-i18n="common.ok">Ok</span>
@@ -371,6 +372,8 @@
                     </div>
                 </div>
 
+                <hr style="border: 0; border-top: 1px solid #e0e0e0; margin: 30px 0;">
+
                 <h2 style="text-align: left; margin-top: 30px; font-size: 1.2rem;" data-i18n="room.appearance_section">
                     Apparence</h2>
 
@@ -395,12 +398,14 @@
                 </div>
 
                 <div style="display: flex; justify-content: space-between; align-items: center; margin: 15px 0;">
-                    <span data-i18n="overlays.settings.language"> Langue</span>
-                    <a class="button-text" href="#" id="langToggle"
+                    <span>Langue</span>
+                    <a class="button-text" href="#" data-open="languageOverlay"
                         style="min-height: 41px; width: auto; padding: 0 20px; flex: unset; min-width: 80px; opacity: 30%; pointer-events: none;">
                         <span class="text" style="font-size: 14px;">FR</span>
                     </a>
                 </div>
+
+                <hr style="border: 0; border-top: 1px solid #e0e0e0; margin: 30px 0;">
 
                 <h2 style="text-align: left; margin-top: 30px; font-size: 1.2rem;" data-i18n="room.github_section">
                     Github</h2>
@@ -425,7 +430,7 @@
                 </p>
 
                 <div class="overlay-footer">
-                    <a class="button-text" id="closeSettings" href="#" style="width: auto; padding: 0 40px; margin: 0;">
+                    <a class="button-text" data-close href="#" style="width: auto; padding: 0 40px; margin: 0;">
                         <img class="icon" src="./assets/icon/check.png" alt="">
                         <span class="text" data-i18n="common.save">Sauvegarder</span>
                     </a>
@@ -460,7 +465,7 @@
                 </div>
 
                 <div class="overlay-footer">
-                    <a class="button-text" id="closeLangOverlay" href="#" style="width: auto; padding: 0 30px;">
+                    <a class="button-text" data-close href="#" style="width: auto; padding: 0 30px;">
                         <img class="icon" src="./assets/icon/cross.png">
                         <span class="text" data-i18n="common.cancel">Annuler</span>
                     </a>

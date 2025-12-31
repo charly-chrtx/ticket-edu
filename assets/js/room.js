@@ -777,19 +777,6 @@ function show_copy_feedback(element, original_text, success_text = "Copié !") {
     setTimeout(() => { element.textContent = original_text; }, 2000);
 }
 
-function toggle_overlay(id, show) {
-    const el = ui_elements[id] || document.getElementById(id);
-    if (el) el.style.display = show ? "flex" : "none";
-}
-
-function close_all_overlays() {
-    document.querySelectorAll('.menu-overlay').forEach(el => {
-        // prevent closing login overlay if locked
-        if (el.id === 'loginOverlay' && !is_admin && (csv_mode || force_name_mode) && !student_name) return;
-        el.style.display = "none";
-    });
-}
-
 function show_connection_error() {
     const overlay = create_tag('div', 'menu-overlay', '', { display: 'flex', zIndex: '9999' });
     const box = create_tag('div', 'menu-box');
@@ -1971,44 +1958,39 @@ function setup_csv_settings() {
 function setup_event_listeners() {
     const els = ui_elements;
 
-    if (els.createbutton) els.createbutton.onclick = (e) => {
-        e.preventDefault();
-
-        // lock name input if logged in
-        if (!is_admin && (csv_mode || force_name_mode) && student_name) {
-            els.name.value = student_name;
-            els.name.disabled = true;
-            els.name.style.opacity = '0.6';
-        } else if (!is_admin) {
-            els.name.disabled = false;
-            els.name.disabled = false;
-            els.name.style.opacity = '1';
-            if (fileUploadContainer) {
-                fileUploadContainer.style.display = 'none';
+    document.addEventListener('overlay:opened', (e) => {
+        
+        // Cas : Ouverture du formulaire de création (Ticket ou Dépôt)
+        if (e.detail.id === 'formOverlay') {
+            const els = ui_elements;
+            
+            // Logique Admin / User
+            if (!is_admin && (csv_mode || force_name_mode) && student_name) {
+                els.name.value = student_name;
+                els.name.disabled = true;
+                els.name.style.opacity = '0.6';
+            } else if (!is_admin) {
+                els.name.disabled = false;
+                els.name.style.opacity = '1';
+                if (fileUploadContainer) fileUploadContainer.style.display = 'none';
             }
+            
+            if (is_admin) update_cloud_ui();
         }
-        if (is_admin) update_cloud_ui();
 
-        toggle_overlay("formOverlay", true);
-    };
+        // Cas : Ouverture des paramètres
+        if (e.detail.id === 'settingsOverlay') {
+             if (typeof is_admin !== 'undefined' && is_admin) {
+                 update_cloud_ui(); 
+             }
+             // Mise à jour radio max tickets
+             const radio = document.querySelector(`input[name="SliderCount"][value="${max_tickets}"]`);
+             if (radio) radio.checked = true;
+        }
+    });
 
     if (els.create) els.create.onclick = (e) => { e.preventDefault(); handle_form_submit(); };
     if (els.loginEnter) els.loginEnter.onclick = (e) => { e.preventDefault(); handle_login_submit(); };
-
-    // settings
-    document.getElementById("setting")?.addEventListener('click', (e) => {
-        e.preventDefault();
-        toggle_overlay("settingsOverlay", true);
-
-        if (typeof is_admin !== 'undefined' && is_admin) {
-             update_cloud_ui(); 
-        }
-
-        const radio = document.querySelector(`input[name="SliderCount"][value="${max_tickets}"]`);
-        if (radio) radio.checked = true;
-    });
-
-    document.getElementById("closeSettings")?.addEventListener('click', (e) => { e.preventDefault(); close_all_overlays(); });
 
     const st_container = els.announcementContainer;
     if (st_container) {
@@ -2061,8 +2043,6 @@ function setup_event_listeners() {
     setup_download_modal_listeners();
 
     // logout
-    document.getElementById("logout")?.addEventListener('click', (e) => { e.preventDefault(); toggle_overlay("logoutOverlay", true); });
-    document.getElementById("cancelLogout")?.addEventListener('click', (e) => { e.preventDefault(); close_all_overlays(); });
     document.getElementById("confirmLogout")?.addEventListener('click', (e) => {
         e.preventDefault();
         localStorage.removeItem('last_room');

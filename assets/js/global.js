@@ -256,25 +256,75 @@ if (rangeInput) {
     updateSlider();
 }
 
-// -- Langues --
+// --- Gestionnaire d'Overlays Unifié (Stack System) ---
 
-const closeLangOverlay = document.getElementById('closeLangOverlay');
-const languageOverlay = document.getElementById('languageOverlay');
-const settingsOverlayRef = document.getElementById('settingsOverlay');
+const OverlayManager = {
+    stack: [],
+    baseZIndex: 1000,
 
-if (closeLangOverlay && languageOverlay) {
-    closeLangOverlay.addEventListener('click', (e) => {
-        e.preventDefault();
-        languageOverlay.style.display = 'none';
-        if (settingsOverlayRef) settingsOverlayRef.style.display = 'flex';
-    });
-}
+    open: function(overlayId) {
+        const overlay = document.getElementById(overlayId);
+        if (!overlay) return console.error(`Overlay #${overlayId} introuvable`);
+        if (this.stack.includes(overlay)) return;
+        const newZIndex = this.baseZIndex + this.stack.length + 1;
+        
+        overlay.style.zIndex = newZIndex;
+        overlay.style.display = 'flex';
 
-if (languageOverlay) {
-    languageOverlay.addEventListener('click', (e) => {
-        if (e.target === languageOverlay) {
-            languageOverlay.style.display = 'none';
-            if (settingsOverlayRef) settingsOverlayRef.style.display = 'flex';
+        const box = overlay.querySelector('.menu-box');
+        if(box) {
+            box.style.animation = 'none';
+            box.offsetHeight;
+            box.style.animation = null; 
         }
-    });
-}
+
+        this.stack.push(overlay);
+        document.dispatchEvent(new CustomEvent('overlay:opened', { detail: { id: overlayId } }));
+    },
+
+    closeTop: function() {
+        if (this.stack.length === 0) return;
+
+        const overlay = this.stack.pop();
+        overlay.style.display = 'none';
+        overlay.style.zIndex = '';
+    },
+
+    closeSpecific: function(overlayId) {
+        const overlay = document.getElementById(overlayId);
+        const index = this.stack.indexOf(overlay);
+        if (index > -1) {
+            this.stack.splice(index, 1);
+            overlay.style.display = 'none';
+        }
+    }
+};
+
+// --- Écouteurs d'événements globaux ---
+
+document.addEventListener('click', (e) => {
+    const target = e.target.closest('[data-open], [data-close], a, button, .menu-overlay');
+    if (!target) return;
+
+    if (target.dataset.open) {
+        e.preventDefault();
+        OverlayManager.open(target.dataset.open);
+    }
+
+    if (target.dataset.close !== undefined) {
+        e.preventDefault();
+        OverlayManager.closeTop();
+    }
+
+    if (target.classList.contains('menu-overlay') && target === e.target) {
+        if (OverlayManager.stack.length > 0 && OverlayManager.stack[OverlayManager.stack.length - 1] === target) {
+            OverlayManager.closeTop();
+        }
+    }
+});
+
+document.addEventListener('keydown', (e) => {
+    if (e.key === "Escape") {
+        OverlayManager.closeTop();
+    }
+});

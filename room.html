@@ -25,7 +25,7 @@
     <div class="left-container">
 
       <div class="top">
-        <a href="#" class="button-text" id="createbutton" style="height: 92px;" data-i18n="room.new_ticket">
+        <a href="#" class="button-text" id="createbutton" data-open="formOverlay" style="height: 92px;" data-i18n="room.new_ticket">
           <img class="icon" src="./assets/icon/icon thin.png" alt="">
           <span class="text">Nouveau tickets</span>
         </a>
@@ -36,11 +36,11 @@
               style="height: 32px; width: 32px; object-fit: contain;">
             <span class="text" data-i18n="room.code_placeholder">*****</span>
           </a>
-          <a href="#" class="button-simple" id="logout">
+          <a href="#" class="button-simple" id="logout" data-open="logoutOverlay">
             <img class="icon" src="./assets/icon/logout.png" alt=""
               style="height: 32px; width: 32px; object-fit: contain;">
           </a>
-          <a href="#" class="button-simple" id="setting">
+          <a href="#" class="button-simple" id="setting" data-open="settingsOverlay">
             <img class="icon" src="./assets/icon/Settings.png" alt=""
               style="height: 32px; width: 32px; object-fit: contain;">
           </a>
@@ -171,7 +171,7 @@
 
             <div class="overlay-footer" style="display: flex; justify-content: center; gap: 15px; margin-top: 30px;">
 
-              <a class="button-text" id="cancelCreate" href="#"
+              <a class="button-text" data-close href="#"
                 style="width: auto; padding: 0 30px; margin: 0; min-width: 140px;" data-i18n="common.cancel">
                 <img class="icon" src="./assets/icon/cross.png">
                 <span class="text">Annuler</span>
@@ -247,6 +247,7 @@
             </div>
 
             <div id="adminSettingsSection" style="display: none;">
+              <hr style="border: 0; border-top: 1px solid #e0e0e0; margin: 30px 0;">
               <h2 style="text-align: left; margin-top: 30px; font-size: 1.2rem;" data-i18n="room.admin_section">Admin
               </h2>
 
@@ -332,7 +333,9 @@
                 </label>
               </div>
 
-            </div>
+            </div> 
+
+            <hr style="border: 0; border-top: 1px solid #e0e0e0; margin: 30px 0;">
 
             <h2 style="text-align: left; margin-top: 30px; font-size: 1.2rem;">Son</h2>
 
@@ -354,6 +357,8 @@
 
               </div>
             </div>
+
+            <hr style="border: 0; border-top: 1px solid #e0e0e0; margin: 30px 0;">
 
             <h2 style="text-align: left; margin-top: 30px; font-size: 1.2rem;" data-i18n="room.appearance_section">
               Apparence</h2>
@@ -377,12 +382,14 @@
             </div>
 
             <div style="display: flex; justify-content: space-between; align-items: center; margin: 15px 0;">
-              <span data-i18n="overlays.settings.language"> Langue</span>
-              <a class="button-text" id="langToggle" href="#"
-                style="min-height: 41px; width: auto; padding: 0 20px; flex: unset; min-width: 80px; opacity: 30%; pointer-events: none;">
+              <span data-i18n="overlays.settings.language">Langue</span>
+              <a class="button-text" data-open="languageOverlay" href="#"
+                style="min-height: 41px; width: auto; padding: 0 20px; flex: unset; min-width: 80px;">
                 <span class="text" style="font-size: 14px;">FR</span>
               </a>
             </div>
+
+            <hr style="border: 0; border-top: 1px solid #e0e0e0; margin: 30px 0;">
 
             <h2 style="text-align: left; margin-top: 30px; font-size: 1.2rem;" data-i18n="room.github_section">Github
             </h2>
@@ -402,7 +409,7 @@
               style="display: flex; justify-content: space-between; align-items: center; margin: 15px 0; flex-wrap: wrap; gap: 10px;">
               <span data-i18n="overlays.settings.report_bug_mobile">Veuillez signaler les problèmes ou bugs
                 constatés.</span>
-              <a class="button-text" id="openGlobalReport" target="_blank"
+              <a class="button-text" data-open="globalReport" target="_blank"
                 style="min-height: 41px; padding: 0 20px; flex: unset; width: 100%; max-width: 200px; margin: 0;"
                 data-i18n="overlays.settings.report_bug">
                 <img class="icon" src="./assets/icon/report.png">
@@ -418,7 +425,7 @@
             </p>
 
             <div class="overlay-footer">
-              <a class="button-text" id="closeSettings" href="#" style="width: auto; padding: 0 40px; margin: 0;"
+              <a class="button-text" data-close href="#" style="width: auto; padding: 0 40px; margin: 0;"
                 data-i18n="common.save">
                 <img class="icon" src="./assets/icon/check.png" alt="">
                 <span class="text">Sauvegarder</span>
@@ -448,7 +455,7 @@
                 <span class="text">Oui, partir</span>
               </a>
 
-              <a class="button-text" id="cancelLogout" href="#"
+              <a class="button-text" id="cancelLogout" href="#" data-close
                 style="width: auto; padding: 0 30px; margin: 0; background-color: #ff7070; min-width: 140px;"
                 data-i18n="overlays.logout.no">
                 <img class="icon" src="./assets/icon/cross.png" alt="">
@@ -475,13 +482,13 @@
 
             <div class="overlay-footer" style="display: flex; justify-content: center; gap: 15px; margin-top: 30px;">
 
-              <a class="button-text" id="closeBlocked" href="#"
+              <a class="button-text" data-close href="#"
                 style="width: auto; padding: 0 30px; margin: 0; min-width: 140px;" data-i18n="common.ok">
                 <img class="icon" src="./assets/icon/check.png" alt="">
                 <span class="text">Ok</span>
               </a>
 
-              <a class="button-text" id="openAiReport" href="#" onclick="envoyerSignalement()"
+              <a class="button-text" data-open="openaiReport" href="#" onclick="envoyerSignalement()"
                 style="width: auto; padding: 0 30px; margin: 0; min-width: 140px; background-color: #ff7070;"
                 data-i18n="common.report">
                 <img class="icon" src="./assets/icon/report.png" alt="">
@@ -549,7 +556,7 @@
               data-i18n="overlays.bug_report.placeholder"></textarea>
 
             <div class="overlay-footer" style="display: flex; justify-content: center; gap: 15px; margin-top: 30px;">
-              <a class="button-text" id="cancelBugReport" href="#"
+              <a class="button-text" data-close href="#"
                 style="width: auto; padding: 0 30px; margin: 0; min-width: 140px;" data-i18n="common.cancel">
                 <img class="icon" src="./assets/icon/cross.png">
                 <span class="text">Annuler</span>
@@ -683,7 +690,7 @@
 
         <div class="overlay-footer" style="display: flex; justify-content: center; gap: 15px; margin-top: 30px;">
 
-          <a class="button-text" id="depositCancel" href="#"
+          <a class="button-text" data-close href="#"
             style="width: auto; padding: 0 30px; margin: 0; min-width: 140px;" data-i18n="common.cancel">
             <img class="icon" src="./assets/icon/cross.png">
             <span class="text">Annuler</span>
@@ -726,7 +733,7 @@
               </div>
 
               <div class="overlay-footer">
-                  <a class="button-text" id="closeLangOverlay" href="#" style="width: auto; padding: 0 30px;">
+                  <a class="button-text" data-close href="#" style="width: auto; padding: 0 30px;">
                       <img class="icon" src="./assets/icon/cross.png">
                       <span class="text" data-i18n="common.cancel">Annuler</span>
                   </a>
