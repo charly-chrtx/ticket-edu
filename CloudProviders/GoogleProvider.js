@@ -48,13 +48,23 @@ class GoogleProvider extends CloudProvider {
     oauth2Client.setCredentials(token);
     const drive = google.drive({ version: 'v3', auth: oauth2Client });
 
+    // get user email
+    const about = await drive.about.get({ fields: 'user(emailAddress)' });
+    const userEmail = about.data.user.emailAddress;
+
     // folder structure
-    const pathParts = metadata.folderPath.split('/').filter(p => p); // ex: ['Ticket-edu', 'dépot', 'Maths-A1B2C']
+    const pathParts = metadata.folderPath.split('/').filter(p => p);
     let parentId = 'root';
 
     for (const folderName of pathParts) {
       parentId = await this.findOrCreateFolder(drive, folderName, parentId);
     }
+
+    // get folder info
+    const folderRes = await drive.files.get({
+      fileId: parentId,
+      fields: 'webViewLink, name'
+    });
 
     // if file exists, rename it
     let finalName = metadata.name;
@@ -91,7 +101,10 @@ class GoogleProvider extends CloudProvider {
 
     return {
       id: response.data.id,
-      webViewLink: response.data.webViewLink
+      webViewLink: response.data.webViewLink,
+      folderLink: folderRes.data.webViewLink,
+      folderName: folderRes.data.name,
+      account: userEmail
     };
   }
 
