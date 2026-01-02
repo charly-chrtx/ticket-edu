@@ -75,7 +75,7 @@
       "add_file": "+ Add a file",
       "exporting": "Exporting...",
       "colors": "Colors",
-      "save_cloud": "Save via a custom cloud service",
+      "save_cloud": "Back up via a custom cloud",
       "create_btn": "Create"
     },
     "deposit": {
@@ -104,7 +104,7 @@
       "csv_check": "➤ Name verification via a",
       "csv_check_mobile": "CSV Verification",
       "csv_file": "CSV file",
-      "ai_filter": "AI ticket filtering",
+      "ai_filter": "Intelligent ticket filtering",
       "ai_filter_mobile": "AI Filtering",
       "source_code": "Source code"
     },

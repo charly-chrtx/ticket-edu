@@ -67,6 +67,7 @@
       <div class="menu-overlay" id="formOverlay" style="display: none;">
         <div class="menu-box">
 
+
           <div class="admin-selector" id="adminTypeSelector" style="display: none;">
             <div class="slider-selector">
               <label class="slider-option">
@@ -83,6 +84,8 @@
           <div class="input" style="padding-bottom: 0;">
 
             <h1 data-i18n="overlays.create_ticket.title">Nouveau ticket</h1>
+
+            <h2 style="text-align: left; margin-top: 30px; font-size: 1.2rem;">Message</h2>
 
             <div style="margin: 15px 0;">
               <input type="text" id="name" name="name" placeholder="Nom" style="width: 100%;"
@@ -107,6 +110,8 @@
                 data-i18n="overlays.create_ticket.desc_placeholder" />
             </div>
 
+            <hr style="border: 0; border-top: 1px solid #e0e0e0; margin: 30px 0;">
+
             <h2 style="text-align: left; margin-top: 30px; font-size: 1.2rem;"
               data-i18n="overlays.create_ticket.colors">Couleurs</h2>
 
@@ -120,53 +125,51 @@
               <a class='color' style="background-color: #AEFFA6"></a>
             </div>
 
-            <div class="checkbox-container" id="SaveToCloud" style="padding-top: 30px;">
-              <div class="checkbox" onclick="this.classList.toggle('checkbox-checked')"></div>
-              <span style="margin-left: 15px;" data-i18n="overlays.create_ticket.save_cloud">Sauvegarder via un service
-                cloud personnalisé</span>
-            </div>
+            <div id="cloudSection" style="display: none;">
+              <hr style="border: 0; border-top: 1px solid #e0e0e0; margin: 30px 0;">
 
-            <div class="cloudservices">
+              <h2 style="text-align: left; margin-top: 30px; font-size: 1.2rem;" data-i18n="overlays.create_ticket.save_cloud">Sauvegarde Cloud</h2>
 
-              <div class="cloud-provider-card" id="ticketcloudCard" onclick="handle_cloud_click('ticket')">
-                <div class="provider-icon-wrapper">
-                  <img class="icon" src="./assets/icon/ticketcloud.png" alt="Ticket Cloud">
+              <div class="cloudservices">
+                <div class="cloud-provider-card" id="ticketcloudCard" onclick="handle_cloud_click('ticket')">
+                  <div class="provider-icon-wrapper">
+                    <img class="icon" src="./assets/icon/ticketcloud.png" alt="Ticket Cloud">
+                  </div>
+                  <div class="provider-info">
+                    <span class="provider-name" data-i18n="cloud.private">Private Cloud</span>
+                  </div>
                 </div>
-                <div class="provider-info">
-                  <span class="provider-name" data-i18n="cloud.private">Private Cloud</span>
+
+                <div class="cloud-provider-card" id="googleDriveCard" onclick="handle_cloud_click('google')">
+                  <div class="provider-icon-wrapper">
+                    <img class="icon" src="./assets/icon/gdrive.png" alt="Google Drive">
+                  </div>
+                  <div class="provider-info">
+                    <span class="provider-name" data-i18n="cloud.google">Google Drive</span>
+                    <span class="provider-status" data-i18n="cloud.not_connected">Non connecté</span>
+                  </div>
+                </div>
+
+                <div class="cloud-provider-card" id="nextcloudCard" onclick="handle_cloud_click('nextcloud')">
+                  <div class="provider-icon-wrapper">
+                    <img class="icon" src="./assets/icon/nextcloud.png" alt="Nextcloud">
+                  </div>
+                  <div class="provider-info">
+                    <span class="provider-name" data-i18n="cloud.nextcloud">Nextcloud</span>
+                    <span class="provider-status" data-i18n="cloud.not_connected">Non connecté</span>
+                  </div>
+                </div>
+
+                <div class="cloud-provider-card" id="onedriveCard" onclick="handle_cloud_click('onedrive')">
+                  <div class="provider-icon-wrapper">
+                    <img class="icon" src="./assets/icon/onedrive.png" alt="OneDrive">
+                  </div>
+                  <div class="provider-info">
+                    <span class="provider-name" data-i18n="cloud.onedrive">OneDrive</span>
+                    <span class="provider-status" data-i18n="cloud.not_connected">Non connecté</span>
+                  </div>
                 </div>
               </div>
-
-              <div class="cloud-provider-card" id="googleDriveCard" onclick="handle_cloud_click('google')">
-                <div class="provider-icon-wrapper">
-                  <img class="icon" src="./assets/icon/gdrive.png" alt="Google Drive">
-                </div>
-                <div class="provider-info">
-                  <span class="provider-name" data-i18n="cloud.google">Google Drive</span>
-                  <span class="provider-status" data-i18n="cloud.not_connected">Non connecté</span>
-                </div>
-              </div>
-
-              <div class="cloud-provider-card" id="nextcloudCard" onclick="handle_cloud_click('nextcloud')">
-                <div class="provider-icon-wrapper">
-                  <img class="icon" src="./assets/icon/nextcloud.png" alt="Nextcloud">
-                </div>
-                <div class="provider-info">
-                  <span class="provider-name" data-i18n="cloud.nextcloud">Nextcloud</span>
-                  <span class="provider-status" data-i18n="cloud.not_connected">Non connecté</span>
-                </div>
-              </div>
-
-              <div class="cloud-provider-card" id="onedriveCard" onclick="handle_cloud_click('onedrive')">
-                <div class="provider-icon-wrapper">
-                  <img class="icon" src="./assets/icon/onedrive.png" alt="OneDrive">
-                </div>
-                <div class="provider-info">
-                  <span class="provider-name" data-i18n="cloud.onedrive">OneDrive</span>
-                  <span class="provider-status" data-i18n="cloud.not_connected">Non connecté</span>
-                </div>
-              </div>
-
             </div>
 
             <div class="overlay-footer" style="display: flex; justify-content: center; gap: 15px; margin-top: 30px;">
@@ -363,7 +366,7 @@
             <h2 style="text-align: left; margin-top: 30px; font-size: 1.2rem;" data-i18n="room.appearance_section">
               Apparence</h2>
             <div style="display: flex; justify-content: space-between; align-items: center; margin: 15px 0; gap: 10px;">
-              <span style="text-align: left;" data-i18n="overlays.settings.dark_mode">Mode sombre (beta)</span>
+              <span style="text-align: left;" data-i18n="overlays.settings.dark_mode">Mode sombre (Bêta)</span>
 
               <div class="slider-selector" style="width: 200px;">
                 <label class="slider-option">
@@ -382,7 +385,7 @@
             </div>
 
             <div style="display: flex; justify-content: space-between; align-items: center; margin: 15px 0;">
-              <span data-i18n="overlays.settings.language"> Langue</span>
+              <span data-i18n="overlays.settings.language">Langue (Bêta)</span>
               <a class="button-text" id="langToggle" href="#"
                 style="min-height: 41px; width: auto; padding: 0 20px; flex: unset; min-width: 80px; opacity: 30%; pointer-events: none;">
                 <span class="text" style="font-size: 14px;">FR</span>

@@ -75,7 +75,7 @@
       "add_file": "+ Ajouter un fichier",
       "exporting": "Exportation...",
       "colors": "Couleurs",
-      "save_cloud": "Sauvegarder via un cloud personnalisé",
+      "save_cloud": "Lieu de sauvegarde",
       "create_btn": "Créer"
     },
     "deposit": {
@@ -104,7 +104,7 @@
       "csv_check": "➤ Vérification nom via",
       "csv_check_mobile": "Vérification CSV",
       "csv_file": "Fichier CSV",
-      "ai_filter": "Filtrage IA des tickets",
+      "ai_filter": "Filtrage intelligent des tickets",
       "ai_filter_mobile": "Filtrage IA",
       "source_code": "Code source"
     },
@@ -185,7 +185,7 @@
     "check_error": "Erreur de vérification",
     "limit_reached": "Limite atteinte.",
     "name_required": "Nom requis.",
-    "content_required": "Message ou fichier requis.",
+    "content_required": "Message requis.",
     "forbidden_word": "Mot interdit détecté (filtre local).",
     "deposit_name_req": "Nom du dépôt requis.",
     "cloud_req": "Veuillez vous connecter au service Cloud avant de créer.",
