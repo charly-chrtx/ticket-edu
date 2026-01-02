@@ -268,7 +268,7 @@ async function handle_cloud_handshake(provider) {
     if (provider != 'nextcloud') {
         document.body.style.cursor = 'wait';
     }
-    
+
     if (!crypto_key) {
         is_connecting_cloud = false;
         document.body.style.cursor = 'default';
@@ -415,21 +415,35 @@ function open_download_modal(deposit) {
 
     // populate cloud info if present
     if (deposit.cloudProvider) {
-        if(cloud_provider_el) cloud_provider_el.textContent = `Stockage: ${deposit.cloudProvider}`;
-        
+        if (cloud_provider_el) cloud_provider_el.textContent = `Stockage: ${deposit.cloudProvider}`;
+
         if (deposit.cloudAccount && cloud_account_el) {
             cloud_account_el.textContent = `Compte: ${deposit.cloudAccount}`;
             cloud_account_el.style.display = '';
         }
-        
+
         if (deposit.cloudPath && cloud_path_el) {
-             cloud_path_el.textContent = `Chemin: ${deposit.cloudPath}`;
-             cloud_path_el.style.display = '';
+            cloud_path_el.textContent = `Chemin: ${deposit.cloudPath}`;
+            cloud_path_el.style.display = '';
         }
 
         if (deposit.cloudWebUrl && show_cloud_btn) {
             show_cloud_btn.style.display = 'flex';
-            // update onclick
+
+            const iconImg = show_cloud_btn.querySelector('.icon');
+            if (iconImg) {
+                const providerKey = deposit.cloudProvider.toLowerCase();
+                if (providerKey.includes('google')) {
+                    iconImg.src = "./assets/icon/gdrive.png";
+                } else if (providerKey.includes('onedrive')) {
+                    iconImg.src = "./assets/icon/onedrive.png";
+                } else if (providerKey.includes('nextcloud')) {
+                    iconImg.src = "./assets/icon/nextcloud.png";
+                } else {
+                    iconImg.src = "./assets/icon/cloud.png";
+                }
+            }
+
             show_cloud_btn.onclick = (e) => {
                 e.preventDefault();
                 window.open(deposit.cloudWebUrl, '_blank');
@@ -491,7 +505,7 @@ function open_download_modal(deposit) {
         if (dl_all_btn) {
             const new_btn = dl_all_btn.cloneNode(true);
             dl_all_btn.parentNode.replaceChild(new_btn, dl_all_btn);
-            
+
             new_btn.onclick = async (e) => {
                 e.preventDefault();
                 const originalText = new_btn.innerHTML;
@@ -501,18 +515,18 @@ function open_download_modal(deposit) {
 
                 try {
                     const zip = new JSZip();
-                    
+
                     // get and process each file
                     for (const file of files) {
                         // download encrypted blob
                         const blob_enc = await api_download(file.id);
-                        
+
                         // decrypt blob
                         const blob_clear = await decrypt_blob(blob_enc);
-                        
+
                         // determine filename
                         const original_name = file.originalName || file.name;
-                        let filename = file.customName 
+                        let filename = file.customName
                             ? `${normalize_name_segment(file.customName)}.${original_name.split('.').pop()}`
                             : original_name;
 
@@ -521,8 +535,8 @@ function open_download_modal(deposit) {
                     }
 
                     // generate zip
-                    const content = await zip.generateAsync({type: "blob"});
-                    
+                    const content = await zip.generateAsync({ type: "blob" });
+
                     // save
                     saveAs(content, `depot-${deposit.name || 'fichiers'}.zip`);
 
@@ -1532,11 +1546,11 @@ function setup_deposit_drag_drop() {
 }
 
 async function upload_deposit() {
-    if (!current_deposit_target) return notif('Dépôt introuvable',"error");
-    if (!deposit_pending_file) return notif('Aucun fichier sélectionné',"error");
+    if (!current_deposit_target) return notif('Dépôt introuvable', "error");
+    if (!deposit_pending_file) return notif('Aucun fichier sélectionné', "error");
 
     if (deposit_pending_file.size > 50 * 1024 * 1024) {
-        return notif('Fichier trop volumineux (max 50 Mo).',"error");
+        return notif('Fichier trop volumineux (max 50 Mo).', "error");
     }
 
     const customNameEl = document.getElementById('depositCustomName');
@@ -1555,18 +1569,18 @@ async function upload_deposit() {
 
     // prepare filename logic
     let outNameBase = '';
-    
+
     if (customName) {
         // use custom name only
         outNameBase = normalize_name_segment(customName);
     } else {
         // use depositname.originalfilename
         const segmentA = normalize_name_segment(current_deposit_target.name || 'depot');
-        
+
         // get original name without extension
         const parts = deposit_pending_file.name.split('.');
         const originalBase = parts.length > 1 ? parts.slice(0, -1).join('.') : parts[0];
-        
+
         outNameBase = `${segmentA}.${normalize_name_segment(originalBase)}`;
     }
 
@@ -2039,7 +2053,7 @@ function setup_event_listeners() {
         toggle_overlay("settingsOverlay", true);
 
         if (typeof is_admin !== 'undefined' && is_admin) {
-             update_cloud_ui(); 
+            update_cloud_ui();
         }
 
         const radio = document.querySelector(`input[name="SliderCount"][value="${max_tickets}"]`);
@@ -2171,8 +2185,8 @@ function setup_event_listeners() {
         close_all_overlays();
 
         if (pending_files.length > 0 && confirm("Annuler et perdre les fichiers ?")) {
-             pending_files = [];
-             render_pending_files();
+            pending_files = [];
+            render_pending_files();
         } else if (pending_files.length === 0) {
 
         }
