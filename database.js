@@ -64,6 +64,8 @@ db.serialize(() => {
     name TEXT,
     color TEXT,
     cloudProvider TEXT,
+    cloudAccount TEXT,
+    cloudPath TEXT,
     createdAt TEXT
   )`);
 
@@ -75,6 +77,8 @@ db.serialize(() => {
       { table: 'files', col: 'cloudId', type: 'TEXT' },
       { table: 'deposits', col: 'color', type: 'TEXT' },
       { table: 'deposits', col: 'cloudProvider', type: 'TEXT' },
+      { table: 'deposits', col: 'cloudAccount', type: 'TEXT' },
+      { table: 'deposits', col: 'cloudPath', type: 'TEXT' },
       { table: 'rooms', col: 'forceName', type: 'INTEGER DEFAULT 0' }
     ];
 

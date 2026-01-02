@@ -101,7 +101,7 @@ app.get('/api/cloud/status', (req, res) => {
   const roomCode = req.query.roomCode;
 
   const userSession = cloudManager.getSession(sessionId);
-  
+
   const roomSession = roomCode ? cloudManager.getRoomToken(roomCode) : null;
 
   const activeSession = roomSession || userSession;
@@ -227,7 +227,7 @@ app.get('/api/cloud/callback/:provider', async (req, res) => {
 // cloud disconnect
 app.post('/api/cloud/disconnect', (req, res) => {
   const { roomCode } = req.body;
-  
+
   if (roomCode) {
     // delete room data
     cloudManager.deleteRoomKey(roomCode);
@@ -891,13 +891,33 @@ app.post('/api/deposits', async (req, res) => {
 
     const id = "dep_" + Date.now();
 
-    // insert with provider
-    db.run("INSERT INTO deposits (id, roomCode, name, color, cloudProvider, createdAt) VALUES (?, ?, ?, ?, ?, ?)",
-      [id, roomCode, name, color || '#cdcdcd', cloudProvider || null, new Date().toISOString()],
+    let cloudAccount = null;
+    let cloudPath = null;
+
+    if (cloudProvider) {
+      const roomSession = cloudManager.getRoomToken(roomCode);
+
+      if (roomSession && roomSession.provider === cloudProvider) {
+
+        const userSession = cloudManager.getSession(req.cookies.sessionID);
+        if (userSession && userSession.provider === cloudProvider) {
+          cloudAccount = userSession.email;
+        } else if (roomSession.token) {
+          cloudAccount = roomSession.token.email || 'Inconnu';
+        }
+
+        const rootPath = roomSession.basePath || process.env.CLOUD_BASE_PATH || 'Ticket-Edu';
+        cloudPath = `${rootPath}/dépots/${roomCode}/${normalize(name)}`;
+      }
+    }
+
+
+    db.run("INSERT INTO deposits (id, roomCode, name, color, cloudProvider, cloudAccount, cloudPath, createdAt) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+      [id, roomCode, name, color || '#cdcdcd', cloudProvider || null, cloudAccount, cloudPath, new Date().toISOString()],
       (err) => {
         if (err) return res.status(500).json({ error: err.message });
         notifierClients(roomCode, 'update');
-        res.status(201).json({ id, name, color, cloudProvider });
+        res.status(201).json({ id, name, color, cloudProvider, cloudAccount, cloudPath });
       }
     );
   });

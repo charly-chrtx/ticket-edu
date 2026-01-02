@@ -17,9 +17,21 @@ class GoogleProvider extends CloudProvider {
     });
   }
 
-  async getTokenFromCode(code, redirectUri) {
+async getTokenFromCode(code, redirectUri) {
     const oauth2Client = new google.auth.OAuth2(this.clientId, this.clientSecret, redirectUri);
     const { tokens } = await oauth2Client.getToken(code);
+
+    try {
+      oauth2Client.setCredentials(tokens);
+      const drive = google.drive({ version: 'v3', auth: oauth2Client });
+      const about = await drive.about.get({ fields: 'user(emailAddress)' });
+      
+      tokens.email = about.data.user.emailAddress; 
+    } catch (e) {
+      console.error("Impossible de récupérer l'email lors du handshake Google:", e.message);
+      tokens.email = 'Inconnu';
+    }
+
     return tokens;
   }
 
