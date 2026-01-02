@@ -235,7 +235,7 @@ h1 {
     display: flex;
     flex-direction: column;
     gap: clamp(10px, 1.5vw, 20px);
-    filter: drop-shadow(0px 4px 0px rgb(0, 0, 0, 0.2));
+    filter: drop-shadow(0px 4px 0px rgb(0, 0, 0, 0.2)) !important;
     background-color: var(--card-bg);
     transition: all 0.3s ease;
     scrollbar-gutter: stable;
@@ -852,7 +852,7 @@ textarea:hover:not(:focus) {
     padding: clamp(30px, 3vw, 40px);
     border-radius: 2.5rem;
     border: 2px solid black;
-    box-shadow: 0 3px 0px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 4px 0px rgba(0, 0, 0, 0.2);
     text-align: center;
     width: 100%;
     max-width: 900px;
@@ -1803,7 +1803,6 @@ body.dark-mode #qrcode-container {
     height: 100%;
     object-fit: contain;
     pointer-events: none;
-    filter: none !important;
 }
 
 

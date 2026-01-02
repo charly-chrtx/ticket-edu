@@ -197,18 +197,16 @@ async function update_cloud_ui() {
     console.log("--- DEBUG: update_cloud_ui appelé ---");
 
     const cloudSection = document.getElementById('cloudSection');
-    const cloudServicesContainer = document.querySelector('.cloudservices'); // <-- AJOUT IMPORTANT
+    const cloudServicesContainer = document.querySelector('.cloudservices');
 
     if (!cloudSection) return;
 
-    // 1. Vérification des conditions
     const isAdmin = typeof is_admin !== 'undefined' ? is_admin : false;
     const typeRadio = document.querySelector('input[name="AdminType"]:checked');
     const isDepositMode = typeRadio && typeRadio.value === 'depot';
     
     console.log(`Status: Admin=${isAdmin}, Mode=${typeRadio ? typeRadio.value : 'null'}`);
 
-    // Si NON, on cache tout et on arrête.
     if (!isAdmin || !isDepositMode) {
         console.log(">> Masqué (Pas admin ou pas mode dépôt)");
         cloudSection.style.display = 'none';
@@ -217,18 +215,14 @@ async function update_cloud_ui() {
 
     console.log(">> Affichage forcé de la section Cloud");
 
-    // 2. Affichage des conteneurs parents
     cloudSection.style.display = 'block';
     
-    // CORRECTION : On s'assure que le conteneur flex est bien visible aussi
     if (cloudServicesContainer) {
         cloudServicesContainer.style.display = 'flex'; 
-        // Force le style flex au cas où le CSS le cacherait
         cloudServicesContainer.style.flexWrap = 'wrap'; 
         cloudServicesContainer.style.gap = '10px';
     }
 
-    // 3. Force l'affichage de TOUTES les cartes (sans vérifier l'API)
     const allCards = [
         'ticketcloudCard',
         'googleDriveCard',
@@ -239,13 +233,12 @@ async function update_cloud_ui() {
     allCards.forEach(id => {
         const el = document.getElementById(id);
         if (el) {
-            el.style.display = 'flex'; // On force l'affichage
+            el.style.display = 'flex';
         } else {
             console.warn(`Attention: L'élément ${id} est introuvable dans le HTML`);
         }
     });
 
-    // 4. Gestion cosmétique (Texte vert si connecté)
     try {
         const status = await api_call(`/api/cloud/status?roomCode=${room_code}`);
         
