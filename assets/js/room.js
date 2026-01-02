@@ -59,7 +59,7 @@ async function resolveApiBase() {
         api_url = remote;
     }
 
-    // derive websocket URL from api_url
+    // derive websocket url from api_url
     if (api_url.startsWith('https://')) {
         ws_url = api_url.replace(/^https:/, 'wss:');
     } else if (api_url.startsWith('http://')) {
@@ -67,14 +67,14 @@ async function resolveApiBase() {
     } else {
         ws_url = api_url;
     }
-    console.log('API base:', api_url, 'WS base:', ws_url);
+    console.log('api base:', api_url, 'ws base:', ws_url);
 }
 
 // ui state
 let ui_elements = {};
 let dot_interval = null;
 
-//logs
+// logs
 const log_buffer = [];
 const max_logs = 50;
 
@@ -397,9 +397,45 @@ function open_download_modal(deposit) {
     const list = document.getElementById('file-list');
     const dl_all_btn = document.getElementById('download-all');
 
+    // cloud integration elements
+    const cloud_provider_el = ui_elements.cloudstoragesolution;
+    const cloud_account_el = ui_elements.cloudaccount;
+    const cloud_path_el = ui_elements.cloudpath;
+    const show_cloud_btn = ui_elements.showcloud;
+
     if (!modal || !list) return;
 
     modal.style.display = '';
+
+    // reset cloud ui defaults
+    if (cloud_provider_el) cloud_provider_el.textContent = "Stockage: Local";
+    if (cloud_account_el) cloud_account_el.style.display = 'none';
+    if (cloud_path_el) cloud_path_el.style.display = 'none';
+    if (show_cloud_btn) show_cloud_btn.style.display = 'none';
+
+    // populate cloud info if present
+    if (deposit.cloudProvider) {
+        if(cloud_provider_el) cloud_provider_el.textContent = `Stockage: ${deposit.cloudProvider}`;
+        
+        if (deposit.cloudAccount && cloud_account_el) {
+            cloud_account_el.textContent = `Compte: ${deposit.cloudAccount}`;
+            cloud_account_el.style.display = '';
+        }
+        
+        if (deposit.cloudPath && cloud_path_el) {
+             cloud_path_el.textContent = `Chemin: ${deposit.cloudPath}`;
+             cloud_path_el.style.display = '';
+        }
+
+        if (deposit.cloudWebUrl && show_cloud_btn) {
+            show_cloud_btn.style.display = 'flex';
+            // update onclick
+            show_cloud_btn.onclick = (e) => {
+                e.preventDefault();
+                window.open(deposit.cloudWebUrl, '_blank');
+            }
+        }
+    }
 
     list.innerHTML = '';
     const files = deposit.files || [];
@@ -706,7 +742,9 @@ function init_ui() {
         'nameChoicesContainer', 'csvButton', 'csvInput', 'qrcode-container'
         , 'depositOverlay', 'depositCustomName', 'depositDropArea', 'depositFileInput', 'depositFileName', 'depositSend', 'depositCancel',
         'bugReportOverlay', 'bugDescription', 'sendBugReport',
-        'cancelBugReport', 'openGlobalReport', 'openAiReport'
+        'cancelBugReport', 'openGlobalReport', 'openAiReport',
+        'cloudstoragesolution', 'cloudaccount', 'cloudpath', 'showcloud',
+        'langToggle', 'languageOverlay', 'closeLangOverlay'
     ];
 
     ids.forEach(id => {
@@ -1157,7 +1195,7 @@ function update_storage_ui() {
     let total_bytes = 0;
     let total_files = 0;
 
-    // Calcul des fichiers
+    // calcul des fichiers
     announcements_list.forEach(a => {
         if (a.files) {
             total_files += a.files.length;
@@ -1886,7 +1924,7 @@ function setup_websocket() {
 
 // settings admin
 
-// 1. Au chargement : on essaie de récupérer le nom sauvegardé, sinon défaut
+// 1. au chargement : on essaie de récupérer le nom sauvegardé, sinon défaut
 var current_csv_name = localStorage.getItem('my_csv_name') || "Fichier CSV";
 
 function setup_csv_settings() {
@@ -2188,6 +2226,16 @@ function setup_event_listeners() {
         handle_cloud_handshake('nextcloud');
     });
 
+    // language overlay
+    if (els.langToggle) els.langToggle.onclick = (e) => {
+        e.preventDefault();
+        toggle_overlay('languageOverlay', true);
+    };
+    if (els.closeLangOverlay) els.closeLangOverlay.onclick = (e) => {
+        e.preventDefault();
+        toggle_overlay('languageOverlay', false);
+    };
+
     window.addEventListener('message', (event) => {
         if (event.data && event.data.type === 'CLOUD_AUTH_RESULT') {
             if (event.data.status === 'success') {
@@ -2236,4 +2284,3 @@ function add_files(files) {
 window.addEventListener('DOMContentLoaded', () => {
     init_app();
 });
-
