@@ -706,6 +706,11 @@
       <div class="input" style="padding-bottom: 0; align-items: center;">
 
         <h1 data-i18n="overlays.download_modal.title">Fichiers du dépôt</h1>
+        <div class="depositinfos">
+          <span id="cloudstoragesolution" data-i18n="overlays.download_modal.cloud_storage">Stockage Cloud:</span>
+          <span id="cloudaccount" data-i18n="overlays.download_modal.account">Compte:</span>
+          <span id="cloudpath" data-i18n="overlays.download_modal.path">Chemin:</span>
+        </div>
 
         <ul id="file-list" class="file-list"></ul>
 
@@ -716,6 +721,13 @@
             data-i18n="overlays.download_modal.download_all">
             <img class="icon" src="./assets/icon/download.png">
             <span class="text">Tout télécharger .zip</span>
+          </a>
+
+          <a class="button-text" id="showcloud" href="#"
+            style="width: auto; padding: 0 30px; margin: 0; min-width: 140px;"
+            data-i18n="overlays.download_modal.open_cloud">
+            <img class="icon" src="./assets/icon/gdrive.png">
+            <span class="text">Ouvrir le cloud</span>
           </a>
 
         </div>

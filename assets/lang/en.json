@@ -144,7 +144,11 @@
     },
     "download_modal": {
       "title": "Deposit files",
-      "download_all": "Download all .zip"
+      "account": "Account:",
+      "path": "Path:",
+      "cloud_storage": "Cloud storage:",
+      "download_all": "Download all .zip",
+      "open_cloud": "Open cloud"
     }
   },
   "cloud": {
