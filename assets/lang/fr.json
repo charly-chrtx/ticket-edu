@@ -144,7 +144,11 @@
     },
     "download_modal": {
       "title": "Fichiers déposés",
-      "download_all": "Tout télécharger .zip"
+      "account": "Compte:",
+      "path": "Chemin:",
+      "cloud_storage": "Stockage Cloud:",
+      "download_all": "Tout télécharger .zip",
+      "open_cloud": "Ouvrir le cloud"
     }
   },
   "cloud": {
