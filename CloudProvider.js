@@ -20,6 +20,11 @@ class CloudProvider {
     throw new Error("method 'verifyCredentials' must be implemented");
   }
 
+  // create folder and return url
+  async createFolder(path, tokenOrCredentials) {
+    throw new Error("method 'createFolder' must be implemented");
+  }
+
   // upload file stream
   // returns { id, webViewLink, ... }
   async uploadStream(fileStream, metadata, tokenOrCredentials) {

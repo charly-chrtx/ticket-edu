@@ -66,6 +66,7 @@ db.serialize(() => {
     cloudProvider TEXT,
     cloudAccount TEXT,
     cloudPath TEXT,
+    cloudWebUrl TEXT,
     createdAt TEXT
   )`);
 
@@ -79,6 +80,7 @@ db.serialize(() => {
       { table: 'deposits', col: 'cloudProvider', type: 'TEXT' },
       { table: 'deposits', col: 'cloudAccount', type: 'TEXT' },
       { table: 'deposits', col: 'cloudPath', type: 'TEXT' },
+      { table: 'deposits', col: 'cloudWebUrl', type: 'TEXT' },
       { table: 'rooms', col: 'forceName', type: 'INTEGER DEFAULT 0' }
     ];
 
@@ -94,6 +96,5 @@ db.serialize(() => {
     });
   });
 });
-
 
 module.exports = db;

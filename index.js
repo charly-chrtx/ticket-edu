@@ -886,38 +886,55 @@ app.delete('/api/tickets/:id', (req, res) => {
 app.post('/api/deposits', async (req, res) => {
   const { roomCode, userId, name, color, cloudProvider } = req.body;
 
-  db.get("SELECT adminId FROM rooms WHERE code = ?", [roomCode], (err, room) => {
+  db.get("SELECT adminId FROM rooms WHERE code = ?", [roomCode], async (err, room) => {
     if (!room || room.adminId !== userId) return res.status(403).json({ error: "unauthorized" });
 
     const id = "dep_" + Date.now();
-
     let cloudAccount = null;
     let cloudPath = null;
+    let cloudWebUrl = null;
 
     if (cloudProvider) {
       const roomSession = cloudManager.getRoomToken(roomCode);
+      
+      // logic to determine token
+      let tokenToUse = null;
 
       if (roomSession && roomSession.provider === cloudProvider) {
-
         const userSession = cloudManager.getSession(req.cookies.sessionID);
+        
+        // prefer user session
         if (userSession && userSession.provider === cloudProvider) {
           cloudAccount = userSession.email;
+          tokenToUse = userSession.token;
         } else if (roomSession.token) {
+          // fallback to room admin
           cloudAccount = roomSession.token.email || 'Inconnu';
+          tokenToUse = roomSession.token;
         }
 
         const rootPath = roomSession.basePath || process.env.CLOUD_BASE_PATH || 'Ticket-Edu';
         cloudPath = `${rootPath}/dépots/${roomCode}/${normalize(name)}`;
+
+        // create folder immediately
+        try {
+          const providerInstance = cloudManager.getProvider(cloudProvider);
+          if (providerInstance && tokenToUse) {
+            cloudWebUrl = await providerInstance.createFolder(cloudPath, tokenToUse);
+            console.log("folder created, url:", cloudWebUrl);
+          }
+        } catch (e) {
+          console.error("error creating cloud folder:", e.message);
+        }
       }
     }
 
-
-    db.run("INSERT INTO deposits (id, roomCode, name, color, cloudProvider, cloudAccount, cloudPath, createdAt) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-      [id, roomCode, name, color || '#cdcdcd', cloudProvider || null, cloudAccount, cloudPath, new Date().toISOString()],
+    db.run("INSERT INTO deposits (id, roomCode, name, color, cloudProvider, cloudAccount, cloudPath, cloudWebUrl, createdAt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+      [id, roomCode, name, color || '#cdcdcd', cloudProvider || null, cloudAccount, cloudPath, cloudWebUrl, new Date().toISOString()],
       (err) => {
         if (err) return res.status(500).json({ error: err.message });
         notifierClients(roomCode, 'update');
-        res.status(201).json({ id, name, color, cloudProvider, cloudAccount, cloudPath });
+        res.status(201).json({ id, name, color, cloudProvider, cloudAccount, cloudPath, cloudWebUrl });
       }
     );
   });

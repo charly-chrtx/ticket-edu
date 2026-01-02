@@ -17,7 +17,7 @@ class GoogleProvider extends CloudProvider {
     });
   }
 
-async getTokenFromCode(code, redirectUri) {
+  async getTokenFromCode(code, redirectUri) {
     const oauth2Client = new google.auth.OAuth2(this.clientId, this.clientSecret, redirectUri);
     const { tokens } = await oauth2Client.getToken(code);
 
@@ -33,6 +33,17 @@ async getTokenFromCode(code, redirectUri) {
     }
 
     return tokens;
+  }
+
+  // helper to ensure path exists
+  async _ensureFolderPath(drive, folderPath) {
+    const pathParts = folderPath.split('/').filter(p => p);
+    let parentId = 'root';
+
+    for (const folderName of pathParts) {
+      parentId = await this.findOrCreateFolder(drive, folderName, parentId);
+    }
+    return parentId;
   }
 
   async findOrCreateFolder(drive, folderName, parentId = 'root') {
@@ -55,6 +66,22 @@ async getTokenFromCode(code, redirectUri) {
     }
   }
 
+  // create folder and get link
+  async createFolder(folderPath, token) {
+    const oauth2Client = new google.auth.OAuth2(this.clientId, this.clientSecret);
+    oauth2Client.setCredentials(token);
+    const drive = google.drive({ version: 'v3', auth: oauth2Client });
+
+    const parentId = await this._ensureFolderPath(drive, folderPath);
+
+    const res = await drive.files.get({
+      fileId: parentId,
+      fields: 'webViewLink'
+    });
+
+    return res.data.webViewLink;
+  }
+
   async uploadStream(fileStream, metadata, token) {
     const oauth2Client = new google.auth.OAuth2(this.clientId, this.clientSecret);
     oauth2Client.setCredentials(token);
@@ -65,12 +92,7 @@ async getTokenFromCode(code, redirectUri) {
     const userEmail = about.data.user.emailAddress;
 
     // folder structure
-    const pathParts = metadata.folderPath.split('/').filter(p => p);
-    let parentId = 'root';
-
-    for (const folderName of pathParts) {
-      parentId = await this.findOrCreateFolder(drive, folderName, parentId);
-    }
+    const parentId = await this._ensureFolderPath(drive, metadata.folderPath);
 
     // get folder info
     const folderRes = await drive.files.get({
