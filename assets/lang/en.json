@@ -40,8 +40,8 @@
   "room": {
     "title": "Ticket",
     "new_ticket": "New ticket",
-    "new_message": "New message",
-    "new_deposit": "New deposit",
+    "new_message": "Message",
+    "new_deposit": "Deposit",
     "code_placeholder": "*****",
     "scan_join": "Scan to join us.",
     "copy_link": "Copy group link",

@@ -701,6 +701,40 @@
     </div>
   </div>
 
+  <div class="menu-overlay" id="languageOverlay" style="display: none;">
+      <div class="menu-box" style="max-width: 400px;">
+          <div class="input" style="padding-bottom: 0;">
+              
+              <h1 data-i18n="overlays.settings.language">Langue</h1>
+
+              <p style="margin: 20px 0; opacity: 0.7; text-align: center;">
+                  Sélectionnez votre langue
+              </p>
+
+              <div style="display: flex; flex-direction: column; gap: 15px; margin: 30px 0;">
+                  
+                  <a class="button-text" href="#" onclick="window.localeManager.changeLanguage('fr')">
+                      <img class="icon" src="./assets/icon/frenchflag.png" alt="FR" style="border: 2px #000 solid; border-radius: 20px; filter: none !important;">
+                      <span class="text">Français</span>
+                  </a>
+
+                  <a class="button-text" href="#" onclick="window.localeManager.changeLanguage('en')">
+                      <img class="icon" src="./assets/icon/englishflag.png" alt="EN" style="border: 2px #000 solid; border-radius: 20px; filter: none !important;">
+                      <span class="text">English</span>
+                  </a>
+
+              </div>
+
+              <div class="overlay-footer">
+                  <a class="button-text" id="closeLangOverlay" href="#" style="width: auto; padding: 0 30px;">
+                      <img class="icon" src="./assets/icon/cross.png">
+                      <span class="text" data-i18n="common.cancel">Annuler</span>
+                  </a>
+              </div>
+          </div>
+      </div>
+  </div>
+
   <div class="menu-overlay hidden" id="download-modal">
     <div class="menu-box">
       <div class="input" style="padding-bottom: 0; align-items: center;">

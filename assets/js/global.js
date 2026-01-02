@@ -42,9 +42,6 @@ function applyTheme(theme) {
   }
 }
 
-/**
- * Cycle à travers les modes : Light -> Auto -> Dark -> Light ...
- */
 function cycleNextTheme() {
   const currentTheme = localStorage.getItem('theme_preference') || 'auto';
   let nextTheme;
@@ -257,4 +254,27 @@ window.addEventListener('load', function() {
 if (rangeInput) {
     rangeInput.addEventListener('input', updateSlider);
     updateSlider();
+}
+
+// -- Langues --
+
+const closeLangOverlay = document.getElementById('closeLangOverlay');
+const languageOverlay = document.getElementById('languageOverlay');
+const settingsOverlayRef = document.getElementById('settingsOverlay');
+
+if (closeLangOverlay && languageOverlay) {
+    closeLangOverlay.addEventListener('click', (e) => {
+        e.preventDefault();
+        languageOverlay.style.display = 'none';
+        if (settingsOverlayRef) settingsOverlayRef.style.display = 'flex';
+    });
+}
+
+if (languageOverlay) {
+    languageOverlay.addEventListener('click', (e) => {
+        if (e.target === languageOverlay) {
+            languageOverlay.style.display = 'none';
+            if (settingsOverlayRef) settingsOverlayRef.style.display = 'flex';
+        }
+    });
 }
