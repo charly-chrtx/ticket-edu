@@ -136,7 +136,7 @@ function create_tag(tag, class_name, content = '', style = {}) {
 
 // cloud interaction
 function handle_cloud_click(provider) {
-let cardId = `${provider}Card`;
+    let cardId = `${provider}Card`;
     if (provider === 'google') cardId = 'googleDriveCard';
     if (provider === 'ticket') cardId = 'ticketcloudCard'; // <--- INDISPENSABLE
 
@@ -204,22 +204,19 @@ async function update_cloud_ui() {
     const isAdmin = typeof is_admin !== 'undefined' ? is_admin : false;
     const typeRadio = document.querySelector('input[name="AdminType"]:checked');
     const isDepositMode = typeRadio && typeRadio.value === 'depot';
-    
+
     console.log(`Status: Admin=${isAdmin}, Mode=${typeRadio ? typeRadio.value : 'null'}`);
 
     if (!isAdmin || !isDepositMode) {
-        console.log(">> Masqué (Pas admin ou pas mode dépôt)");
         cloudSection.style.display = 'none';
         return;
     }
 
-    console.log(">> Affichage forcé de la section Cloud");
-
     cloudSection.style.display = 'block';
-    
+
     if (cloudServicesContainer) {
-        cloudServicesContainer.style.display = 'flex'; 
-        cloudServicesContainer.style.flexWrap = 'wrap'; 
+        cloudServicesContainer.style.display = 'flex';
+        cloudServicesContainer.style.flexWrap = 'wrap';
         cloudServicesContainer.style.gap = '10px';
     }
 
@@ -234,21 +231,19 @@ async function update_cloud_ui() {
         const el = document.getElementById(id);
         if (el) {
             el.style.display = 'flex';
-        } else {
-            console.warn(`Attention: L'élément ${id} est introuvable dans le HTML`);
         }
     });
 
     try {
         const status = await api_call(`/api/cloud/status?roomCode=${room_code}`);
-        
+
         ['google', 'nextcloud', 'onedrive', 'ticket'].forEach(p => set_cloud_card_state(p, 'idle'));
 
         if (status.connected && status.provider) {
             set_cloud_card_state(status.provider, 'connected');
         }
     } catch (e) {
-        console.log("Check status ignoré (mode local ou erreur API), boutons restent visibles.");
+        console.error("Erreur récupération statut cloud:", e);
     }
 }
 
@@ -293,7 +288,7 @@ async function handle_cloud_handshake(provider) {
             roomCode: room_code,
             provider: provider,
             cryptoKey: key_arr,
-            ...auth_data
+            authData: auth_data
         };
 
         const res = await api_call('/api/cloud/handshake', 'POST', body);
@@ -377,7 +372,7 @@ function prompt_nextcloud_creds() {
 
             if (!url || !user || !pass) return alert("Tout les champs sont requis");
 
-            closeAndResolve({ ncUrl: url, ncUser: user, ncPass: pass });
+            closeAndResolve({ url: url, user: user, pass: pass });
         };
     });
 }
@@ -1709,25 +1704,6 @@ function render_pending_files() {
 }
 
 async function handle_form_submit() {
-    if (adminType === 'depot') {
-        if (!name) return notif('Nom du dépôt requis.', "error");
-
-        let provider = null;
-
-        try {
-            const status = await api_call(`/api/cloud/status?roomCode=${room_code}`);
-
-            if (status.connected) {
-                provider = status.provider;
-            }
-        } catch (e) {
-            console.error(e);
-        }
-
-        await create_deposit(name, color, provider);
-        return;
-    }
-
     if (is_sending) return;
     const name_input = ui_elements.name;
     const infos_input = ui_elements.infos;
@@ -1751,7 +1727,7 @@ async function handle_form_submit() {
             if (!name) return notif('Nom du dépôt requis.', "error");
 
             let provider = null;
-            
+
             try {
                 const status = await api_call(`/api/cloud/status?roomCode=${room_code}`);
                 if (status.connected) {
