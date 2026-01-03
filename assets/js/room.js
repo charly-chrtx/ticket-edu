@@ -283,7 +283,7 @@ async function handle_cloud_handshake(provider) {
 
     let auth_data = {};
 
-    // nextcloud specific flow
+    // nextcloud flow
     if (provider === 'nextcloud') {
         const nc_url = await prompt_nextcloud_creds();
 
@@ -301,28 +301,29 @@ async function handle_cloud_handshake(provider) {
 
             set_cloud_card_state(provider, 'loading');
 
-            // get login link
+            // init login
             const res = await api_call('/api/cloud/nextcloud/init', 'POST', {
                 roomCode: room_code,
                 serverUrl: nc_url,
                 cryptoKey: key_arr
             });
 
-            // Adaptation au format de réponse Nextcloud
+            // adapt response
             const loginUrl = res.login || res.loginUrl;
             const pollToken = (res.poll && res.poll.token) ? res.poll.token : res.pollToken;
 
             if (loginUrl && pollToken) {
                 const popup = window.open(loginUrl, '_blank', 'width=500,height=600');
-
-                // poll until valid
+                
+                // poll loop
                 const interval = setInterval(async () => {
                     try {
-                        const poll = await api_call('/api/cloud/nextcloud/poll', 'POST', {
+                        const poll = await api_call('/api/cloud/nextcloud/poll', 'POST', { 
                             token: pollToken,
                             url: nc_url,
                             roomCode: room_code
-                        }); 
+                        });
+                        
                         if (poll.success) {
                             clearInterval(interval);
                             if (popup) popup.close();
@@ -332,7 +333,7 @@ async function handle_cloud_handshake(provider) {
                         } else if (poll.status === 'error') {
                             throw new Error('Auth failed');
                         }
-                        // pending...
+                        // pending
                     } catch (e) {
                         clearInterval(interval);
                         is_connecting_cloud = false;
@@ -369,11 +370,11 @@ async function handle_cloud_handshake(provider) {
         if (!res) return;
 
         if (res.redirectUrl) {
-            // redirect flow (google/onedrive)
+            // redirect flow
             window.open(res.redirectUrl, '_blank', 'width=500,height=600');
-        }
-        else if (res.connected || res.status === 'connected') {
-            await update_cloud_ui();
+        } 
+        else if (res.connected || res.status === 'connected') {            
+            await update_cloud_ui(); 
         }
     } catch (e) {
         set_cloud_card_state(provider, "error");
