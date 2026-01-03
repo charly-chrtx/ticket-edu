@@ -130,51 +130,21 @@ app.post('/api/cloud/handshake', async (req, res) => {
   }
 
   try {
-    // nextcloud logic
     if (provider === 'nextcloud') {
       
-      // legacy auth (user + pass)
-      if (authData.user && authData.pass) {
-        await providerInstance.verifyCredentials(authData);
-
-        authData.email = authData.user;
-
-        // create session
-        let sessionId = req.cookies.sessionID;
-        if (!sessionId) {
-          sessionId = crypto.randomUUID();
-          res.cookie('sessionID', sessionId, { httpOnly: true });
-        }
-
-        cloudManager.setSession(sessionId, {
-          provider: 'nextcloud',
-          token: authData,
-          email: authData.user
-        });
-
-        cloudManager.setRoomToken(roomCode, {
-          provider: 'nextcloud',
-          token: authData,
-          basePath: basePath
-        });
-
-        return res.json({ status: "connected" });
-      } 
-      
-      // login flow v2 (url only)
-      else if (authData.url) {
+      if (authData.url) {
         const flowData = await providerInstance.startLoginFlow(authData.url);
         
         // return poll info to client
         return res.json({ 
           action: "poll_required",
           loginUrl: flowData.login,
-          poll: flowData.poll // { token, endpoint }
+          poll: flowData.poll
         });
       } 
       
       else {
-        return res.status(400).json({ error: "missing credentials" });
+        return res.status(400).json({ error: "URL requise pour l'authentification Nextcloud" });
       }
     }
 
@@ -209,7 +179,8 @@ app.post('/api/cloud/nextcloud/poll', async (req, res) => {
       const authData = {
         url: serverUrl,
         user: result.loginName,
-        pass: result.appPassword
+        pass: result.appPassword,
+        email: result.loginName
       };
 
       // save session
