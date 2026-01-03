@@ -308,15 +308,22 @@ async function handle_cloud_handshake(provider) {
                 cryptoKey: key_arr
             });
 
-            if (res && res.loginUrl && res.pollToken) {
-                const popup = window.open(res.loginUrl, '_blank', 'width=500,height=600');
-                
+            // Adaptation au format de réponse Nextcloud
+            const loginUrl = res.login || res.loginUrl;
+            const pollToken = (res.poll && res.poll.token) ? res.poll.token : res.pollToken;
+
+            if (loginUrl && pollToken) {
+                const popup = window.open(loginUrl, '_blank', 'width=500,height=600');
+
                 // poll until valid
                 const interval = setInterval(async () => {
                     try {
-                        const poll = await api_call('/api/cloud/nextcloud/poll', 'POST', { token: res.pollToken });
-                        
-                        if (poll.status === 'success') {
+                        const poll = await api_call('/api/cloud/nextcloud/poll', 'POST', {
+                            token: pollToken,
+                            url: nc_url,
+                            roomCode: room_code
+                        }); 
+                        if (poll.success) {
                             clearInterval(interval);
                             if (popup) popup.close();
                             await update_cloud_ui();
@@ -364,9 +371,9 @@ async function handle_cloud_handshake(provider) {
         if (res.redirectUrl) {
             // redirect flow (google/onedrive)
             window.open(res.redirectUrl, '_blank', 'width=500,height=600');
-        } 
-        else if (res.connected || res.status === 'connected') {            
-            await update_cloud_ui(); 
+        }
+        else if (res.connected || res.status === 'connected') {
+            await update_cloud_ui();
         }
     } catch (e) {
         set_cloud_card_state(provider, "error");
