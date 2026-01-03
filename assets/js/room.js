@@ -194,7 +194,6 @@ function set_cloud_card_state(provider, state, msg = null) {
 
 // sync ui with config
 async function update_cloud_ui() {
-    console.log("--- DEBUG: update_cloud_ui appelé ---");
 
     const cloudSection = document.getElementById('cloudSection');
     const cloudServicesContainer = document.querySelector('.cloudservices');
@@ -204,8 +203,6 @@ async function update_cloud_ui() {
     const isAdmin = typeof is_admin !== 'undefined' ? is_admin : false;
     const typeRadio = document.querySelector('input[name="AdminType"]:checked');
     const isDepositMode = typeRadio && typeRadio.value === 'depot';
-
-    console.log(`Status: Admin=${isAdmin}, Mode=${typeRadio ? typeRadio.value : 'null'}`);
 
     if (!isAdmin || !isDepositMode) {
         cloudSection.style.display = 'none';
@@ -293,11 +290,14 @@ async function handle_cloud_handshake(provider) {
 
         const res = await api_call('/api/cloud/handshake', 'POST', body);
 
+        if (!res) return;
+
         if (res.redirectUrl) {
             // redirect flow (google/onedrive)
             window.open(res.redirectUrl, '_blank', 'width=500,height=600');
-        } else if (res.connected) {
-            alert('Connexion réussie !');
+        } 
+        else if (res.connected || res.status === 'connected') {            
+            await update_cloud_ui(); 
         }
     } catch (e) {
         set_cloud_card_state(provider, "error");
@@ -330,20 +330,22 @@ function prompt_nextcloud_creds() {
 
         box.innerHTML = `
             <h3>Connexion Nextcloud</h3>
-            <div class="nc-input-group">
-                <input type="text" id="ncUrl" placeholder="URL (ex: https://cloud.exemple.com)" />
-                <input type="text" id="ncUser" placeholder="Nom d'utilisateur" />
-                <input type="password" id="ncPass" placeholder="Mot de passe / App Password" />
-            </div>
+            <form id="ncForm" class="nc-input-group" onsubmit="event.preventDefault(); document.getElementById('ncSubmit').click();">
+                <input type="text" id="ncUrl" placeholder="URL (ex: https://cloud.exemple.com)" autocomplete="url" />
+                <input type="text" id="ncUser" placeholder="Nom d'utilisateur" autocomplete="username" />
+                <input type="password" id="ncPass" placeholder="Mot de passe / App Password" autocomplete="current-password" />
+                <button type="submit" style="display:none;"></button>
+            </form>
+
             <div class="overlay-footer" style="display:flex; justify-content:center; gap:10px;">
-            <a class="button-text" id='ncCancel' style="width: auto; padding: 0 30px; margin: 0; min-width: 140px;">
-                <img class="icon" src="./assets/icon/cross.png">
-                <span class="text">Annuler</span>
-            </a>
-            <a class="button-text" id='ncSubmit' style="width: auto; padding: 0 30px; margin: 0; min-width: 140px; background-color: #9ecaff;">
-                <img class="icon" src="./assets/icon/action.png">
-                <span class="text">Connecter</span>
-            </a>
+                <a class="button-text" id='ncCancel' style="width: auto; padding: 0 30px; margin: 0; min-width: 140px;">
+                    <img class="icon" src="./assets/icon/cross.png">
+                    <span class="text">Annuler</span>
+                </a>
+                <a class="button-text" id='ncSubmit' style="width: auto; padding: 0 30px; margin: 0; min-width: 140px; background-color: #9ecaff;">
+                    <img class="icon" src="./assets/icon/action.png">
+                    <span class="text">Connecter</span>
+                </a>
             </div>
         `;
 
