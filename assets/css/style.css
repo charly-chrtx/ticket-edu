@@ -1750,6 +1750,10 @@ body.dark-mode #qrcode-container {
     display: none;
 }
 
+#cloudSection img {
+    filter: invert(0%);
+}
+
 .cloudservices {
     display: flex;
     flex-direction: row;
