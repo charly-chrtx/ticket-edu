@@ -4,7 +4,13 @@ const { URL } = require('url');
 const CloudProvider = require('../CloudProvider');
 
 class NextcloudProvider extends CloudProvider {
+
   getAuthUrl(callbackUrl, state) { return null; }
+
+  // clean url
+  cleanBaseUrl(url) {
+    return url.replace(/\/$/, '');
+  }
 
   // get basic auth header
   getAuthHeader(user, pass) {
@@ -12,13 +18,18 @@ class NextcloudProvider extends CloudProvider {
   }
 
   async verifyCredentials(params) {
-    // use url, user, pass consistently
     const { url, user, pass } = params;
-    const targetUrl = new URL(url);
+    const baseUrl = this.cleanBaseUrl(url);
+    
+    // check user root
+    const targetUrlString = `${baseUrl}/remote.php/dav/files/${user}`;
+    const targetUrl = new URL(targetUrlString);
+
     const options = {
       method: 'PROPFIND',
       headers: { 'Authorization': this.getAuthHeader(user, pass), 'Depth': '0' }
     };
+
     return new Promise((resolve, reject) => {
       const client = targetUrl.protocol === 'http:' ? http : https;
       const req = client.request(targetUrl, options, (res) => {
@@ -30,6 +41,7 @@ class NextcloudProvider extends CloudProvider {
     });
   }
 
+  // check if file/folder exists
   async checkExists(url, authHeader) {
     const targetUrl = new URL(url);
     const options = { method: 'PROPFIND', headers: { 'Authorization': authHeader, 'Depth': '0' } };
@@ -42,39 +54,50 @@ class NextcloudProvider extends CloudProvider {
     });
   }
 
+  // create folder
   async createFolder(pathOrUrl, credentials) {
     const { url, user, pass } = credentials;
+    const baseUrl = this.cleanBaseUrl(url);
     const authHeader = this.getAuthHeader(user, pass);
     
-    // build full url if path is relative
-    let targetUrlString = pathOrUrl;
-    if (!pathOrUrl.startsWith('http')) {
-      const encodedPath = pathOrUrl.split('/').map(encodeURIComponent).join('/');
-      targetUrlString = `${url}/remote.php/dav/files/${user}/${encodedPath}`;
-    }
+    // build webdav url
+    const parts = pathOrUrl.split('/').map(encodeURIComponent);
+    const encodedPath = parts.join('/');
+    const davUrlString = `${baseUrl}/remote.php/dav/files/${user}/${encodedPath}`;
+    
+    // build ui url
+    const uiPath = pathOrUrl.startsWith('/') ? pathOrUrl : '/' + pathOrUrl;
+    const uiUrl = `${baseUrl}/index.php/apps/files/?dir=${encodeURIComponent(uiPath)}`;
 
-    const targetUrl = new URL(targetUrlString);
+    const targetUrl = new URL(davUrlString);
     const options = { method: 'MKCOL', headers: { 'Authorization': authHeader } };
+    
     return new Promise((resolve) => {
       const client = targetUrl.protocol === 'http:' ? http : https;
-      const req = client.request(targetUrl, options, () => resolve(targetUrlString));
+      // execute mkcol
+      const req = client.request(targetUrl, options, () => {
+        // return ui url
+        resolve(uiUrl);
+      });
       req.end();
     });
   }
 
+  // upload stream
   async uploadStream(fileStream, metadata, credentials) {
     const { url, user, pass } = credentials;
+    const baseUrl = this.cleanBaseUrl(url);
     const authHeader = this.getAuthHeader(user, pass);
     
-    const baseUrl = `${url}/remote.php/dav/files/${user}`;
+    const davBaseUrl = `${baseUrl}/remote.php/dav/files/${user}`;
     const pathParts = metadata.folderPath.split('/').filter(p => p);
     
-    let currentPath = baseUrl;
+    // recursive create
+    let currentPath = davBaseUrl;
     for (const part of pathParts) {
       currentPath += '/' + encodeURIComponent(part);
       const exists = await this.checkExists(currentPath, authHeader);
       if (!exists) {
-        // create subfolder
         const subUrl = new URL(currentPath);
         await new Promise(r => {
           const client = subUrl.protocol === 'http:' ? http : https;
@@ -84,6 +107,7 @@ class NextcloudProvider extends CloudProvider {
       }
     }
 
+    // name conflict
     let finalName = metadata.name;
     let counter = 1;
     let targetUrlString = `${currentPath}/${encodeURIComponent(finalName)}`;
@@ -113,9 +137,11 @@ class NextcloudProvider extends CloudProvider {
     });
   }
 
+  // delete file
   async deleteFile(fileId, credentials) {
     if (!fileId) return;
     const { user, pass } = credentials;
+    // fileid is full url
     const targetUrl = new URL(fileId);
     const options = {
       method: 'DELETE',

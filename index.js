@@ -134,6 +134,8 @@ app.post('/api/cloud/handshake', async (req, res) => {
     if (provider === 'nextcloud') {
       await providerInstance.verifyCredentials(authData);
 
+      authData.email = authData.user;
+
       // create session id if needed
       let sessionId = req.cookies.sessionID;
       if (!sessionId) {
