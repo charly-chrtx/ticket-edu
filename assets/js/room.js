@@ -270,7 +270,7 @@ async function handle_cloud_handshake(provider) {
     if (is_connecting_cloud) return;
 
     is_connecting_cloud = true;
-    if (provider != 'nextcloud') {
+    if (provider !== 'nextcloud') {
         document.body.style.cursor = 'wait';
     }
 
@@ -283,7 +283,7 @@ async function handle_cloud_handshake(provider) {
 
     let auth_data = {};
 
-    // nextcloud flow
+    // 1. Pour Nextcloud, on demande d'abord l'URL
     if (provider === 'nextcloud') {
         const nc_url = await prompt_nextcloud_creds();
 
@@ -293,64 +293,8 @@ async function handle_cloud_handshake(provider) {
             set_cloud_card_state(provider, 'idle');
             return;
         }
-
-        try {
-            // export key
-            const raw_key = await window.crypto.subtle.exportKey("raw", crypto_key);
-            const key_arr = Array.from(new Uint8Array(raw_key));
-
-            set_cloud_card_state(provider, 'loading');
-
-            // init login
-            const res = await api_call('/api/cloud/nextcloud/init', 'POST', {
-                roomCode: room_code,
-                serverUrl: nc_url,
-                cryptoKey: key_arr
-            });
-
-            // adapt response
-            const loginUrl = res.login || res.loginUrl;
-            const pollToken = (res.poll && res.poll.token) ? res.poll.token : res.pollToken;
-
-            if (loginUrl && pollToken) {
-                const popup = window.open(loginUrl, '_blank', 'width=500,height=600');
-                
-                // poll loop
-                const interval = setInterval(async () => {
-                    try {
-                        const poll = await api_call('/api/cloud/nextcloud/poll', 'POST', { 
-                            token: pollToken,
-                            url: nc_url,
-                            roomCode: room_code
-                        });
-                        
-                        if (poll.success) {
-                            clearInterval(interval);
-                            if (popup) popup.close();
-                            await update_cloud_ui();
-                            is_connecting_cloud = false;
-                            document.body.style.cursor = 'default';
-                        } else if (poll.status === 'error') {
-                            throw new Error('Auth failed');
-                        }
-                        // pending
-                    } catch (e) {
-                        clearInterval(interval);
-                        is_connecting_cloud = false;
-                        document.body.style.cursor = 'default';
-                        set_cloud_card_state(provider, "error");
-                    }
-                }, 2000);
-            } else {
-                throw new Error("Init failed");
-            }
-        } catch (e) {
-            is_connecting_cloud = false;
-            document.body.style.cursor = 'default';
-            set_cloud_card_state(provider, "error");
-            alert("Erreur connexion: " + e.message);
-        }
-        return;
+        // On prépare les données pour le handshake
+        auth_data = { url: nc_url };
     }
 
     try {
@@ -358,30 +302,85 @@ async function handle_cloud_handshake(provider) {
         const raw_key = await window.crypto.subtle.exportKey("raw", crypto_key);
         const key_arr = Array.from(new Uint8Array(raw_key));
 
-        const body = {
+        set_cloud_card_state(provider, 'loading');
+
+        // 2. Appel unifié au handshake (fonctionne pour Google et Nextcloud v2)
+        const res = await api_call('/api/cloud/handshake', 'POST', {
             roomCode: room_code,
             provider: provider,
             cryptoKey: key_arr,
-            authData: auth_data
-        };
+            authData: auth_data,
+            basePath: 'Ticket-Edu' // Tu peux rendre ça dynamique si besoin
+        });
 
-        const res = await api_call('/api/cloud/handshake', 'POST', body);
+        if (!res) throw new Error("Réponse vide du serveur");
 
-        if (!res) return;
-
-        if (res.redirectUrl) {
-            // redirect flow
-            window.open(res.redirectUrl, '_blank', 'width=500,height=600');
-        } 
-        else if (res.connected || res.status === 'connected') {            
-            await update_cloud_ui(); 
+        // Cas A: Succès immédiat (ex: reconnexion ou auth simple)
+        if (res.connected || res.status === 'connected') {            
+            await update_cloud_ui();
+            is_connecting_cloud = false;
+            document.body.style.cursor = 'default';
         }
+        // Cas B: Redirection OAuth (Google)
+        else if (res.redirectUrl) {
+            window.open(res.redirectUrl, '_blank', 'width=500,height=600');
+            is_connecting_cloud = false;
+            document.body.style.cursor = 'default';
+        }
+        // Cas C: Nextcloud Login Flow v2 (Polling requis)
+        else if (res.action === 'poll_required') {
+            const loginUrl = res.loginUrl;
+            const pollData = res.poll;
+
+            // Ouvrir la fenêtre de validation Nextcloud
+            window.open(loginUrl, '_blank', 'width=500,height=600');
+
+            // Boucle de vérification (Polling)
+            const interval = setInterval(async () => {
+                try {
+                    const pollRes = await api_call('/api/cloud/nextcloud/poll', 'POST', {
+                        token: pollData.token,
+                        endpoint: pollData.endpoint,
+                        serverUrl: auth_data.url,
+                        roomCode: room_code
+                    });
+
+                    // Succès
+                    if (pollRes.status === 'success') {
+                        clearInterval(interval);
+                        await update_cloud_ui();
+                        is_connecting_cloud = false;
+                        document.body.style.cursor = 'default';
+                    } 
+                    // En attente... on continue
+                    else if (pollRes.status === 'pending') {
+                        // rien à faire
+                    }
+                    // Erreur explicite
+                    else {
+                        clearInterval(interval);
+                        throw new Error("Authentification refusée ou échouée");
+                    }
+                } catch (e) {
+                    clearInterval(interval);
+                    is_connecting_cloud = false;
+                    document.body.style.cursor = 'default';
+                    set_cloud_card_state(provider, "error");
+                    console.error("Poll error:", e);
+                }
+            }, 2000); // Vérifie toutes les 2 secondes
+            
+            // Note: on ne met pas is_connecting_cloud = false ici car le polling tourne
+        } 
+        else if (res.error) {
+            throw new Error(res.error);
+        }
+
     } catch (e) {
-        set_cloud_card_state(provider, "error");
-        alert("Erreur connexion: " + e.message);
-    } finally {
         is_connecting_cloud = false;
         document.body.style.cursor = 'default';
+        set_cloud_card_state(provider, "error");
+        alert("Erreur connexion: " + e.message);
     }
 }
 
