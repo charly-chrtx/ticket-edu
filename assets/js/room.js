@@ -283,7 +283,6 @@ async function handle_cloud_handshake(provider) {
 
     let auth_data = {};
 
-    // 1. Pour Nextcloud, on demande d'abord l'URL
     if (provider === 'nextcloud') {
         const nc_url = await prompt_nextcloud_creds();
 
@@ -293,7 +292,6 @@ async function handle_cloud_handshake(provider) {
             set_cloud_card_state(provider, 'idle');
             return;
         }
-        // On prépare les données pour le handshake
         auth_data = { url: nc_url };
     }
 
@@ -304,38 +302,33 @@ async function handle_cloud_handshake(provider) {
 
         set_cloud_card_state(provider, 'loading');
 
-        // 2. Appel unifié au handshake (fonctionne pour Google et Nextcloud v2)
         const res = await api_call('/api/cloud/handshake', 'POST', {
             roomCode: room_code,
             provider: provider,
             cryptoKey: key_arr,
             authData: auth_data,
-            basePath: 'Ticket-Edu' // Tu peux rendre ça dynamique si besoin
+            basePath: 'Ticket-Edu'
         });
 
         if (!res) throw new Error("Réponse vide du serveur");
 
-        // Cas A: Succès immédiat (ex: reconnexion ou auth simple)
-        if (res.connected || res.status === 'connected') {            
+        if (res.connected || res.status === 'connected') {
             await update_cloud_ui();
             is_connecting_cloud = false;
             document.body.style.cursor = 'default';
         }
-        // Cas B: Redirection OAuth (Google)
         else if (res.redirectUrl) {
             window.open(res.redirectUrl, '_blank', 'width=500,height=600');
             is_connecting_cloud = false;
             document.body.style.cursor = 'default';
         }
-        // Cas C: Nextcloud Login Flow v2 (Polling requis)
         else if (res.action === 'poll_required') {
             const loginUrl = res.loginUrl;
             const pollData = res.poll;
 
-            // Ouvrir la fenêtre de validation Nextcloud
-            window.open(loginUrl, '_blank', 'width=500,height=600');
-
-            // Boucle de vérification (Polling)
+            const loginWindow = window.open(loginUrl, '_blank', 'width=500,height=600');
+            
+            
             const interval = setInterval(async () => {
                 try {
                     const pollRes = await api_call('/api/cloud/nextcloud/poll', 'POST', {
@@ -345,18 +338,17 @@ async function handle_cloud_handshake(provider) {
                         roomCode: room_code
                     });
 
-                    // Succès
                     if (pollRes.status === 'success') {
                         clearInterval(interval);
+
+                        if (loginWindow) loginWindow.close();
+
                         await update_cloud_ui();
                         is_connecting_cloud = false;
                         document.body.style.cursor = 'default';
-                    } 
-                    // En attente... on continue
-                    else if (pollRes.status === 'pending') {
-                        // rien à faire
                     }
-                    // Erreur explicite
+                    else if (pollRes.status === 'pending') {
+                    }
                     else {
                         clearInterval(interval);
                         throw new Error("Authentification refusée ou échouée");
@@ -368,10 +360,9 @@ async function handle_cloud_handshake(provider) {
                     set_cloud_card_state(provider, "error");
                     console.error("Poll error:", e);
                 }
-            }, 2000); // Vérifie toutes les 2 secondes
-            
-            // Note: on ne met pas is_connecting_cloud = false ici car le polling tourne
-        } 
+            }, 2000);
+
+        }
         else if (res.error) {
             throw new Error(res.error);
         }
@@ -490,7 +481,9 @@ function open_download_modal(deposit) {
             cloud_path_el.style.display = '';
         }
 
-        if (deposit.cloudWebUrl && show_cloud_btn) {
+        const hasFiles = deposit.files && deposit.files.length > 0;
+
+        if (deposit.cloudWebUrl && show_cloud_btn && hasFiles) {
             show_cloud_btn.style.display = 'flex';
 
             const iconImg = show_cloud_btn.querySelector('.icon');
@@ -511,7 +504,9 @@ function open_download_modal(deposit) {
                 e.preventDefault();
                 window.open(deposit.cloudWebUrl, '_blank');
             }
-        }
+        } else if (show_cloud_btn) {
+                show_cloud_btn.style.display = 'none';
+            }
     }
 
     list.innerHTML = '';
