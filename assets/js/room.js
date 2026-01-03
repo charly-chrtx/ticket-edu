@@ -194,7 +194,6 @@ function set_cloud_card_state(provider, state, msg = null) {
 
 // sync ui with config
 async function update_cloud_ui() {
-
     const cloudSection = document.getElementById('cloudSection');
     const cloudServicesContainer = document.querySelector('.cloudservices');
 
@@ -217,6 +216,7 @@ async function update_cloud_ui() {
         cloudServicesContainer.style.gap = '10px';
     }
 
+    // hide all cards first
     const allCards = [
         'ticketcloudCard',
         'googleDriveCard',
@@ -226,21 +226,41 @@ async function update_cloud_ui() {
 
     allCards.forEach(id => {
         const el = document.getElementById(id);
-        if (el) {
-            el.style.display = 'flex';
-        }
+        if (el) el.style.display = 'none';
     });
 
-    try {
-        const status = await api_call(`/api/cloud/status?roomCode=${room_code}`);
+    // always show private cloud
+    const privateCard = document.getElementById('ticketcloudCard');
+    if (privateCard) privateCard.style.display = 'flex';
 
+    try {
+        // get active providers
+        const providers = await api_call('/api/cloud/config');
+
+        if (providers && Array.isArray(providers)) {
+            if (providers.includes('google')) {
+                const el = document.getElementById('googleDriveCard');
+                if (el) el.style.display = 'flex';
+            }
+            if (providers.includes('onedrive')) {
+                const el = document.getElementById('onedriveCard');
+                if (el) el.style.display = 'flex';
+            }
+            if (providers.includes('nextcloud')) {
+                const el = document.getElementById('nextcloudCard');
+                if (el) el.style.display = 'flex';
+            }
+        }
+
+        // update status
+        const status = await api_call(`/api/cloud/status?roomCode=${room_code}`);
         ['google', 'nextcloud', 'onedrive', 'ticket'].forEach(p => set_cloud_card_state(p, 'idle'));
 
         if (status.connected && status.provider) {
             set_cloud_card_state(status.provider, 'connected');
         }
     } catch (e) {
-        console.error("Erreur récupération statut cloud:", e);
+        console.error("cloud status error", e);
     }
 }
 
