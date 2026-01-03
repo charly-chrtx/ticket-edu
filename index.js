@@ -130,13 +130,89 @@ app.post('/api/cloud/handshake', async (req, res) => {
   }
 
   try {
-    // direct auth (nextcloud)
+    // nextcloud logic
     if (provider === 'nextcloud') {
-      await providerInstance.verifyCredentials(authData);
+      
+      // legacy auth (user + pass)
+      if (authData.user && authData.pass) {
+        await providerInstance.verifyCredentials(authData);
 
-      authData.email = authData.user;
+        authData.email = authData.user;
 
-      // create session id if needed
+        // create session
+        let sessionId = req.cookies.sessionID;
+        if (!sessionId) {
+          sessionId = crypto.randomUUID();
+          res.cookie('sessionID', sessionId, { httpOnly: true });
+        }
+
+        cloudManager.setSession(sessionId, {
+          provider: 'nextcloud',
+          token: authData,
+          email: authData.user
+        });
+
+        cloudManager.setRoomToken(roomCode, {
+          provider: 'nextcloud',
+          token: authData,
+          basePath: basePath
+        });
+
+        return res.json({ status: "connected" });
+      } 
+      
+      // login flow v2 (url only)
+      else if (authData.url) {
+        const flowData = await providerInstance.startLoginFlow(authData.url);
+        
+        // return poll info to client
+        return res.json({ 
+          action: "poll_required",
+          loginUrl: flowData.login,
+          poll: flowData.poll // { token, endpoint }
+        });
+      } 
+      
+      else {
+        return res.status(400).json({ error: "missing credentials" });
+      }
+    }
+
+    // oauth flow (google)
+    if (provider === 'google') {
+      const state = JSON.stringify({ roomCode, basePath });
+      const callbackUrl = `${process.env.BASE_URL}/api/cloud/callback/google`;
+      const url = providerInstance.getAuthUrl(callbackUrl, state);
+      return res.json({ redirectUrl: url });
+    }
+
+  } catch (e) {
+    console.error("handshake error", e);
+    return res.status(500).json({ error: e.message });
+  }
+});
+
+//poll nextcloud
+app.post('/api/cloud/nextcloud/poll', async (req, res) => {
+  const { token, endpoint, roomCode, basePath, serverUrl } = req.body;
+  const providerInstance = cloudManager.getProvider('nextcloud');
+  
+  if (!providerInstance) return res.status(500).json({ error: "provider missing" });
+
+  try {
+    // check status
+    const result = await providerInstance.pollCredentials(token, endpoint);
+
+    // success (got credentials)
+    if (result && result.loginName && result.appPassword) {
+      
+      const authData = {
+        url: serverUrl,
+        user: result.loginName,
+        pass: result.appPassword
+      };
+
+      // save session
       let sessionId = req.cookies.sessionID;
       if (!sessionId) {
         sessionId = crypto.randomUUID();
@@ -146,30 +222,27 @@ app.post('/api/cloud/handshake', async (req, res) => {
       cloudManager.setSession(sessionId, {
         provider: 'nextcloud',
         token: authData,
-        email: authData.user || 'unknown'
+        email: result.loginName
       });
 
-      // save token for the room
-      cloudManager.setRoomToken(roomCode, {
-        provider: 'nextcloud',
-        token: authData,
-        basePath: basePath
-      });
+      if (roomCode) {
+        cloudManager.setRoomToken(roomCode, {
+          provider: 'nextcloud',
+          token: authData,
+          basePath: basePath
+        });
+      }
 
-      return res.json({ status: "connected" });
-    }
-
-    // oauth flow (google)
-    if (provider === 'google') {
-      const state = JSON.stringify({ roomCode, basePath });
-      // callback url should be defined in env
-      const callbackUrl = `${process.env.BASE_URL}/api/cloud/callback/google`;
-      const url = providerInstance.getAuthUrl(callbackUrl, state);
-      return res.json({ redirectUrl: url });
+      return res.json({ status: "success", user: result.loginName });
+    } 
+    
+    // pending or waiting
+    else {
+      return res.json({ status: "pending" });
     }
 
   } catch (e) {
-    console.error("handshake error", e);
+    console.error("poll error", e);
     return res.status(500).json({ error: e.message });
   }
 });

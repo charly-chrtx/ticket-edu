@@ -17,6 +17,61 @@ class NextcloudProvider extends CloudProvider {
     return 'Basic ' + Buffer.from(`${user}:${pass}`).toString('base64');
   }
 
+  // helper for json requests
+  _jsonRequest(method, urlString, data = null) {
+    const targetUrl = new URL(urlString);
+    const options = {
+      method: method,
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'User-Agent': 'TicketEdu-App'
+      }
+    };
+
+    return new Promise((resolve, reject) => {
+      const client = targetUrl.protocol === 'http:' ? http : https;
+      const req = client.request(targetUrl, options, (res) => {
+        let body = '';
+        res.on('data', chunk => body += chunk);
+        res.on('end', () => {
+          try {
+            // handle 404 during polling
+            if (res.statusCode === 404) {
+               resolve({ status: 404 }); 
+               return;
+            }
+            const json = JSON.parse(body);
+            if (res.statusCode >= 200 && res.statusCode < 300) resolve(json);
+            else resolve({ error: true, status: res.statusCode, ...json });
+          } catch (e) {
+            reject(e);
+          }
+        });
+      });
+      req.on('error', reject);
+      if (data) req.write(data);
+      req.end();
+    });
+  }
+
+  // init v2 flow
+  async startLoginFlow(serverUrl) {
+    const baseUrl = this.cleanBaseUrl(serverUrl);
+    const endpoint = `${baseUrl}/index.php/login/v2`;
+    
+    // post empty to init
+    const result = await this._jsonRequest('POST', endpoint);
+    return result;
+  }
+
+  // check if user approved
+  async pollCredentials(token, endpoint) {
+    const data = `token=${token}`;
+    const result = await this._jsonRequest('POST', endpoint, data);
+    return result;
+  }
+
+  // verify credentials (legacy or after flow)
   async verifyCredentials(params) {
     const { url, user, pass } = params;
     const baseUrl = this.cleanBaseUrl(url);
