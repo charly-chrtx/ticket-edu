@@ -138,15 +138,22 @@ function create_tag(tag, class_name, content = '', style = {}) {
 function handle_cloud_click(provider) {
     let cardId = `${provider}Card`;
     if (provider === 'google') cardId = 'googleDriveCard';
-    if (provider === 'ticket') cardId = 'ticketcloudCard'; // <--- INDISPENSABLE
+    if (provider === 'ticket') cardId = 'ticketcloudCard';
 
     const card = document.getElementById(cardId);
     if (!card) return;
 
-    // Si c'est le cloud privé, on déconnecte juste les autres
     if (provider === 'ticket') {
         disconnect_cloud();
         return;
+    }
+
+    const connectedCard = document.querySelector('.cloud-provider-card.connected');
+    
+    if (connectedCard && connectedCard.id !== 'ticketcloudCard') {
+        if (!confirm("Un service Cloud est déjà connecté. Cette action va le déconnecter. Voulez-vous continuer ?")) {
+            return;
+        }
     }
 
     // start auth flow
@@ -380,7 +387,7 @@ async function disconnect_cloud() {
     if (!confirm("Arrêter la sauvegarde Cloud ?")) return;
     try {
         await api_call('/api/cloud/disconnect', 'POST', { roomCode: room_code });
-        render_cloud_settings();
+        update_cloud_ui();
     } catch (e) {
         alert("Erreur déconnexion");
     }
