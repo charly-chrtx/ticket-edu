@@ -285,15 +285,64 @@ async function handle_cloud_handshake(provider) {
 
     // nextcloud specific flow
     if (provider === 'nextcloud') {
-        const creds = await prompt_nextcloud_creds();
+        const nc_url = await prompt_nextcloud_creds();
 
-        if (!creds) {
+        if (!nc_url) {
             is_connecting_cloud = false;
             document.body.style.cursor = 'default';
             set_cloud_card_state(provider, 'idle');
             return;
         }
-        auth_data = creds;
+
+        try {
+            // export key
+            const raw_key = await window.crypto.subtle.exportKey("raw", crypto_key);
+            const key_arr = Array.from(new Uint8Array(raw_key));
+
+            set_cloud_card_state(provider, 'loading');
+
+            // get login link
+            const res = await api_call('/api/cloud/nextcloud/init', 'POST', {
+                roomCode: room_code,
+                serverUrl: nc_url,
+                cryptoKey: key_arr
+            });
+
+            if (res && res.loginUrl && res.pollToken) {
+                const popup = window.open(res.loginUrl, '_blank', 'width=500,height=600');
+                
+                // poll until valid
+                const interval = setInterval(async () => {
+                    try {
+                        const poll = await api_call('/api/cloud/nextcloud/poll', 'POST', { token: res.pollToken });
+                        
+                        if (poll.status === 'success') {
+                            clearInterval(interval);
+                            if (popup) popup.close();
+                            await update_cloud_ui();
+                            is_connecting_cloud = false;
+                            document.body.style.cursor = 'default';
+                        } else if (poll.status === 'error') {
+                            throw new Error('Auth failed');
+                        }
+                        // pending...
+                    } catch (e) {
+                        clearInterval(interval);
+                        is_connecting_cloud = false;
+                        document.body.style.cursor = 'default';
+                        set_cloud_card_state(provider, "error");
+                    }
+                }, 2000);
+            } else {
+                throw new Error("Init failed");
+            }
+        } catch (e) {
+            is_connecting_cloud = false;
+            document.body.style.cursor = 'default';
+            set_cloud_card_state(provider, "error");
+            alert("Erreur connexion: " + e.message);
+        }
+        return;
     }
 
     try {
@@ -348,12 +397,11 @@ function prompt_nextcloud_creds() {
 
         const box = create_tag('div', 'menu-box');
 
+        // simplified ui
         box.innerHTML = `
             <h3>Connexion Nextcloud</h3>
             <form id="ncForm" class="nc-input-group" onsubmit="event.preventDefault(); document.getElementById('ncSubmit').click();">
                 <input type="text" id="ncUrl" placeholder="URL (ex: https://cloud.exemple.com)" autocomplete="url" />
-                <input type="text" id="ncUser" placeholder="Nom d'utilisateur" autocomplete="username" />
-                <input type="password" id="ncPass" placeholder="Mot de passe / App Password" autocomplete="current-password" />
                 <button type="submit" style="display:none;"></button>
             </form>
 
@@ -389,12 +437,10 @@ function prompt_nextcloud_creds() {
 
         document.getElementById('ncSubmit').onclick = () => {
             const url = document.getElementById('ncUrl').value.trim();
-            const user = document.getElementById('ncUser').value.trim();
-            const pass = document.getElementById('ncPass').value.trim();
 
-            if (!url || !user || !pass) return alert("Tout les champs sont requis");
+            if (!url) return alert("URL requise");
 
-            closeAndResolve({ url: url, user: user, pass: pass });
+            closeAndResolve(url);
         };
     });
 }
