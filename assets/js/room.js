@@ -134,43 +134,51 @@ function create_tag(tag, class_name, content = '', style = {}) {
     return el;
 }
 
-// cloud interaction
+// handle cloud provider click
 function handle_cloud_click(provider) {
-    let cardId = `${provider}Card`;
-    if (provider === 'google') cardId = 'googleDriveCard';
-    if (provider === 'ticket') cardId = 'ticketcloudCard';
-
-    const card = document.getElementById(cardId);
-    if (!card) return;
-
-    if (provider === 'ticket') {
-        disconnect_cloud();
-        return;
-    }
+    let apiProvider = provider;
+    
+    // map ticket ui to local api
+    if (provider === 'ticket') apiProvider = 'local';
 
     const connectedCard = document.querySelector('.cloud-provider-card.connected');
     
-    if (connectedCard && connectedCard.id !== 'ticketcloudCard') {
-        if (!confirm("Un service Cloud est déjà connecté. Cette action va le déconnecter. Voulez-vous continuer ?")) {
+    // check for existing connection
+    if (connectedCard) {
+        let currentConnectedId = connectedCard.id;
+        let clickedId = provider === 'google' ? 'googleDriveCard' : (provider === 'ticket' ? 'ticketcloudCard' : `${provider}Card`);
+
+        // if clicking same card, disconnect
+        if (currentConnectedId === clickedId) {
+            disconnect_cloud();
+            return;
+        }
+
+        // if switching provider
+        if (!confirm("Un service Cloud est déjà connecté. Cette action va le déconnecter pour basculer vers le nouveau. Voulez-vous continuer ?")) {
             return;
         }
     }
 
-    // start auth flow
-    set_cloud_card_state(provider, 'loading');
-    handle_cloud_handshake(provider);
+    // start handshake
+    set_cloud_card_state(apiProvider, 'loading');
+    handle_cloud_handshake(apiProvider);
 }
 
 // update card visual state
 function set_cloud_card_state(provider, state, msg = null) {
-    // reset others if connecting
+    // map api provider to dom id
+    let cardId = `${provider}Card`;
+    if (provider === 'google') cardId = 'googleDriveCard';
+    if (provider === 'local' || provider === 'ticket') cardId = 'ticketcloudCard';
+
+    // reset others on connect
     if (state === 'connected') {
-        ['google', 'nextcloud', 'onedrive'].forEach(p => {
+        ['google', 'nextcloud', 'onedrive', 'local'].forEach(p => {
             if (p !== provider) set_cloud_card_state(p, 'idle');
         });
     }
 
-    const cardId = provider === 'google' ? 'googleDriveCard' : `${provider}Card`;
     const card = document.getElementById(cardId);
     if (!card) return;
 
@@ -187,6 +195,8 @@ function set_cloud_card_state(provider, state, msg = null) {
         case 'connected':
             card.classList.add('connected');
             statusText.textContent = "Connecté & Prêt";
+            // custom text for local
+            if(provider === 'local') statusText.textContent = "Stockage Serveur Actif";
             break;
         case "error":
             card.classList.add("error");
@@ -194,7 +204,9 @@ function set_cloud_card_state(provider, state, msg = null) {
             break;
         case 'idle':
         default:
-            statusText.textContent = "Non connecté";
+            // idle text
+            if(provider === 'local' || provider === 'ticket') statusText.textContent = "Cliquer pour activer";
+            else statusText.textContent = "Non connecté";
             break;
     }
 }
@@ -210,6 +222,7 @@ async function update_cloud_ui() {
     const typeRadio = document.querySelector('input[name="AdminType"]:checked');
     const isDepositMode = typeRadio && typeRadio.value === 'depot';
 
+    // show only in deposit admin mode
     if (!isAdmin || !isDepositMode) {
         cloudSection.style.display = 'none';
         return;
@@ -223,7 +236,7 @@ async function update_cloud_ui() {
         cloudServicesContainer.style.gap = '10px';
     }
 
-    // hide all cards first
+    // hide all cards initially
     const allCards = [
         'ticketcloudCard',
         'googleDriveCard',
@@ -236,32 +249,25 @@ async function update_cloud_ui() {
         if (el) el.style.display = 'none';
     });
 
-    // always show private cloud
-    const privateCard = document.getElementById('ticketcloudCard');
-    if (privateCard) privateCard.style.display = 'flex';
-
     try {
         // get active providers
         const providers = await api_call('/api/cloud/config');
 
         if (providers && Array.isArray(providers)) {
-            if (providers.includes('google')) {
-                const el = document.getElementById('googleDriveCard');
-                if (el) el.style.display = 'flex';
-            }
-            if (providers.includes('onedrive')) {
-                const el = document.getElementById('onedriveCard');
-                if (el) el.style.display = 'flex';
-            }
-            if (providers.includes('nextcloud')) {
-                const el = document.getElementById('nextcloudCard');
-                if (el) el.style.display = 'flex';
+            if (providers.includes('google')) document.getElementById('googleDriveCard').style.display = 'flex';
+            if (providers.includes('onedrive')) document.getElementById('onedriveCard').style.display = 'flex';
+            if (providers.includes('nextcloud')) document.getElementById('nextcloudCard').style.display = 'flex';
+            
+            // show local card if active
+            if (providers.includes('local')) {
+                const el = document.getElementById('ticketcloudCard');
+                if (el) el.style.display = 'flex'; 
             }
         }
 
-        // update status
+        // update connection status
         const status = await api_call(`/api/cloud/status?roomCode=${room_code}`);
-        ['google', 'nextcloud', 'onedrive', 'ticket'].forEach(p => set_cloud_card_state(p, 'idle'));
+        ['google', 'nextcloud', 'onedrive', 'local'].forEach(p => set_cloud_card_state(p, 'idle'));
 
         if (status.connected && status.provider) {
             set_cloud_card_state(status.provider, 'connected');
@@ -502,6 +508,9 @@ function open_download_modal(deposit) {
                     iconImg.src = "./assets/icon/onedrive.png";
                 } else if (providerKey.includes('nextcloud')) {
                     iconImg.src = "./assets/icon/nextcloud.png";
+                } else if (providerKey.includes('local') || providerKey.includes('ticket')) {
+                    // local icon
+                    iconImg.src = "./assets/icon/ticketcloud.png";
                 } else {
                     iconImg.src = "./assets/icon/cloud.png";
                 }
