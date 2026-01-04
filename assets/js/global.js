@@ -11,10 +11,6 @@ const indexThemeBtn = document.getElementById('indexThemeToggle');
 const themeIcon = document.getElementById('themeIcon');
 const savedTheme = localStorage.getItem('theme_preference') || 'auto';
 
-/**
- * Applique le thème visuellement et met à jour tous les contrôles (radios et icône toggle)
- * @param {string} theme - 'light', 'dark', ou 'auto'
- */
 function applyTheme(theme) {
 
   localStorage.setItem('theme_preference', theme);
@@ -79,7 +75,7 @@ window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e)
   }
 });
 
-// -- Système de Notifications --
+// notification system
 
 function notif(message, type = 'info') {
     const styles = {
@@ -152,7 +148,7 @@ function notif(message, type = 'info') {
     }, 5000);
 }
 
-// --- Gestion des sons ---
+// sound 
 
 const rangeInput = document.getElementById('rangeInput');
 const sliderFill = document.getElementById('sliderFill');
@@ -256,7 +252,7 @@ if (rangeInput) {
     updateSlider();
 }
 
-// -- Langues --
+// language
 
 const closeLangOverlay = document.getElementById('closeLangOverlay');
 const languageOverlay = document.getElementById('languageOverlay');
