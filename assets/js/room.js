@@ -137,12 +137,12 @@ function create_tag(tag, class_name, content = '', style = {}) {
 // handle cloud provider click
 function handle_cloud_click(provider) {
     let apiProvider = provider;
-    
+
     // map ticket ui to local api
     if (provider === 'ticket') apiProvider = 'local';
 
     const connectedCard = document.querySelector('.cloud-provider-card.connected');
-    
+
     // check for existing connection
     if (connectedCard) {
         let currentConnectedId = connectedCard.id;
@@ -196,7 +196,7 @@ function set_cloud_card_state(provider, state, msg = null) {
             card.classList.add('connected');
             statusText.textContent = "Connecté & Prêt";
             // custom text for local
-            if(provider === 'local') statusText.textContent = "Stockage Serveur Actif";
+            if (provider === 'local') statusText.textContent = "Stockage Serveur Actif";
             break;
         case "error":
             card.classList.add("error");
@@ -205,7 +205,7 @@ function set_cloud_card_state(provider, state, msg = null) {
         case 'idle':
         default:
             // idle text
-            if(provider === 'local' || provider === 'ticket') statusText.textContent = "Cliquer pour activer";
+            if (provider === 'local' || provider === 'ticket') statusText.textContent = "Cliquer pour activer";
             else statusText.textContent = "Non connecté";
             break;
     }
@@ -256,11 +256,11 @@ async function update_cloud_ui() {
             if (providers.includes('google')) document.getElementById('googleDriveCard').style.display = 'flex';
             if (providers.includes('onedrive')) document.getElementById('onedriveCard').style.display = 'flex';
             if (providers.includes('nextcloud')) document.getElementById('nextcloudCard').style.display = 'flex';
-            
+
             // show local card if active
             if (providers.includes('local')) {
                 const el = document.getElementById('ticketcloudCard');
-                if (el) el.style.display = 'flex'; 
+                if (el) el.style.display = 'flex';
             }
         }
 
@@ -270,7 +270,7 @@ async function update_cloud_ui() {
 
         if (status.connected && status.provider) {
             set_cloud_card_state(status.provider, 'connected');
-        } 
+        }
         else if (providers && providers.includes('local')) {
             if (!is_connecting_cloud) {
                 console.log("Auto-connecting local provider...");
@@ -345,8 +345,8 @@ async function handle_cloud_handshake(provider) {
             const pollData = res.poll;
 
             const loginWindow = window.open(loginUrl, '_blank', 'width=500,height=600');
-            
-            
+
+
             const interval = setInterval(async () => {
                 try {
                     const pollRes = await api_call('/api/cloud/nextcloud/poll', 'POST', {
@@ -529,8 +529,8 @@ function open_download_modal(deposit) {
                 window.open(deposit.cloudWebUrl, '_blank');
             }
         } else if (show_cloud_btn) {
-                show_cloud_btn.style.display = 'none';
-            }
+            show_cloud_btn.style.display = 'none';
+        }
     }
 
     list.innerHTML = '';
@@ -1816,7 +1816,7 @@ async function handle_form_submit() {
 
     if (is_admin) {
         const adminType = document.querySelector('input[name="AdminType"]:checked')?.value || 'message';
-        
+
         // handle deposit creation
         if (adminType === 'depot') {
             if (!name) return notif('Nom du dépôt requis.', "error");
@@ -1835,7 +1835,17 @@ async function handle_form_submit() {
                 return notif("Erreur lors de la vérification du stockage.", "error");
             }
 
-            await create_deposit(name, color, provider);
+            // disable button
+            is_sending = true;
+            if (create_btn) create_btn.classList.add('button-disabled');
+
+            try {
+                await create_deposit(name, color, provider);
+            } finally {
+                // re-enable button
+                is_sending = false;
+                if (create_btn) create_btn.classList.remove('button-disabled');
+            }
             return;
         }
 

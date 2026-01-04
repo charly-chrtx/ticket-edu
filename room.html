@@ -128,15 +128,18 @@
             <div id="cloudSection" style="display: none;">
               <hr style="border: 0; border-top: 1px solid #e0e0e0; margin: 30px 0;">
 
-              <h2 style="text-align: left; margin-top: 30px; font-size: 1.2rem;" data-i18n="overlays.create_ticket.save_cloud">Sauvegarde Cloud</h2>
+              <h2 style="text-align: left; margin-top: 30px; font-size: 1.2rem;"
+                data-i18n="overlays.create_ticket.save_cloud">Sauvegarde Cloud</h2>
 
-              <div class="cloudservices" style="grid-template-columns: repeat(2, 1fr) !important; display: flex; flex-wrap: wrap; gap: 10px;">
+              <div class="cloudservices"
+                style="grid-template-columns: repeat(2, 1fr) !important; display: flex; flex-wrap: wrap; gap: 10px;">
                 <div class="cloud-provider-card" id="ticketcloudCard" onclick="handle_cloud_click('ticket')">
                   <div class="provider-icon-wrapper">
                     <img class="icon" src="./assets/icon/ticketcloud.png" alt="Ticket Cloud">
                   </div>
                   <div class="provider-info">
                     <span class="provider-name" data-i18n="cloud.private">Private Cloud</span>
+                    <span class="provider-status" data-i18n="cloud.not_connected">Non connecté</span>
                   </div>
                 </div>
 
@@ -311,7 +314,8 @@
               </div>
 
               <div id="csvWrapper" class="csv-anim-container">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin: 0px 10px 60px 10px;">
+                <div
+                  style="display: flex; justify-content: space-between; align-items: center; margin: 0px 10px 60px 10px;">
                   <span>
                     <span data-i18n="overlays.settings.csv_check">➤ Verification du nom via un</span>
                     <span title="Un fichier CSV..." style="text-decoration: underline wavy #9ecaff;"
@@ -714,37 +718,39 @@
   </div>
 
   <div class="menu-overlay" id="languageOverlay" style="display: none;">
-      <div class="menu-box" style="max-width: 400px;">
-          <div class="input" style="padding-bottom: 0;">
-              
-              <h1 data-i18n="overlays.settings.language">Langue</h1>
+    <div class="menu-box" style="max-width: 400px;">
+      <div class="input" style="padding-bottom: 0;">
 
-              <p style="margin: 20px 0; opacity: 0.7; text-align: center;">
-                  Sélectionnez votre langue
-              </p>
+        <h1 data-i18n="overlays.settings.language">Langue</h1>
 
-              <div style="display: flex; flex-direction: column; gap: 15px; margin: 30px 0;">
-                  
-                  <a class="button-text" href="#" onclick="window.localeManager.changeLanguage('fr')">
-                      <img class="icon" src="./assets/icon/frenchflag.png" alt="FR" style="border: 2px #000 solid; border-radius: 20px; filter: none !important;">
-                      <span class="text">Français</span>
-                  </a>
+        <p style="margin: 20px 0; opacity: 0.7; text-align: center;">
+          Sélectionnez votre langue
+        </p>
 
-                  <a class="button-text" href="#" onclick="window.localeManager.changeLanguage('en')">
-                      <img class="icon" src="./assets/icon/englishflag.png" alt="EN" style="border: 2px #000 solid; border-radius: 20px; filter: none !important;">
-                      <span class="text">English</span>
-                  </a>
+        <div style="display: flex; flex-direction: column; gap: 15px; margin: 30px 0;">
 
-              </div>
+          <a class="button-text" href="#" onclick="window.localeManager.changeLanguage('fr')">
+            <img class="icon" src="./assets/icon/frenchflag.png" alt="FR"
+              style="border: 2px #000 solid; border-radius: 20px; filter: none !important;">
+            <span class="text">Français</span>
+          </a>
 
-              <div class="overlay-footer">
-                  <a class="button-text" id="closeLangOverlay" href="#" style="width: auto; padding: 0 30px;">
-                      <img class="icon" src="./assets/icon/cross.png">
-                      <span class="text" data-i18n="common.cancel">Annuler</span>
-                  </a>
-              </div>
-          </div>
+          <a class="button-text" href="#" onclick="window.localeManager.changeLanguage('en')">
+            <img class="icon" src="./assets/icon/englishflag.png" alt="EN"
+              style="border: 2px #000 solid; border-radius: 20px; filter: none !important;">
+            <span class="text">English</span>
+          </a>
+
+        </div>
+
+        <div class="overlay-footer">
+          <a class="button-text" id="closeLangOverlay" href="#" style="width: auto; padding: 0 30px;">
+            <img class="icon" src="./assets/icon/cross.png">
+            <span class="text" data-i18n="common.cancel">Annuler</span>
+          </a>
+        </div>
       </div>
+    </div>
   </div>
 
   <div class="menu-overlay hidden" id="download-modal">
