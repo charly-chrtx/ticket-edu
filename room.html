@@ -456,9 +456,6 @@
               Tu devras rentrer le code de la room pour revenir.
             </p>
 
-            <img class="banner" src="./assets/banner/leave.png" alt="Bannière Déconnexion"
-              data-i18n="[alt]overlays.logout.banner_alt">
-
             <div class="overlay-footer" style="display: flex; justify-content: center; gap: 15px; margin-top: 30px;">
 
               <a class="button-text" id="confirmLogout" href="#"
@@ -564,8 +561,6 @@
               Les logs de la console seront envoyés automatiquement.
             </p>
 
-            <img class="banner" src="./assets/banner/report.png" alt="Bannière Report">
-
             <textarea id="bugDescription" placeholder="Décrivez le problème (optionnel)..."
               data-i18n="overlays.bug_report.placeholder"></textarea>
 
@@ -593,9 +588,6 @@
           <div class="input" style="padding-bottom: 0;">
 
             <h1 data-i18n="overlays.closed_group.title">Groupe femré</h1>
-
-            <img class="banner" src="./assets/banner/nofound.png" alt="Bannière Groupe Fermé"
-              data-i18n="[alt]overlays.closed_group.banner_alt">
 
             <h2 style="text-align: left; margin-top: 30px; font-size: 1.2rem;"
               data-i18n="overlays.closed_group.subtitle">Pourquoi votre groupe est fermé?</h2>
@@ -732,17 +724,15 @@
           Sélectionnez votre langue
         </p>
 
-        <img class="banner" src="./assets/banner/lang.png" alt="Bannière Langue">
-
         <div style="display: flex; flex-direction: column; gap: 15px; margin: 30px 0;">
 
-          <a class="button-text" href="#" onclick="window.localeManager.changeLanguage('fr')">
+          <a class="button-text" href="#" onclick="window.localeManager.changeLanguage('fr')" style="border-radius: 40px 40px 10px 10px !important;">
             <img class="icon" src="./assets/icon/png/frenchflag.png" alt="FR"
               style="border: 2px #000 solid; border-radius: 20px; filter: none !important;">
             <span class="text">Français</span>
           </a>
 
-          <a class="button-text" href="#" onclick="window.localeManager.changeLanguage('en')">
+          <a class="button-text" href="#" onclick="window.localeManager.changeLanguage('en')" style="border-radius: 10px 10px 40px 40px !important;">
             <img class="icon" src="./assets/icon/png/englishflag.png" alt="EN"
               style="border: 2px #000 solid; border-radius: 20px; filter: none !important;">
             <span class="text">English</span>
@@ -774,6 +764,12 @@
         <ul id="file-list" class="file-list"></ul>
 
         <div class="overlay-footer" style="display: flex; justify-content: center; gap: 15px; margin-top: 30px;">
+
+          <a class="button-text" href="#" data-close id="closeBlocked"
+            style="width: auto; padding: 0 30px; margin: 0; min-width: 140px;" data-i18n="common.close">
+            <img class="icon" src="./assets/icon/png/cross.png">
+            <span class="text">Fermer</span>
+          </a>
 
           <a class="button-text" id="download-all" href="#"
             style="width: auto; padding: 0 30px; margin: 0; min-width: 140px;"
