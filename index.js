@@ -19,6 +19,7 @@ const NextcloudProvider = require('./CloudProviders/NextcloudProvider');
 cloudManager.registerProvider('google', new GoogleProvider());
 cloudManager.registerProvider('onedrive', new OneDriveProvider());
 cloudManager.registerProvider('nextcloud', new NextcloudProvider());
+cloudManager.registerProvider('local', new LocalProvider());
 
 
 // ai filter
@@ -123,6 +124,12 @@ app.post('/api/cloud/handshake', async (req, res) => {
     return res.status(400).json({ error: "missing fields" });
   }
 
+  // local bypass
+  if (provider === 'local') { //
+    cloudManager.setRoomKey(roomCode, cryptoKey);
+    return res.json({ connected: true });
+  }
+
   // store key in ram
   cloudManager.setRoomKey(roomCode, cryptoKey);
 
@@ -133,18 +140,18 @@ app.post('/api/cloud/handshake', async (req, res) => {
 
   try {
     if (provider === 'nextcloud') {
-      
+
       if (authData.url) {
         const flowData = await providerInstance.startLoginFlow(authData.url);
-        
+
         // return poll info to client
-        return res.json({ 
+        return res.json({
           action: "poll_required",
           loginUrl: flowData.login,
           poll: flowData.poll
         });
-      } 
-      
+      }
+
       else {
         return res.status(400).json({ error: "URL requise pour l'authentification Nextcloud" });
       }
@@ -168,7 +175,7 @@ app.post('/api/cloud/handshake', async (req, res) => {
 app.post('/api/cloud/nextcloud/poll', async (req, res) => {
   const { token, endpoint, roomCode, basePath, serverUrl } = req.body;
   const providerInstance = cloudManager.getProvider('nextcloud');
-  
+
   if (!providerInstance) return res.status(500).json({ error: "provider missing" });
 
   try {
@@ -177,7 +184,7 @@ app.post('/api/cloud/nextcloud/poll', async (req, res) => {
 
     // success (got credentials)
     if (result && result.loginName && result.appPassword) {
-      
+
       const authData = {
         url: serverUrl,
         user: result.loginName,
@@ -207,8 +214,8 @@ app.post('/api/cloud/nextcloud/poll', async (req, res) => {
       }
 
       return res.json({ status: "success", user: result.loginName });
-    } 
-    
+    }
+
     // pending or waiting
     else {
       return res.json({ status: "pending" });
@@ -297,6 +304,7 @@ function getActiveProviders() {
   if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) providers.push('google');
   if (process.env.ONEDRIVE_CLIENT_ID) providers.push('onedrive');
   if (process.env.NEXTCLOUD_ENABLE === 'true') providers.push('nextcloud');
+  if (process.env.TICKET_CLOUD_ENABLE === 'true') providers.push('local');
   return providers;
 }
 app.get('/api/cloud/config', (req, res) => {
@@ -944,29 +952,41 @@ app.post('/api/deposits', async (req, res) => {
     let tokenToUse = null;
 
     if (cloudProvider) {
-      const roomSession = cloudManager.getRoomToken(roomCode);
-      
-      // logic to determine token
-      if (roomSession && roomSession.provider === cloudProvider) {
-        const userSession = cloudManager.getSession(req.cookies.sessionID);
-        
-        // prefer user session
-        if (userSession && userSession.provider === cloudProvider) {
-          cloudAccount = userSession.email;
-          tokenToUse = userSession.token;
-        } else if (roomSession.token) {
-          // fallback to room admin
-          cloudAccount = roomSession.token.email || 'Inconnu';
-          tokenToUse = roomSession.token;
-        }
 
-        const rootPath = roomSession.basePath || process.env.CLOUD_BASE_PATH || 'Ticket-Edu';
+      // handle local provider
+      if (cloudProvider === 'local') { //
+        cloudAccount = 'Server Storage';
+        tokenToUse = 'local_token'; // dummy token
+        const rootPath = process.env.CLOUD_BASE_PATH || 'Ticket-Edu';
         cloudPath = `${rootPath}/dépots/${roomCode}/${normalize(name)}`;
+      }
+      // handle external providers
+      else {
+        const roomSession = cloudManager.getRoomToken(roomCode);
 
-        // create folder immediately
+        // logic to determine token
+        if (roomSession && roomSession.provider === cloudProvider) {
+          const userSession = cloudManager.getSession(req.cookies.sessionID);
+
+          // prefer user session
+          if (userSession && userSession.provider === cloudProvider) {
+            cloudAccount = userSession.email;
+            tokenToUse = userSession.token;
+          } else if (roomSession.token) {
+            // fallback to room admin
+            cloudAccount = roomSession.token.email || 'Inconnu';
+            tokenToUse = roomSession.token;
+          }
+          const rootPath = roomSession.basePath || process.env.CLOUD_BASE_PATH || 'Ticket-Edu';
+          cloudPath = `${rootPath}/dépots/${roomCode}/${normalize(name)}`;
+        }
+      }
+
+      // create folder logic
+      if (tokenToUse && cloudPath) {
         try {
           const providerInstance = cloudManager.getProvider(cloudProvider);
-          if (providerInstance && tokenToUse) {
+          if (providerInstance) {
             cloudWebUrl = await providerInstance.createFolder(cloudPath, tokenToUse);
             console.log("folder created, url:", cloudWebUrl);
 
@@ -1193,7 +1213,7 @@ app.get('/api/deposits/:id/zip', (req, res) => {
         // init archive
         const zipName = normalize(deposit.name || 'archive') + '.zip';
         res.attachment(zipName);
-        
+
         const archive = archiver('zip', { zlib: { level: 9 } });
 
         archive.on('error', (err) => {
@@ -1301,34 +1321,34 @@ app.post('/api/files', upload.single('file'), (req, res) => {
 });
 
 app.get('/api/files/download/:fileId', async (req, res) => {
-    try {
-        const fileId = req.params.fileId;
-        const token = req.session.token;
+  try {
+    const fileId = req.params.fileId;
+    const token = req.session.token;
 
-        // get file metadata
-        const file = await db.getFile(fileId);
+    // get file metadata
+    const file = await db.getFile(fileId);
 
-        if (!file) {
-            return res.status(404).send('file not found');
-        }
-
-        // set response headers
-        res.setHeader('Content-Disposition', `attachment; filename="${file.name}"`);
-        res.setHeader('Content-Type', file.mime_type || 'application/octet-stream');
-
-        // get provider instance
-        const provider = CloudProvider.getProvider(file.provider_type);
-
-        // get data stream
-        const stream = await provider.getDownloadStream(file.cloud_id, token);
-
-        // pipe to response
-        stream.pipe(res);
-
-    } catch (err) {
-        console.error(err);
-        res.status(500).send('download error');
+    if (!file) {
+      return res.status(404).send('file not found');
     }
+
+    // set response headers
+    res.setHeader('Content-Disposition', `attachment; filename="${file.name}"`);
+    res.setHeader('Content-Type', file.mime_type || 'application/octet-stream');
+
+    // get provider instance
+    const provider = CloudProvider.getProvider(file.provider_type);
+
+    // get data stream
+    const stream = await provider.getDownloadStream(file.cloud_id, token);
+
+    // pipe to response
+    stream.pipe(res);
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('download error');
+  }
 });
 
 // delete file
@@ -1710,9 +1730,13 @@ function supprimerRoomsInactives() {
             db.all("SELECT * FROM files WHERE roomCode = ?", [room.code], (err, files) => {
               if (files) {
                 files.forEach(f => {
+                  // check if local file exists
+                  if (!f.encryptedName) return;
+
                   let target = UPLOAD_DIR;
                   if (f.depositId) target = PATH_DEP;
                   else if (f.announcementId) target = PATH_ANN;
+
                   const p = path.join(target, f.encryptedName);
                   if (fs.existsSync(p)) fs.unlinkSync(p);
                 });
@@ -1737,6 +1761,7 @@ function supprimerRoomsInactives() {
   });
 }
 
+// auto cleanup deposits
 function supprimerDepositsExpires() {
   const now = Date.now();
 
@@ -1750,6 +1775,9 @@ function supprimerDepositsExpires() {
         db.all("SELECT encryptedName FROM files WHERE depositId = ?", [dep.id], (err, files) => {
           if (files) {
             files.forEach(f => {
+              // skip cloud files
+              if (!f.encryptedName) return;
+
               const p = path.join(PATH_DEP, f.encryptedName);
               if (fs.existsSync(p)) fs.unlinkSync(p);
             });
@@ -1758,7 +1786,7 @@ function supprimerDepositsExpires() {
           db.run("DELETE FROM files WHERE depositId = ?", [dep.id]);
           // cleanup deposit token
           cloudManager.deleteDepositToken(dep.id);
-          
+
           db.run("DELETE FROM deposits WHERE id = ?", [dep.id]);
           console.log(`deposit ${dep.id} expired and deleted`);
         });
