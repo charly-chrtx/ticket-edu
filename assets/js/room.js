@@ -222,7 +222,6 @@ async function update_cloud_ui() {
     const typeRadio = document.querySelector('input[name="AdminType"]:checked');
     const isDepositMode = typeRadio && typeRadio.value === 'depot';
 
-    // show only in deposit admin mode
     if (!isAdmin || !isDepositMode) {
         cloudSection.style.display = 'none';
         return;
@@ -236,7 +235,7 @@ async function update_cloud_ui() {
         cloudServicesContainer.style.gap = '10px';
     }
 
-    // hide all cards initially
+    // hide all cards first
     const allCards = [
         'ticketcloudCard',
         'googleDriveCard',
@@ -265,12 +264,18 @@ async function update_cloud_ui() {
             }
         }
 
-        // update connection status
+        // update status
         const status = await api_call(`/api/cloud/status?roomCode=${room_code}`);
         ['google', 'nextcloud', 'onedrive', 'local'].forEach(p => set_cloud_card_state(p, 'idle'));
 
         if (status.connected && status.provider) {
             set_cloud_card_state(status.provider, 'connected');
+        } 
+        else if (providers && providers.includes('local')) {
+            if (!is_connecting_cloud) {
+                console.log("Auto-connecting local provider...");
+                await handle_cloud_handshake('local');
+            }
         }
     } catch (e) {
         console.error("cloud status error", e);
@@ -1808,6 +1813,7 @@ async function handle_form_submit() {
 
     if (is_admin) {
         const adminType = document.querySelector('input[name="AdminType"]:checked')?.value || 'message';
+        
         // handle deposit creation
         if (adminType === 'depot') {
             if (!name) return notif('Nom du dépôt requis.', "error");
@@ -1818,14 +1824,18 @@ async function handle_form_submit() {
                 const status = await api_call(`/api/cloud/status?roomCode=${room_code}`);
                 if (status.connected) {
                     provider = status.provider;
+                } else {
+                    return notif("Aucun stockage connecté. Veuillez sélectionner un service Cloud ou Local.", "error");
                 }
             } catch (e) {
                 console.error(e);
+                return notif("Erreur lors de la vérification du stockage.", "error");
             }
 
             await create_deposit(name, color, provider);
             return;
         }
+
         if (!name && pending_files.length === 0) return notif('Message requis.', "error");
         await process_admin_upload(name, color);
         return;
