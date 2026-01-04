@@ -629,7 +629,7 @@ app.get('/api/rooms/:code', (req, res) => {
   const roomCode = req.params.code;
 
   db.get(
-    "SELECT code, adminId, maxTickets, aiEnabled, csvFilePath, forceName FROM rooms WHERE code = ?",
+    "SELECT code, adminId, maxTickets, aiEnabled, csvFilePath, forceName, createdAt FROM rooms WHERE code = ?",
     [roomCode],
     (err, room) => {
       if (err) return res.status(500).json({ error: err.message });
@@ -655,6 +655,9 @@ app.get('/api/rooms/:code', (req, res) => {
       // users online
       const usersOnline = [...clientRooms.values()]
         .filter(c => c.code === roomCode).length;
+      
+      room.usersOnline = usersOnline;
+      room.connectedCount = usersOnline; 
 
       // storage used
       db.get(
@@ -665,7 +668,6 @@ app.get('/api/rooms/:code', (req, res) => {
 
           const storageUsed = row?.total || 0;
 
-          room.usersOnline = usersOnline;
           room.storage = {
             used: storageUsed,
             max: globalSettings.maxStoragePerRoom
