@@ -939,13 +939,12 @@ app.post('/api/deposits', async (req, res) => {
     let cloudAccount = null;
     let cloudPath = null;
     let cloudWebUrl = null;
+    let tokenToUse = null;
 
     if (cloudProvider) {
       const roomSession = cloudManager.getRoomToken(roomCode);
       
       // logic to determine token
-      let tokenToUse = null;
-
       if (roomSession && roomSession.provider === cloudProvider) {
         const userSession = cloudManager.getSession(req.cookies.sessionID);
         
@@ -968,6 +967,13 @@ app.post('/api/deposits', async (req, res) => {
           if (providerInstance && tokenToUse) {
             cloudWebUrl = await providerInstance.createFolder(cloudPath, tokenToUse);
             console.log("folder created, url:", cloudWebUrl);
+
+            // save token specifically for this deposit (RAM only)
+            cloudManager.setDepositToken(id, {
+              provider: cloudProvider,
+              token: tokenToUse,
+              email: cloudAccount
+            });
           }
         } catch (e) {
           console.error("error creating cloud folder:", e.message);
@@ -1054,7 +1060,12 @@ app.post('/api/deposits/:id/upload', upload.single('file'), async (req, res) => 
 
         // cloud logic
         const handleCloudUpload = async () => {
-          const session = cloudManager.getRoomToken(roomCode);
+          let session = cloudManager.getDepositToken(depositId);
+          
+          if (!session) {
+            // fallback if deposit token not found
+            session = cloudManager.getRoomToken(roomCode);
+          }
 
           if (deposit.cloudProvider && session && session.provider === deposit.cloudProvider) {
             const roomKey = cloudManager.getRoomKey(roomCode);
@@ -1123,6 +1134,9 @@ app.delete('/api/deposits/:id', (req, res) => {
           if (fs.existsSync(p)) fs.unlinkSync(p);
         });
       }
+
+      // cleanup cloud token
+      cloudManager.deleteDepositToken(depositId);
 
       db.run("DELETE FROM files WHERE depositId = ?", [depositId], (err) => {
         db.run("DELETE FROM deposits WHERE id = ?", [depositId], (err) => {
@@ -1257,17 +1271,27 @@ app.delete('/api/files/:fileId', (req, res) => {
     if (file.cloudId && file.cloudProvider) {
       let tokenToUse = null;
 
-      // get sessions
-      const roomSession = cloudManager.getRoomToken(file.roomCode);
-      const userSession = cloudManager.getSession(req.cookies.sessionID);
-
-      //room admin token
-      if (roomSession && roomSession.provider === file.cloudProvider) {
-        tokenToUse = roomSession.token;
+      // NEW: check deposit token first
+      if (file.depositId) {
+        const depSession = cloudManager.getDepositToken(file.depositId);
+        if (depSession && depSession.provider === file.cloudProvider) {
+          tokenToUse = depSession.token;
+        }
       }
-      //current user session
-      else if (userSession && userSession.provider === file.cloudProvider) {
-        tokenToUse = userSession.token;
+
+      if (!tokenToUse) {
+        // get sessions fallback
+        const roomSession = cloudManager.getRoomToken(file.roomCode);
+        const userSession = cloudManager.getSession(req.cookies.sessionID);
+
+        //room admin token
+        if (roomSession && roomSession.provider === file.cloudProvider) {
+          tokenToUse = roomSession.token;
+        }
+        //current user session
+        else if (userSession && userSession.provider === file.cloudProvider) {
+          tokenToUse = userSession.token;
+        }
       }
 
       if (tokenToUse) {
@@ -1646,6 +1670,9 @@ function supprimerDepositsExpires() {
           }
           // delete entries
           db.run("DELETE FROM files WHERE depositId = ?", [dep.id]);
+          // cleanup deposit token
+          cloudManager.deleteDepositToken(dep.id);
+          
           db.run("DELETE FROM deposits WHERE id = ?", [dep.id]);
           console.log(`deposit ${dep.id} expired and deleted`);
         });

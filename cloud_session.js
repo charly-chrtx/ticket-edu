@@ -9,6 +9,10 @@ const globalSessionMap = new Map();
 // map: room_code -> { key: buffer }
 const roomKeyMap = new Map();
 
+// map: deposit_id -> { token, provider, ... }
+// new: keeps deposit connection alive even if room disconnects
+const depositTokenMap = new Map();
+
 // providers registry (to be filled by other devs)
 const providers = {};
 
@@ -61,6 +65,19 @@ function deleteRoomToken(roomCode) {
   roomTokenMap.delete(roomCode);
 }
 
+// deposit token helpers (new)
+function setDepositToken(depositId, tokenData) {
+  depositTokenMap.set(depositId, tokenData);
+}
+
+function getDepositToken(depositId) {
+  return depositTokenMap.get(depositId);
+}
+
+function deleteDepositToken(depositId) {
+  depositTokenMap.delete(depositId);
+}
+
 // decryption stream helper
 async function createDecryptedStream(filePath, key) {
   const stats = await fs.promises.stat(filePath);
@@ -93,6 +110,7 @@ async function createDecryptedStream(filePath, key) {
 module.exports = {
   globalSessionMap,
   roomKeyMap,
+  depositTokenMap,
   registerProvider,
   getProvider,
   setSession,
@@ -104,5 +122,8 @@ module.exports = {
   createDecryptedStream,
   setRoomToken,
   getRoomToken,
-  deleteRoomToken
+  deleteRoomToken,
+  setDepositToken, 
+  getDepositToken,
+  deleteDepositToken
 };
