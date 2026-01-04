@@ -13,7 +13,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Ticket - Connexion</title>
     <link rel="stylesheet" href="./assets/css/style.css" />
-    <link rel="icon" type="image/png" href="./assets/icon/favicon.png">
+    <link rel="icon" type="image/png" href="./assets/icon/png/favicon.png">
 
     <style>
         body,
@@ -111,20 +111,20 @@
     <audio id="startinMusic" src="./assets/sound/starting.mp3"></audio>
     <canvas id="bgCanvas"></canvas>
 
-    <img src="./assets/icon/logo.png" alt="Logo" class="logo" onerror="this.style.display='none'">
+    <img src="./assets/icon/png/logo.png" alt="Logo" class="logo" onerror="this.style.display='none'">
 
     <div class="landing-container">
 
         <div class="action-buttons">
 
             <a href="#" class="button-text">
-                <img class="icon" src="./assets/icon/search.png" alt="Search"
-                    onerror="this.src='./assets/icon/icon thin.png'">
+                <img class="icon" src="./assets/icon/png/search.png" alt="Search"
+                    onerror="this.src='./assets/icon/png/icon thin.png'">
                 <span class="text" data-i18n="landing.join_group">Rejoindre un groupe</span>
             </a>
 
             <a href="#" class="button-text">
-                <img class="icon" src="./assets/icon/add.png" alt="Add">
+                <img class="icon" src="./assets/icon/png/add.png" alt="Add">
                 <span class="text" data-i18n="landing.create_group">Créer un groupe</span>
             </a>
 
@@ -139,15 +139,15 @@
 
         <div class="toggles-container">
             <a href="#" class="button-simple" id="indexSoundToggle">
-                <img class="icon" id="volumebutton" src="./assets/icon/volume_high.png" alt="Sound">
+                <img class="icon" id="volumebutton" src="./assets/icon/png/volume_high.png" alt="Sound">
             </a>
 
             <a href="#" class="button-simple" id="indexThemeToggle">
-                <img class="icon" id="themeIcon" src="./assets/icon/darkmod.png" alt="Theme">
+                <img class="icon" id="themeIcon" src="./assets/icon/png/darkmod.png" alt="Theme">
             </a>
 
             <a href="#" class="button-simple" id="settingsBtn">
-                <img class="icon" id="settingsIcon" src="./assets/icon/Settings.png" alt="Settings">
+                <img class="icon" id="settingsIcon" src="./assets/icon/png/Settings.png" alt="Settings">
             </a>
         </div>
     </div>
@@ -172,13 +172,13 @@
 
                     <a class="button-text" id="cancelJoin" href="#"
                         style="width: auto; padding: 0 30px; margin: 0; min-width: 140px;">
-                        <img class="icon" src="./assets/icon/cross.png">
+                        <img class="icon" src="./assets/icon/png/cross.png">
                         <span class="text" data-i18n="common.cancel">Annuler</span>
                     </a>
 
                     <a class="button-text" id="confirmJoin" href="#"
                         style="width: auto; background-color: #9ecaff; padding: 0 30px; margin: 0; min-width: 140px;">
-                        <img class="icon" src="./assets/icon/action.png" alt="">
+                        <img class="icon" src="./assets/icon/png/action.png" alt="">
                         <span class="text" data-i18n="overlays.join.validate">Rejoindre</span>
                     </a>
 
@@ -336,7 +336,7 @@
                 <div class="overlay-footer">
                     <a class="button-text" id="confirmLogs" href="#"
                         style="width: auto; padding: 0 30px; margin: 0; min-width: 140px;">
-                        <img class="icon" src="./assets/icon/check.png" alt="">
+                        <img class="icon" src="./assets/icon/png/check.png" alt="">
                         <span class="text" data-i18n="common.ok">Ok</span>
                     </a>
                 </div>
@@ -366,7 +366,7 @@
                             </div>
                         </div>
 
-                        <img class="slider-icon" src="./assets/icon/volume_off.png">
+                        <img class="slider-icon" src="./assets/icon/png/volume_off.png">
 
                     </div>
                 </div>
@@ -414,7 +414,7 @@
                     <span data-i18n="overlays.settings.project_opensource">Projet open-source Github</span>
                     <a class="button-text" href="https://github.com/charly-chrtx/ticket-edu" target="_blank"
                         style="min-height: 41px; padding: 0 20px; flex: unset; width: 100%; max-width: 200px; margin: 0;">
-                        <img class="icon" src="./assets/icon/github.png">
+                        <img class="icon" src="./assets/icon/png/github.png">
                         <span class="text" style="font-size: 14px;" data-i18n="overlays.settings.view_project">Voir le
                             projet</span>
                     </a>
@@ -430,7 +430,7 @@
 
                 <div class="overlay-footer">
                     <a class="button-text" id="closeSettings" href="#" style="width: auto; padding: 0 40px; margin: 0;">
-                        <img class="icon" src="./assets/icon/check.png" alt="">
+                        <img class="icon" src="./assets/icon/png/check.png" alt="">
                         <span class="text" data-i18n="common.save">Sauvegarder</span>
                     </a>
                 </div>
@@ -452,12 +452,12 @@
                 <div style="display: flex; flex-direction: column; gap: 15px; margin: 30px 0;">
                     
                     <a class="button-text" href="#" onclick="window.localeManager.changeLanguage('fr')">
-                        <img class="icon" src="./assets/icon/frenchflag.png" alt="FR" style="border: 2px #000 solid; border-radius: 20px; filter: none !important;">
+                        <img class="icon" src="./assets/icon/png/frenchflag.png" alt="FR" style="border: 2px #000 solid; border-radius: 20px; filter: none !important;">
                         <span class="text">Français</span>
                     </a>
 
                     <a class="button-text" href="#" onclick="window.localeManager.changeLanguage('en')">
-                        <img class="icon" src="./assets/icon/englishflag.png" alt="EN" style="border: 2px #000 solid; border-radius: 20px; filter: none !important;">
+                        <img class="icon" src="./assets/icon/png/englishflag.png" alt="EN" style="border: 2px #000 solid; border-radius: 20px; filter: none !important;">
                         <span class="text">English</span>
                     </a>
 
@@ -465,7 +465,7 @@
 
                 <div class="overlay-footer">
                     <a class="button-text" id="closeLangOverlay" href="#" style="width: auto; padding: 0 30px;">
-                        <img class="icon" src="./assets/icon/cross.png">
+                        <img class="icon" src="./assets/icon/png/cross.png">
                         <span class="text" data-i18n="common.cancel">Annuler</span>
                     </a>
                 </div>
