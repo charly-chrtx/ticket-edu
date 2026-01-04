@@ -1,9 +1,9 @@
 // -- Systeme pour le darkmod
 
 const ICON_PATHS = {
-  'light': './assets/icon/lightmod.png',
-  'auto': './assets/icon/automod.png',
-  'dark': './assets/icon/darkmod.png'
+  'light': './assets/icon/png/lightmod.png',
+  'auto': './assets/icon/png/automod.png',
+  'dark': './assets/icon/png/darkmod.png'
 };
 
 const themeRadios = document.querySelectorAll('input[name="ThemeOption"]');
@@ -84,17 +84,17 @@ window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e)
 function notif(message, type = 'info') {
     const styles = {
         success: { 
-            icon: './assets/icon/success.png',
+            icon: './assets/icon/png/success.png',
             sound: './assets/sound/success.mp3',
             color: '#9ecaff'
         },
         error: { 
-            icon: './assets/icon/error.png',
+            icon: './assets/icon/png/error.png',
             sound: './assets/sound/error.mp3',
             color: '#9ecaff'
         },
         info: { 
-            icon: './assets/icon/info.png',
+            icon: './assets/icon/png/info.png',
             sound: './assets/sound/success.mp3',
             color: '#9ecaff'
         }
@@ -130,9 +130,9 @@ function notif(message, type = 'info') {
     
     notif.innerHTML = `
         <div class="notif-progress" style="background-color: ${selectedStyle.color || '#ccc'};"></div>
-        <img src="${selectedStyle.icon}" class="notif-icon" onerror="this.src='./assets/icon/icon thin.png'">
+        <img src="${selectedStyle.icon}" class="notif-icon" onerror="this.src='./assets/icon/png/icon thin.png'">
         <span class="notif-message">${message}</span>
-        <img src="./assets/icon/cross.png" class="notif-icon close-btn">
+        <img src="./assets/icon/png/cross.png" class="notif-icon close-btn">
     `;
 
     notif.querySelector('.close-btn').onclick = () => notif.remove();
@@ -163,10 +163,10 @@ const startingMusic = document.getElementById("startinMusic");
 const muteButton = document.getElementById('indexSoundToggle');
 
 const icons = {
-    mute: './assets/icon/volume_off.png',
-    low: './assets/icon/volume_low.png',
-    mid: './assets/icon/volume_mid.png',
-    high: './assets/icon/volume_high.png'
+    mute: './assets/icon/png/volume_off.png',
+    low: './assets/icon/png/volume_low.png',
+    mid: './assets/icon/png/volume_mid.png',
+    high: './assets/icon/png/volume_high.png'
 };
 
 const savedVolume = localStorage.getItem('savedVolume');

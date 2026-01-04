@@ -826,9 +826,14 @@ textarea:hover:not(:focus) {
 
 .banner {
     display: block;
-    width: 100%;
+    width: 80%;
+    min-width: 300px;
+    max-width: 400px;
     border-radius: 8px;
+    margin: 40px auto;
     object-fit: cover;
+    align-items: center;
+    justify-content: center;
 }
 
 .menu-overlay {

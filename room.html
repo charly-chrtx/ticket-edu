@@ -456,6 +456,9 @@
               Tu devras rentrer le code de la room pour revenir.
             </p>
 
+            <img class="banner" src="./assets/banner/leave.png" alt="Bannière Déconnexion"
+              data-i18n="[alt]overlays.logout.banner_alt">
+
             <div class="overlay-footer" style="display: flex; justify-content: center; gap: 15px; margin-top: 30px;">
 
               <a class="button-text" id="confirmLogout" href="#"
@@ -553,13 +556,15 @@
       </div>
 
       <div class="menu-overlay" id="bugReportOverlay" style="display: none;">
-        <div class="menu-box">
+        <div class="menu-box" style="width: 700px;">
           <div class="input" style="padding-bottom: 0;">
             <h1 data-i18n="overlays.bug_report.title">Signaler un problème</h1>
 
             <p style="margin: 15px 0; opacity: 0.7;" data-i18n="overlays.bug_report.message">
               Les logs de la console seront envoyés automatiquement.
             </p>
+
+            <img class="banner" src="./assets/banner/report.png" alt="Bannière Report">
 
             <textarea id="bugDescription" placeholder="Décrivez le problème (optionnel)..."
               data-i18n="overlays.bug_report.placeholder"></textarea>
@@ -718,7 +723,7 @@
   </div>
 
   <div class="menu-overlay" id="languageOverlay" style="display: none;">
-    <div class="menu-box" style="max-width: 400px;">
+    <div class="menu-box" style="max-width: 500px;">
       <div class="input" style="padding-bottom: 0;">
 
         <h1 data-i18n="overlays.settings.language">Langue</h1>
@@ -726,6 +731,8 @@
         <p style="margin: 20px 0; opacity: 0.7; text-align: center;">
           Sélectionnez votre langue
         </p>
+
+        <img class="banner" src="./assets/banner/lang.png" alt="Bannière Langue">
 
         <div style="display: flex; flex-direction: column; gap: 15px; margin: 30px 0;">
 
