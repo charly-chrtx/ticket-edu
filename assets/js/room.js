@@ -328,7 +328,7 @@ async function handle_cloud_handshake(provider) {
             basePath: 'Ticket-Edu'
         });
 
-        if (!res) throw new Error("Réponse vide du serveur");
+        if (!res) throw new notif("Réponse vide du serveur", "error");
 
         if (res.connected || res.status === 'connected') {
             await update_cloud_ui();
@@ -389,7 +389,7 @@ async function handle_cloud_handshake(provider) {
         is_connecting_cloud = false;
         document.body.style.cursor = 'default';
         set_cloud_card_state(provider, "error");
-        alert("Erreur connexion: " + e.message);
+        notif("Erreur connexion: " + e.message);
     }
 }
 
@@ -400,7 +400,7 @@ async function disconnect_cloud() {
         await api_call('/api/cloud/disconnect', 'POST', { roomCode: room_code });
         update_cloud_ui();
     } catch (e) {
-        alert("Erreur déconnexion");
+        notif("Erreur déconnexion");
     }
 }
 
@@ -412,6 +412,9 @@ function prompt_nextcloud_creds() {
         overlay.style.display = 'flex';
 
         const box = create_tag('div', 'menu-box');
+
+        box.style.width = '500px';
+        box.style.maxWidth = '90%';
 
         // simplified ui
         box.innerHTML = `
@@ -427,7 +430,7 @@ function prompt_nextcloud_creds() {
                     <span class="text">Annuler</span>
                 </a>
                 <a class="button-text" id='ncSubmit' style="width: auto; padding: 0 30px; margin: 0; min-width: 140px; background-color: #9ecaff;">
-                    <img class="icon" src="./assets/icon/action.png">
+                    <img class="icon" src="./assets/icon/connection.png">
                     <span class="text">Connecter</span>
                 </a>
             </div>
@@ -454,7 +457,7 @@ function prompt_nextcloud_creds() {
         document.getElementById('ncSubmit').onclick = () => {
             const url = document.getElementById('ncUrl').value.trim();
 
-            if (!url) return alert("URL requise");
+            if (!url) return notif("URL requise", "error");
 
             closeAndResolve(url);
         };

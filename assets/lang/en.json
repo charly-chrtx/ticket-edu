@@ -109,7 +109,7 @@
       "source_code": "Source code"
     },
     "logout": {
-      "title": "Logout?",
+      "title": "Logout",
       "message": "You will have to enter the room code to return.",
       "yes": "Yes, leave",
       "no": "No, stay"
