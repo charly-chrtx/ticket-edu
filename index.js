@@ -11,7 +11,6 @@ const path = require('path');
 const cookieParser = require('cookie-parser');
 const cloudManager = require('./cloud_session');
 const crypto = require('crypto');
-const archiver = require('archiver');
 const CloudProvider = require('./CloudProvider');
 const GoogleProvider = require('./CloudProviders/GoogleProvider');
 const OneDriveProvider = require('./CloudProviders/OneDriveProvider');
@@ -125,9 +124,15 @@ app.post('/api/cloud/handshake', async (req, res) => {
     return res.status(400).json({ error: "missing fields" });
   }
 
-  // local bypass
-  if (provider === 'local') { //
+// local bypass
+  if (provider === 'local') { 
     cloudManager.setRoomKey(roomCode, cryptoKey);
+    cloudManager.setRoomToken(roomCode, {
+      provider: 'local',
+      token: 'local_token',
+      basePath: basePath || 'Ticket-Edu',
+      email: roomCode
+    });
     return res.json({ connected: true });
   }
 
@@ -955,11 +960,11 @@ app.post('/api/deposits', async (req, res) => {
     if (cloudProvider) {
 
       // handle local provider
-      if (cloudProvider === 'local') { //
-        cloudAccount = 'Server Storage';
-        tokenToUse = 'local_token'; // dummy token
-        const rootPath = process.env.CLOUD_BASE_PATH || 'Ticket-Edu';
-        cloudPath = `${rootPath}/dépots/${roomCode}/${normalize(name)}`;
+      if (cloudProvider === 'local') { 
+        // hide info for local
+        cloudAccount = null;
+        tokenToUse = 'local_token'; 
+        cloudPath = null;
       }
       // handle external providers
       else {
@@ -983,8 +988,8 @@ app.post('/api/deposits', async (req, res) => {
         }
       }
 
-      // create folder logic
-      if (tokenToUse && cloudPath) {
+      // create folder logic (skip for local)
+      if (tokenToUse && cloudPath && cloudProvider !== 'local') {
         try {
           const providerInstance = cloudManager.getProvider(cloudProvider);
           if (providerInstance) {
@@ -1090,12 +1095,19 @@ app.post('/api/deposits/:id/upload', upload.single('file'), async (req, res) => 
           if (deposit.cloudProvider) {
             let session = cloudManager.getDepositToken(depositId);
             if (!session) session = cloudManager.getRoomToken(roomCode);
+            
+            // local bypass
+            if (deposit.cloudProvider === 'local') {
+              session = { provider: 'local', token: 'local_token' };
+            }
 
             const provider = cloudManager.getProvider(deposit.cloudProvider);
 
             if (provider && session && session.provider === deposit.cloudProvider) {
               const fileStream = fs.createReadStream(file.path);
               const rootPath = session.basePath || CLOUD_BASE_PATH;
+              
+              // path ignored by local
               const folderPath = `${rootPath}/dépots/${roomCode}/${normalize(deposit.name)}`;
 
               const cloudMeta = {
@@ -1109,11 +1121,20 @@ app.post('/api/deposits/:id/upload', upload.single('file'), async (req, res) => 
               const result = await provider.uploadStream(fileStream, cloudMeta, session.token);
               cloudFileId = result.id;
 
-              // delete local file (exclusive upload)
+              // delete temp file
               if (fs.existsSync(file.path)) {
                 fs.unlinkSync(file.path);
               }
-              encryptedName = null; // file is only on cloud
+              
+              // handle local mapping
+              if (deposit.cloudProvider === 'local') {
+                // save as encrypted local
+                encryptedName = result.id;
+                cloudFileId = null;
+              } else {
+                encryptedName = null; // cloud only
+              }
+
             } else {
               throw new Error("missing provider or session");
             }
@@ -1172,76 +1193,6 @@ app.delete('/api/deposits/:id', (req, res) => {
           res.json({ message: "deposit deleted" });
         });
       });
-    });
-  });
-});
-
-// zip
-app.get('/api/deposits/:id/zip', (req, res) => {
-  const depositId = req.params.id;
-
-  db.get("SELECT * FROM deposits WHERE id = ?", [depositId], (err, deposit) => {
-    if (err || !deposit) return res.status(404).json({ error: "deposit not found" });
-
-    // external clouds only
-    // for ticket cloud (local), keep old system
-    if (!deposit.cloudProvider) {
-      return res.status(400).json({ error: "zip only for external clouds" });
-    }
-
-    db.all("SELECT * FROM files WHERE depositId = ?", [depositId], async (err, files) => {
-      if (err) return res.status(500).json({ error: err.message });
-      if (!files || files.length === 0) return res.status(400).json({ error: "no files" });
-
-      try {
-        const provider = cloudManager.getProvider(deposit.cloudProvider);
-        if (!provider) throw new Error("provider not supported");
-
-        // token priority: deposit > room > user
-        const depSession = cloudManager.getDepositToken(depositId);
-        const roomSession = cloudManager.getRoomToken(deposit.roomCode);
-        const userSession = cloudManager.getSession(req.cookies.sessionID);
-
-        let token = null;
-        if (depSession && depSession.provider === deposit.cloudProvider) {
-          token = depSession.token;
-        } else if (roomSession && roomSession.provider === deposit.cloudProvider) {
-          token = roomSession.token;
-        } else if (userSession && userSession.provider === deposit.cloudProvider) {
-          token = userSession.token;
-        }
-
-        // init archive
-        const zipName = normalize(deposit.name || 'archive') + '.zip';
-        res.attachment(zipName);
-
-        const archive = archiver('zip', { zlib: { level: 9 } });
-
-        archive.on('error', (err) => {
-          console.error("archive error", err);
-          res.end();
-        });
-
-        archive.pipe(res);
-
-        // stream files from cloud
-        for (const file of files) {
-          try {
-            if (file.cloudId) {
-              const stream = await provider.getDownloadStream(file.cloudId, token);
-              archive.append(stream, { name: file.originalName });
-            }
-          } catch (e) {
-            console.error(`zip add failed ${file.originalName}`, e);
-          }
-        }
-
-        archive.finalize();
-
-      } catch (e) {
-        console.error("zip setup error", e);
-        if (!res.headersSent) res.status(500).json({ error: e.message });
-      }
     });
   });
 });
@@ -1321,35 +1272,77 @@ app.post('/api/files', upload.single('file'), (req, res) => {
   });
 });
 
-app.get('/api/files/download/:fileId', async (req, res) => {
-  try {
-    const fileId = req.params.fileId;
-    const token = req.session.token;
+app.get('/api/files/download/:fileId', (req, res) => {
+  const fileId = req.params.fileId;
 
-    // get file metadata
-    const file = await db.getFile(fileId);
+  // get file and provider info
+  const query = `
+    SELECT f.*, d.cloudProvider 
+    FROM files f 
+    LEFT JOIN deposits d ON f.depositId = d.id
+    WHERE f.id = ?`;
 
-    if (!file) {
-      return res.status(404).send('file not found');
+  db.get(query, [fileId], async (err, file) => {
+    if (err) return res.status(500).send('database error');
+    if (!file) return res.status(404).send('file not found');
+
+    // check consistency (allow local with null cloudId)
+    const isLocal = file.cloudProvider === 'local';
+    if ((!file.cloudId && !isLocal) || !file.cloudProvider) {
+      return res.status(400).send('not a cloud file');
     }
 
-    // set response headers
-    res.setHeader('Content-Disposition', `attachment; filename="${file.name}"`);
-    res.setHeader('Content-Type', file.mime_type || 'application/octet-stream');
+    try {
+      let tokenToUse = null;
 
-    // get provider instance
-    const provider = CloudProvider.getProvider(file.provider_type);
+      // bypass auth for local provider
+      if (isLocal) {
+        tokenToUse = 'local_token';
+      } else {
+        // try deposit token for external clouds
+        if (file.depositId) {
+          const depSession = cloudManager.getDepositToken(file.depositId);
+          if (depSession && depSession.provider === file.cloudProvider) {
+            tokenToUse = depSession.token;
+          }
+        }
 
-    // get data stream
-    const stream = await provider.getDownloadStream(file.cloud_id, token);
+        // try room or user token fallback
+        if (!tokenToUse) {
+          const roomSession = cloudManager.getRoomToken(file.roomCode);
+          const userSession = cloudManager.getSession(req.cookies.sessionID);
 
-    // pipe to response
-    stream.pipe(res);
+          if (roomSession && roomSession.provider === file.cloudProvider) {
+            tokenToUse = roomSession.token;
+          } else if (userSession && userSession.provider === file.cloudProvider) {
+            tokenToUse = userSession.token;
+          }
+        }
+      }
 
-  } catch (err) {
-    console.error(err);
-    res.status(500).send('download error');
-  }
+      if (!tokenToUse) {
+        return res.status(403).send('cloud auth missing');
+      }
+
+      const provider = cloudManager.getProvider(file.cloudProvider);
+      if (!provider) return res.status(500).send('provider not found');
+
+      // headers
+      res.setHeader('Content-Disposition', `attachment; filename="${file.originalName}"`);
+      res.setHeader('Content-Type', file.mimeType || 'application/octet-stream');
+
+      // determine correct id to fetch (encryptedName for local, cloudId for others)
+      const targetId = isLocal ? file.encryptedName : file.cloudId;
+
+      // stream
+      const stream = await provider.getDownloadStream(targetId, tokenToUse);
+      stream.pipe(res);
+
+    } catch (e) {
+      console.error("download error:", e);
+      if (!res.headersSent) res.status(500).send('download failed');
+    }
+  });
 });
 
 // delete file

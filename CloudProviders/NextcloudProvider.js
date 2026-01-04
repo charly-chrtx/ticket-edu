@@ -192,6 +192,30 @@ class NextcloudProvider extends CloudProvider {
     });
   }
 
+  // download stream
+  async getDownloadStream(fileId, credentials) {
+    const { user, pass } = credentials;
+    const targetUrl = new URL(fileId);
+    
+    const options = {
+      method: 'GET',
+      headers: { 'Authorization': this.getAuthHeader(user, pass) }
+    };
+
+    return new Promise((resolve, reject) => {
+      const client = targetUrl.protocol === 'http:' ? http : https;
+      const req = client.request(targetUrl, options, (res) => {
+        if (res.statusCode >= 200 && res.statusCode < 300) {
+          resolve(res);
+        } else {
+          reject(new Error(`download failed ${res.statusCode}`));
+        }
+      });
+      req.on('error', reject);
+      req.end();
+    });
+  }
+
   // delete file
   async deleteFile(fileId, credentials) {
     if (!fileId) return;

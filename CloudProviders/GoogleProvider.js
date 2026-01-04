@@ -154,6 +154,19 @@ class GoogleProvider extends CloudProvider {
       console.error("Google Drive delete error:", e.message);
     }
   }
+
+  async getDownloadStream(fileId, token) {
+    const oauth2Client = new google.auth.OAuth2(this.clientId, this.clientSecret);
+    oauth2Client.setCredentials(token);
+    const drive = google.drive({ version: 'v3', auth: oauth2Client });
+
+    const res = await drive.files.get(
+      { fileId: fileId, alt: 'media' },
+      { responseType: 'stream' }
+    );
+    
+    return res.data;
+  }
 }
 
 module.exports = GoogleProvider;

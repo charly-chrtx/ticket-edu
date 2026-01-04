@@ -5,50 +5,48 @@ const CloudProvider = require('../CloudProvider');
 class LocalProvider extends CloudProvider {
   constructor() {
     super();
-    // use env var or default
+    // base upload dir
     this.baseDir = process.env.UPLOAD_DIR || './uploads';
+    // target deposits dir
+    this.depositsDir = path.join(this.baseDir, 'deposits');
+    
+    // ensure deposits dir exists
+    if (!fs.existsSync(this.depositsDir)) {
+      fs.mkdirSync(this.depositsDir, { recursive: true });
+    }
   }
 
   getAuthUrl(callbackUrl, state) { return null; }
 
   async getTokenFromCode(code, redirectUri) { return null; }
 
-  // always valid for local
+  // always valid
   async verifyCredentials(params) {
     return true; 
   }
 
-  // create local folder
+  // no folder creation needed for flat structure
   async createFolder(folderPath, tokenOrCredentials) {
-    const fullPath = path.join(this.baseDir, folderPath);
-    
-    if (!fs.existsSync(fullPath)) {
-      fs.mkdirSync(fullPath, { recursive: true });
-    }
-    
-    // return relative path as url
-    return folderPath;
+    return null;
   }
 
-  // save stream to disk
+  // save with random name
   async uploadStream(fileStream, metadata, tokenOrCredentials) {
-    const folderPath = metadata.folderPath ? path.join(this.baseDir, metadata.folderPath) : this.baseDir;
+    // generate random encrypted name
+    const suffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    const encryptedName = 'local-dep-' + suffix;
     
-    // ensure dir exists
-    if (!fs.existsSync(folderPath)) {
-      fs.mkdirSync(folderPath, { recursive: true });
-    }
-
-    const filePath = path.join(folderPath, metadata.name);
+    const filePath = path.join(this.depositsDir, encryptedName);
     const writeStream = fs.createWriteStream(filePath);
 
     return new Promise((resolve, reject) => {
       fileStream.pipe(writeStream);
       
       writeStream.on('finish', () => {
+        // return encrypted name as id, no url
         resolve({ 
-          id: filePath, 
-          webViewLink: filePath 
+          id: encryptedName, 
+          webViewLink: null 
         });
       });
 
@@ -58,18 +56,20 @@ class LocalProvider extends CloudProvider {
     });
   }
 
-  // read stream from disk
+  // read from deposits dir
   async getDownloadStream(fileId, tokenOrCredentials) {
-    if (!fs.existsSync(fileId)) {
+    const filePath = path.join(this.depositsDir, fileId);
+    if (!fs.existsSync(filePath)) {
       throw new Error("file not found");
     }
-    return fs.createReadStream(fileId);
+    return fs.createReadStream(filePath);
   }
 
-  // delete local file
+  // delete from deposits dir
   async deleteFile(fileId, tokenOrCredentials) {
-    if (fs.existsSync(fileId)) {
-      fs.unlinkSync(fileId);
+    const filePath = path.join(this.depositsDir, fileId);
+    if (fs.existsSync(filePath)) {
+      fs.unlinkSync(filePath);
     }
   }
 }
