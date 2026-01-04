@@ -16,6 +16,7 @@ const CloudProvider = require('./CloudProvider');
 const GoogleProvider = require('./CloudProviders/GoogleProvider');
 const OneDriveProvider = require('./CloudProviders/OneDriveProvider');
 const NextcloudProvider = require('./CloudProviders/NextcloudProvider');
+const LocalProvider = require('./CloudProviders/LocalProvider');
 cloudManager.registerProvider('google', new GoogleProvider());
 cloudManager.registerProvider('onedrive', new OneDriveProvider());
 cloudManager.registerProvider('nextcloud', new NextcloudProvider());
