@@ -14,6 +14,9 @@ DB_PATH=./tickets.db
 UPLOAD_DIR=./uploads
 MAX_STORAGE_MO=10000
 
+# Local storage 
+TICKET_CLOUD_ENABLE=true
+
 # Google Drive
 GOOGLE_CLIENT_ID=
 GOOGLE_CLIENT_SECRET=

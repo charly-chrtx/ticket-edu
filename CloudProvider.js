@@ -31,6 +31,11 @@ class CloudProvider {
     throw new Error("method 'uploadStream' must be implemented");
   }
 
+  // get download stream
+  async getDownloadStream(fileId, tokenOrCredentials) {
+    throw new Error("method 'getDownloadStream' must be implemented");
+  }
+
   // delete file
   async deleteFile(fileId, tokenOrCredentials) {
     throw new Error("method 'deleteFile' must be implemented");

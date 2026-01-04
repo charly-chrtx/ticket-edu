@@ -11,6 +11,8 @@ const path = require('path');
 const cookieParser = require('cookie-parser');
 const cloudManager = require('./cloud_session');
 const crypto = require('crypto');
+const archiver = require('archiver');
+const CloudProvider = require('./CloudProvider');
 const GoogleProvider = require('./CloudProviders/GoogleProvider');
 const OneDriveProvider = require('./CloudProviders/OneDriveProvider');
 const NextcloudProvider = require('./CloudProviders/NextcloudProvider');
@@ -1026,20 +1028,23 @@ app.post('/api/deposits/:id/upload', upload.single('file'), async (req, res) => 
   if (!file) return res.status(400).json({ error: "no file" });
 
   db.get("SELECT cloudProvider, name FROM deposits WHERE id = ?", [depositId], async (err, deposit) => {
+    // cleanup if deposit invalid
     if (err || !deposit) {
-      fs.unlinkSync(file.path);
+      if (fs.existsSync(file.path)) fs.unlinkSync(file.path);
       return res.status(404).json({ error: "deposit not found" });
     }
 
     db.get("SELECT id FROM files WHERE depositId = ? AND userId = ?", [depositId, userId], async (err, existing) => {
+      // prevent duplicates
       if (existing) {
-        fs.unlinkSync(file.path);
+        if (fs.existsSync(file.path)) fs.unlinkSync(file.path);
         return res.status(403).json({ error: "already uploaded" });
       }
 
+      // ai validation
       const isSafe = await validateContent(customName);
       if (!isSafe) {
-        fs.unlinkSync(file.path);
+        if (fs.existsSync(file.path)) fs.unlinkSync(file.path);
         return res.status(400).json({ error: "blocked by ai" });
       }
 
@@ -1047,71 +1052,71 @@ app.post('/api/deposits/:id/upload', upload.single('file'), async (req, res) => 
       let baseName = customName || path.basename(file.originalname, ext);
       const finalName = normalize(baseName) + ext;
 
-      // quota check
-      db.get("SELECT SUM(size) as total FROM files WHERE roomCode = ?", [roomCode], (err, row) => {
+      // check quota
+      db.get("SELECT SUM(size) as total FROM files WHERE roomCode = ?", [roomCode], async (err, row) => {
         const current = row?.total || 0;
         if (current + file.size > globalSettings.maxStoragePerRoom) {
-          fs.unlinkSync(file.path);
+          if (fs.existsSync(file.path)) fs.unlinkSync(file.path);
           return res.status(413).json({ error: "quota exceeded" });
         }
 
         const fileId = "fdep_" + Date.now();
         let cloudFileId = null;
+        let encryptedName = file.filename; // default local retention
 
-        // cloud logic
-        const handleCloudUpload = async () => {
-          let session = cloudManager.getDepositToken(depositId);
-          
-          if (!session) {
-            // fallback if deposit token not found
-            session = cloudManager.getRoomToken(roomCode);
-          }
+        try {
+          // handle cloud provider if present
+          if (deposit.cloudProvider) {
+            let session = cloudManager.getDepositToken(depositId);
+            if (!session) session = cloudManager.getRoomToken(roomCode);
 
-          if (deposit.cloudProvider && session && session.provider === deposit.cloudProvider) {
-            const roomKey = cloudManager.getRoomKey(roomCode);
-            if (roomKey) {
-              try {
-                const provider = cloudManager.getProvider(session.provider);
-                if (provider) {
-                  const decryptStream = await cloudManager.createDecryptedStream(file.path, roomKey);
+            const provider = cloudManager.getProvider(deposit.cloudProvider);
 
-                  // use custom path or default from env
-                  const rootPath = session.basePath || CLOUD_BASE_PATH;
-                  const folderPath = `${rootPath}/dépots/${roomCode}/${normalize(deposit.name)}`;
+            if (provider && session && session.provider === deposit.cloudProvider) {
+              const fileStream = fs.createReadStream(file.path);
+              const rootPath = session.basePath || CLOUD_BASE_PATH;
+              const folderPath = `${rootPath}/dépots/${roomCode}/${normalize(deposit.name)}`;
 
-                  const cloudMeta = {
-                    name: finalName,
-                    mimeType: file.mimetype,
-                    folderPath: folderPath,
-                    size: file.size
-                  };
+              const cloudMeta = {
+                name: finalName,
+                mimeType: file.mimetype,
+                folderPath: folderPath,
+                size: file.size
+              };
 
-                  const result = await provider.uploadStream(decryptStream, cloudMeta, session.token);
-                  cloudFileId = result.id;
-                  console.log("cloud upload success, id:", cloudFileId);
-                }
-              } catch (cloudErr) {
-                console.error("cloud upload failed", cloudErr);
-              }
-            }
-          }
-        };
+              // upload stream
+              const result = await provider.uploadStream(fileStream, cloudMeta, session.token);
+              cloudFileId = result.id;
 
-        handleCloudUpload().then(() => {
-          // db insert
-          db.run(`INSERT INTO files (id, originalName, encryptedName, mimeType, size, roomCode, userId, depositId, cloudId)
-                  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-            [fileId, finalName, file.filename, file.mimetype, file.size, roomCode, userId, depositId, cloudFileId],
-            (err) => {
-              if (err) {
+              // delete local file (exclusive upload)
+              if (fs.existsSync(file.path)) {
                 fs.unlinkSync(file.path);
-                return res.status(500).json({ error: err.message });
               }
-              notifierClients(roomCode, 'updateDeposit');
-              res.status(201).json({ message: "uploaded" });
+              encryptedName = null; // file is only on cloud
+            } else {
+              throw new Error("missing provider or session");
             }
-          );
-        });
+          }
+        } catch (e) {
+          console.error("upload error", e);
+          // cleanup local file if upload failed
+          if (fs.existsSync(file.path)) fs.unlinkSync(file.path);
+          return res.status(500).json({ error: "upload failed" });
+        }
+
+        // db insert
+        db.run(`INSERT INTO files (id, originalName, encryptedName, mimeType, size, roomCode, userId, depositId, cloudId)
+                  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          [fileId, finalName, encryptedName, file.mimetype, file.size, roomCode, userId, depositId, cloudFileId],
+          (err) => {
+            if (err) {
+              if (encryptedName && fs.existsSync(file.path)) fs.unlinkSync(file.path);
+              return res.status(500).json({ error: err.message });
+            }
+            notifierClients(roomCode, 'updateDeposit');
+            res.status(201).json({ message: "uploaded" });
+          }
+        );
       });
     });
   });
@@ -1146,6 +1151,76 @@ app.delete('/api/deposits/:id', (req, res) => {
           res.json({ message: "deposit deleted" });
         });
       });
+    });
+  });
+});
+
+// zip
+app.get('/api/deposits/:id/zip', (req, res) => {
+  const depositId = req.params.id;
+
+  db.get("SELECT * FROM deposits WHERE id = ?", [depositId], (err, deposit) => {
+    if (err || !deposit) return res.status(404).json({ error: "deposit not found" });
+
+    // external clouds only
+    // for ticket cloud (local), keep old system
+    if (!deposit.cloudProvider) {
+      return res.status(400).json({ error: "zip only for external clouds" });
+    }
+
+    db.all("SELECT * FROM files WHERE depositId = ?", [depositId], async (err, files) => {
+      if (err) return res.status(500).json({ error: err.message });
+      if (!files || files.length === 0) return res.status(400).json({ error: "no files" });
+
+      try {
+        const provider = cloudManager.getProvider(deposit.cloudProvider);
+        if (!provider) throw new Error("provider not supported");
+
+        // token priority: deposit > room > user
+        const depSession = cloudManager.getDepositToken(depositId);
+        const roomSession = cloudManager.getRoomToken(deposit.roomCode);
+        const userSession = cloudManager.getSession(req.cookies.sessionID);
+
+        let token = null;
+        if (depSession && depSession.provider === deposit.cloudProvider) {
+          token = depSession.token;
+        } else if (roomSession && roomSession.provider === deposit.cloudProvider) {
+          token = roomSession.token;
+        } else if (userSession && userSession.provider === deposit.cloudProvider) {
+          token = userSession.token;
+        }
+
+        // init archive
+        const zipName = normalize(deposit.name || 'archive') + '.zip';
+        res.attachment(zipName);
+        
+        const archive = archiver('zip', { zlib: { level: 9 } });
+
+        archive.on('error', (err) => {
+          console.error("archive error", err);
+          res.end();
+        });
+
+        archive.pipe(res);
+
+        // stream files from cloud
+        for (const file of files) {
+          try {
+            if (file.cloudId) {
+              const stream = await provider.getDownloadStream(file.cloudId, token);
+              archive.append(stream, { name: file.originalName });
+            }
+          } catch (e) {
+            console.error(`zip add failed ${file.originalName}`, e);
+          }
+        }
+
+        archive.finalize();
+
+      } catch (e) {
+        console.error("zip setup error", e);
+        if (!res.headersSent) res.status(500).json({ error: e.message });
+      }
     });
   });
 });
@@ -1225,24 +1300,35 @@ app.post('/api/files', upload.single('file'), (req, res) => {
   });
 });
 
-// download file
-app.get('/api/files/download/:fileId', (req, res) => {
-  db.get("SELECT * FROM files WHERE id = ?", [req.params.fileId], (err, file) => {
-    if (err || !file) return res.status(404).json({ error: 'file not found' });
+app.get('/api/files/download/:fileId', async (req, res) => {
+    try {
+        const fileId = req.params.fileId;
+        const token = req.session.token;
 
-    let targetDir = UPLOAD_DIR;
-    if (file.depositId) {
-      targetDir = PATH_DEP;
-    } else if (file.announcementId) {
-      targetDir = PATH_ANN;
-    }
+        // get file metadata
+        const file = await db.getFile(fileId);
 
-    const filePath = path.join(targetDir, file.encryptedName);
-    if (!fs.existsSync(filePath)) {
-      return res.status(404).json({ error: 'file missing' });
+        if (!file) {
+            return res.status(404).send('file not found');
+        }
+
+        // set response headers
+        res.setHeader('Content-Disposition', `attachment; filename="${file.name}"`);
+        res.setHeader('Content-Type', file.mime_type || 'application/octet-stream');
+
+        // get provider instance
+        const provider = CloudProvider.getProvider(file.provider_type);
+
+        // get data stream
+        const stream = await provider.getDownloadStream(file.cloud_id, token);
+
+        // pipe to response
+        stream.pipe(res);
+
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('download error');
     }
-    res.download(filePath, file.originalName);
-  });
 });
 
 // delete file
