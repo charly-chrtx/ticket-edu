@@ -109,8 +109,8 @@
       "source_code": "Code source"
     },
     "logout": {
-      "title": "Déconnexion ?",
-      "message": "Vous devrez entrer le code de la salle pour revenir.",
+      "title": "Déconnexion",
+      "message": "Voulez vous vraiment quitter ce groupe ?",
       "yes": "Oui, quitter",
       "no": "Non, rester"
     },
