@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
   <title>Ticket - Room</title>
   <link rel="stylesheet" href="./assets/css/style.css" />
-  <link rel="icon" type="image/png" href="./assets/icon/favicon.png">
+  <link rel="icon" type="image/png" href="./assets/icon/png/favicon.png">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
   <style>
@@ -743,16 +743,16 @@
 
       <div class="top">
         <a href="#" class="button-text" id="codebutton">
-          <img class="icon" src="./assets/icon/key.png" alt="">
+          <img class="icon" src="./assets/icon/png/key.png" alt="">
           <span class="text" data-i18n="room.code_placeholder">*****</span>
         </a>
 
         <div class="button">
           <a href="#" class="button-simple" id="setting">
-            <img class="icon" src="./assets/icon/Settings.png" alt="">
+            <img class="icon" src="./assets/icon/png/Settings.png" alt="">
           </a>
           <a href="#" class="button-simple" id="logout">
-            <img class="icon" src="./assets/icon/logout.png" alt="">
+            <img class="icon" src="./assets/icon/png/logout.png" alt="">
           </a>
         </div>
       </div>
@@ -784,16 +784,16 @@
   <div class="bottom-nav">
     <div class="nav-tabs">
       <a href="#" class="nav-tab active" id="tabEnCours">
-        <img src="./assets/icon/icon thin.png" alt="En cours">
+        <img src="./assets/icon/png/icon thin.png" alt="En cours">
         <span data-i18n="room.ongoing">En cours</span>
       </a>
       <a href="#" class="nav-tab" id="tabHistorique">
-        <img src="./assets/icon/history.png" alt="Historique">
+        <img src="./assets/icon/png/history.png" alt="Historique">
         <span data-i18n="room.history">Historique</span>
       </a>
     </div>
     <a href="#" class="create-fab" id="createbutton">
-      <img src="./assets/icon/add.png" alt="Créer">
+      <img src="./assets/icon/png/add.png" alt="Créer">
     </a>
   </div>
 
@@ -855,32 +855,32 @@
 
         <div class="cloudservices">
           <div class="cloud-provider-card" id="ticketcloudCard" onclick="handle_cloud_click('ticket')">
-            <div class="provider-icon-wrapper"><img src="./assets/icon/ticketcloud.png"></div>
+            <div class="provider-icon-wrapper"><img src="./assets/icon/png/ticketcloud.png"></div>
             <div class="provider-info"><span class="provider-name" data-i18n="cloud.private">Private Cloud</span></div>
           </div>
           <div class="cloud-provider-card" id="googleDriveCard" onclick="handle_cloud_click('google')">
-            <div class="provider-icon-wrapper"><img src="./assets/icon/gdrive.png"></div>
+            <div class="provider-icon-wrapper"><img src="./assets/icon/png/gdrive.png"></div>
             <div class="provider-info"><span class="provider-name" data-i18n="cloud.google">Google Drive</span><span class="provider-status" data-i18n="cloud.not_connected">Non connecté</span></div>
           </div>
           <div class="cloud-provider-card" id="nextcloudCard" onclick="handle_cloud_click('nextcloud')">
-            <div class="provider-icon-wrapper"><img src="./assets/icon/nextcloud.png"></div>
+            <div class="provider-icon-wrapper"><img src="./assets/icon/png/nextcloud.png"></div>
             <div class="provider-info"><span class="provider-name" data-i18n="cloud.nextcloud">Nextcloud</span><span class="provider-status" data-i18n="cloud.not_connected">Non connecté</span></div>
           </div>
           <div class="cloud-provider-card" id="onedriveCard" onclick="handle_cloud_click('onedrive')">
-            <div class="provider-icon-wrapper"><img src="./assets/icon/onedrive.png"></div>
+            <div class="provider-icon-wrapper"><img src="./assets/icon/png/onedrive.png"></div>
             <div class="provider-info"><span class="provider-name" data-i18n="cloud.onedrive">OneDrive</span><span class="provider-status" data-i18n="cloud.not_connected">Non connecté</span></div>
           </div>
         </div>
 
         <div class="overlay-footer" style="display: flex; justify-content: center; gap: 10px; margin-top: 30px;">
           <a class="button-text" id='create' href='#' style="width: 100%; padding: 0 20px; margin: 0;">
-            <img class="icon" src="./assets/icon/add.png">
+            <img class="icon" src="./assets/icon/png/add.png">
             <span class="text" data-i18n="overlays.create_ticket.create_btn">Créer</span>
           </a>
 
           <a class="button-text" id='deleteAnnonce' href='#'
             style="width: 100%; padding: 0 20px; margin: 0; background-color: #ff7070; display: none;">
-            <img class="icon" src="./assets/icon/delete.png">
+            <img class="icon" src="./assets/icon/png/delete.png">
             <span class="text">Supprimer</span>
           </a>
         </div>
@@ -913,15 +913,15 @@
 
         <div class="stats-container">
             <div class="stats-badge">
-                <img src="./assets/icon/person.png">
+                <img src="./assets/icon/png/person.png">
                 <span>0</span>
             </div>
             <div class="stats-badge">
-                <img src="./assets/icon/folder.png">
+                <img src="./assets/icon/png/folder.png">
                 <span>0 Go</span>
             </div>
             <div class="stats-badge">
-                <img src="./assets/icon/timer.png">
+                <img src="./assets/icon/png/timer.png">
                 <span>00:00</span>
             </div>
         </div>
@@ -1022,7 +1022,7 @@
         <div class="setting-row">
           <span data-i18n="room.copy_link">Inviter dans la room</span>
           <a class="button-text" id="copyLink" href="#">
-            <img class="icon" src="./assets/icon/icon thin.png">
+            <img class="icon" src="./assets/icon/png/icon thin.png">
             <span class="text" id="copyText">Copier</span>
           </a>
         </div>
@@ -1032,7 +1032,7 @@
         <div class="setting-row">
           <span data-i18n="overlays.settings.project_opensource">Code source</span>
           <a class="button-text" href="https://github.com/charly-chrtx/ticket-edu" target="_blank">
-            <img class="icon" src="./assets/icon/icon thin.png">
+            <img class="icon" src="./assets/icon/png/icon thin.png">
             <span class="text">GitHub</span>
           </a>
         </div>
@@ -1040,7 +1040,7 @@
         <div class="setting-row">
           <span data-i18n="overlays.settings.report_bug_mobile">Signaler un bug</span>
           <a class="button-text" id="openGlobalReport" target="_blank">
-            <img class="icon" src="./assets/icon/report.png">
+            <img class="icon" src="./assets/icon/png/report.png">
             <span class="text" data-i18n="common.report">Signaler</span>
           </a>
         </div>
@@ -1051,7 +1051,7 @@
 
         <div class="overlay-footer">
           <a class="button-text" id="closeSettings" href="#" style="width: 100%; padding: 0 40px; margin: 0;">
-            <img class="icon" src="./assets/icon/check.png" alt="">
+            <img class="icon" src="./assets/icon/png/check.png" alt="">
             <span class="text" data-i18n="common.save">Sauvegarder</span>
           </a>
         </div>
@@ -1068,12 +1068,12 @@
         </p>
         <div class="overlay-footer" style="display: flex; justify-content: center; gap: 15px; margin-top: 30px;">
           <a class="button-text" id="confirmLogout" href="#" style="width: 100%; padding: 0 30px; margin: 0;">
-            <img class="icon" src="./assets/icon/logout.png" alt="">
+            <img class="icon" src="./assets/icon/png/logout.png" alt="">
             <span class="text" data-i18n="overlays.logout.yes">Oui, partir</span>
           </a>
           <a class="button-text" id="cancelLogout" href="#"
             style="width: 100%; padding: 0 30px; margin: 0; background-color: #ff7070;">
-            <img class="icon" src="./assets/icon/cross.png" alt="">
+            <img class="icon" src="./assets/icon/png/cross.png" alt="">
             <span class="text" data-i18n="overlays.logout.no">Non, rester</span>
           </a>
         </div>
@@ -1097,13 +1097,13 @@
 
           <a class="button-text" id="openAiReport" href="#"
             style="width: 100%; padding: 0 30px; margin: 0; background-color: #ff7070; min-width: 140px; opacity: 30%; pointer-events: none;">
-            <img class="icon" src="./assets/icon/report.png" alt="">
+            <img class="icon" src="./assets/icon/png/report.png" alt="">
             <span class="text" data-i18n="common.report">Signaler</span>
           </a>
 
           <a class="button-text" id="closeBlocked" href="#" onclick="closeReportTicketOverlay()"
             style="width: 100%; padding: 0 30px; margin: 0; min-width: 140px;">
-            <img class="icon" src="./assets/icon/check.png" alt="">
+            <img class="icon" src="./assets/icon/png/check.png" alt="">
             <span class="text" data-i18n="common.ok">Ok</span>
           </a>
 
@@ -1145,7 +1145,7 @@
         <div class="overlay-footer" style="display: flex; justify-content: center; margin-top: 30px;">
           <a class="button-text" id="loginEnter" href="#"
             style="width: auto; padding: 0 30px; margin: 0; min-width: 140px;">
-            <img class="icon" src="./assets/icon/check.png" alt="">
+            <img class="icon" src="./assets/icon/png/check.png" alt="">
             <span class="text" data-i18n="overlays.login.enter">Entrer</span>
           </a>
         </div>
@@ -1166,13 +1166,13 @@
 
         <div class="overlay-footer" style="display: flex; justify-content: center; gap: 15px; margin-top: 30px;">
           <a class="button-text" id="sendBugReport" href="#" style="width: 100%; padding: 0 30px; margin: 0;">
-            <img class="icon" src="./assets/icon/check.png">
+            <img class="icon" src="./assets/icon/png/check.png">
             <span class="text" data-i18n="common.send">Envoyer</span>
           </a>
 
           <a class="button-text" id="cancelBugReport" href="#"
             style="width: 100%; padding: 0 30px; margin: 0; background-color: #ff7070;">
-            <img class="icon" src="./assets/icon/cross.png">
+            <img class="icon" src="./assets/icon/png/cross.png">
             <span class="text" data-i18n="common.cancel">Annuler</span>
           </a>
         </div>
@@ -1198,13 +1198,13 @@
 
           <a class="button-text" id="retryConect" href="#"
             style="width: auto; padding: 0 30px; margin: 0; min-width: 140px;">
-            <img class="icon" src="./assets/icon/reload.png" alt="">
+            <img class="icon" src="./assets/icon/png/reload.png" alt="">
             <span class="text" data-i18n="overlays.closed_group.retry">Réessayer</span>
           </a>
 
           <a class="button-text" id="leaveClosed" href="#"
             style="width: auto; padding: 0 30px; margin: 0; min-width: 140px; background-color: #ff7070;">
-            <img class="icon" src="./assets/icon/logout.png" alt="">
+            <img class="icon" src="./assets/icon/png/logout.png" alt="">
             <span class="text" data-i18n="overlays.closed_group.leave">Quitter</span>
           </a>
 
@@ -1238,12 +1238,12 @@
 
         <div class="overlay-footer" style="display: flex; justify-content: center; gap: 15px; margin-top: 30px;">
           <a class="button-text" id="depositSend" href="#" style="width: 100%; padding: 0 30px; margin: 0;">
-            <img class="icon" src="./assets/icon/check.png">
+            <img class="icon" src="./assets/icon/png/check.png">
             <span class="text" data-i18n="common.send">Envoyer</span>
           </a>
           <a class="button-text" id="depositCancel" href="#"
             style="width: 100%; padding: 0 30px; margin: 0; background-color: #ff7070;">
-            <img class="icon" src="./assets/icon/cross.png">
+            <img class="icon" src="./assets/icon/png/cross.png">
             <span class="text" data-i18n="common.cancel">Annuler</span>
           </a>
         </div>
@@ -1256,7 +1256,7 @@
       <div class="modal-header">
         <h3 data-i18n="overlays.download_modal.title">Fichiers du dépôt</h3>
         <button id="close-modal" class="btn-icon">
-          <img src="assets/icon/cross.png" alt="close">
+          <img src="assets/icon/png/cross.png" alt="close">
         </button>
       </div>
       <div class="modal-body">

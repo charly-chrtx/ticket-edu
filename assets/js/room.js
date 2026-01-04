@@ -454,11 +454,11 @@ function prompt_nextcloud_creds() {
 
             <div class="overlay-footer" style="display:flex; justify-content:center; gap:10px;">
                 <a class="button-text" id='ncCancel' style="width: auto; padding: 0 30px; margin: 0; min-width: 140px;">
-                    <img class="icon" src="./assets/icon/cross.png">
+                    <img class="icon" src="./assets/icon/png/cross.png">
                     <span class="text">Annuler</span>
                 </a>
                 <a class="button-text" id='ncSubmit' style="width: auto; padding: 0 30px; margin: 0; min-width: 140px; background-color: #9ecaff;">
-                    <img class="icon" src="./assets/icon/connection.png">
+                    <img class="icon" src="./assets/icon/png/connection.png">
                     <span class="text">Connecter</span>
                 </a>
             </div>
@@ -539,16 +539,16 @@ function open_download_modal(deposit) {
             if (iconImg) {
                 const providerKey = deposit.cloudProvider.toLowerCase();
                 if (providerKey.includes('google')) {
-                    iconImg.src = "./assets/icon/gdrive.png";
+                    iconImg.src = "./assets/icon/png/gdrive.png";
                 } else if (providerKey.includes('onedrive')) {
-                    iconImg.src = "./assets/icon/onedrive.png";
+                    iconImg.src = "./assets/icon/png/onedrive.png";
                 } else if (providerKey.includes('nextcloud')) {
-                    iconImg.src = "./assets/icon/nextcloud.png";
+                    iconImg.src = "./assets/icon/png/nextcloud.png";
                 } else if (providerKey.includes('local') || providerKey.includes('ticket')) {
                     // local icon
-                    iconImg.src = "./assets/icon/ticketcloud.png";
+                    iconImg.src = "./assets/icon/png/ticketcloud.png";
                 } else {
-                    iconImg.src = "./assets/icon/cloud.png";
+                    iconImg.src = "./assets/icon/png/cloud.png";
                 }
             }
 
@@ -601,7 +601,7 @@ function open_download_modal(deposit) {
                 <div style="font-size:0.8em; opacity:0.6; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:280px;">${sub_info}</div>
             `, { display: 'flex', flexDirection: 'column', overflow: 'hidden', marginRight: '10px' });
 
-            const btn = create_tag('button', 'announcement-download', '<img src="./assets/icon/download.png" style="width:20px;">');
+            const btn = create_tag('button', 'announcement-download', '<img src="./assets/icon/png/download.png" style="width:20px;">');
             // fix button style for modal context
             btn.style.flexShrink = '0';
             btn.onclick = () => handle_file_download(file.id, file.originalName || file.name);
@@ -961,7 +961,7 @@ function show_connection_error() {
     msg.style.marginBottom = '20px';
     msg.style.textAlign = 'center';
 
-    const btn = create_tag('a', 'button-text', `<img class="icon" src="./assets/icon/logout.png"><span class="text">Partir</span>`, { width: 'auto', padding: '0 30px', margin: '0', minWidth: '140px' });
+    const btn = create_tag('a', 'button-text', `<img class="icon" src="./assets/icon/png/logout.png"><span class="text">Partir</span>`, { width: 'auto', padding: '0 30px', margin: '0', minWidth: '140px' });
     btn.href = '/';
     btn.onclick = (e) => {
         e.preventDefault();
@@ -1290,7 +1290,7 @@ function update_ticket_container(container_id, list, new_id, is_active) {
 
         const time_str = t.dateCreation ? new Date(t.dateCreation).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
         const can_delete = is_admin || (is_active && t.userId === user_id);
-        const delete_btn = can_delete ? `<a class="delete" data-id="${t.id}"><img src="assets/icon/delete.png" style="width:22px; height:22px;"></a>` : "";
+        const delete_btn = can_delete ? `<a class="delete" data-id="${t.id}"><img src="assets/icon/png/delete.png" style="width:22px; height:22px;"></a>` : "";
 
         if (is_active) {
             let info = `<p id="name">${t.nom}</p>`;
@@ -1431,23 +1431,23 @@ function render_announcements() {
                     const count_txt = `<span style="font-size:0.8em; margin-right:10px; white-space: nowrap; opacity:0.6;">${file_count} fichier${file_count > 1 ? 's' : ''} partagé${file_count > 1 ? 's' : ''}</span>`;
 
                     // download button
-                    const dl_btn = `<button class="announcement-download" title="Voir les fichiers" style="margin-right:5px;"><img src="./assets/icon/download.png" alt="DL"></button>`;
+                    const dl_btn = `<button class="announcement-download" title="Voir les fichiers" style="margin-right:5px;"><img src="./assets/icon/png/download.png" alt="DL"></button>`;
 
                     // delete button
-                    const del_btn = `<button class="announcement-delete" title="Supprimer"><img src="./assets/icon/delete.png" alt="X"></button>`;
+                    const del_btn = `<button class="announcement-delete" title="Supprimer"><img src="./assets/icon/png/delete.png" alt="X"></button>`;
 
                     btn_html = count_txt + dl_btn + del_btn;
                 } else {
                     // standard announcement delete
-                    btn_html = `<button class="announcement-delete" title="Supprimer"><img src="./assets/icon/delete.png" alt="X"></button>`;
+                    btn_html = `<button class="announcement-delete" title="Supprimer"><img src="./assets/icon/png/delete.png" alt="X"></button>`;
                 }
             } else if (is_depot) {
                 if (user_file) {
                     // show delete button
-                    btn_html = `<button class="announcement-delete-file" title="Supprimer mon fichier"><img src="./assets/icon/delete.png" alt="X"></button>`;
+                    btn_html = `<button class="announcement-delete-file" title="Supprimer mon fichier"><img src="./assets/icon/png/delete.png" alt="X"></button>`;
                 } else {
                     // show add button
-                    btn_html = `<button class="announcement-action-btn" title="Ajouter"><img src="./assets/icon/add.png" alt="+"></button>`;
+                    btn_html = `<button class="announcement-action-btn" title="Ajouter"><img src="./assets/icon/png/add.png" alt="+"></button>`;
                 }
             }
 
@@ -1545,11 +1545,11 @@ function render_deposits_list(container) {
         const actions = create_tag('div', '', '', { display: 'flex', gap: '8px', alignItems: 'center' });
 
         if (is_admin) {
-            const del = create_tag('button', 'announcement-delete', `<img src="./assets/icon/delete.png" style="width:18px;height:18px">`);
+            const del = create_tag('button', 'announcement-delete', `<img src="./assets/icon/png/delete.png" style="width:18px;height:18px">`);
             del.onclick = async (e) => { e.preventDefault(); if (!confirm('Supprimer le dépôt ?')) return; await delete_deposit(dep.id); };
             actions.appendChild(del);
         } else {
-            const add = create_tag('button', 'announcement-action-btn', `<img src="./assets/icon/add.png" style="width:18px;height:18px">`);
+            const add = create_tag('button', 'announcement-action-btn', `<img src="./assets/icon/png/add.png" style="width:18px;height:18px">`);
             add.onclick = (e) => { e.preventDefault(); open_deposit_overlay(dep); };
             actions.appendChild(add);
         }
@@ -1785,12 +1785,12 @@ function render_file_item(file, announcement_id, container) {
     `, { display: 'flex', alignItems: 'center', gap: '6px', overflow: 'hidden' });
 
     const actions = create_tag('div', '', '', { display: 'flex', alignItems: 'center', gap: '8px' });
-    const dl_btn = create_tag('button', 'announcement-action-btn', `<img src="./assets/icon/download.png" style="width:18px; height:18px;">`);
+    const dl_btn = create_tag('button', 'announcement-action-btn', `<img src="./assets/icon/png/download.png" style="width:18px; height:18px;">`);
     dl_btn.onclick = (e) => { e.preventDefault(); handle_file_download(file.id, f_name); };
     actions.appendChild(dl_btn);
 
     if (is_admin) {
-        const del_btn = create_tag('button', 'announcement-action-btn', `<img src="./assets/icon/delete.png" style="width:18px; height:18px;">`);
+        const del_btn = create_tag('button', 'announcement-action-btn', `<img src="./assets/icon/png/delete.png" style="width:18px; height:18px;">`);
         del_btn.style.borderColor = '#000000';
         del_btn.onclick = (e) => delete_item(e, `/api/announcements/${announcement_id}/files/${file.id}`, row);
         actions.appendChild(del_btn);
@@ -2100,11 +2100,11 @@ function setup_csv_settings() {
     // render
     if (csv_mode) {
         text_span.style.cssText = "display:flex; justify-content:space-between; align-items:center; width:100%; font-size: 14px;";
-        text_span.innerHTML = `<img class="icon" src="assets/icon/delete.png" style="width:24px;"><span> ${current_csv_name}</span>`;
+        text_span.innerHTML = `<img class="icon" src="assets/icon/png/delete.png" style="width:24px;"><span> ${current_csv_name}</span>`;
     } else {
         new_btn.style.backgroundColor = '';
         text_span.style.cssText = "display:flex; justify-content:space-between; align-items:center; width:100%; font-size: 14px;";
-        text_span.innerHTML = '<img class="icon" src="assets/icon/add.png" style="width:24px;"><span> Ajouter</span>';
+        text_span.innerHTML = '<img class="icon" src="assets/icon/png/add.png" style="width:24px;"><span> Ajouter</span>';
     }
 
     // delete

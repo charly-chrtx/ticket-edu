@@ -11,7 +11,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Ticket</title>
   <link rel="stylesheet" href="./assets/css/style.css" />
-  <link rel="icon" type="image/png" href="./assets/icon/favicon.png">
+  <link rel="icon" type="image/png" href="./assets/icon/png/favicon.png">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
 </head>
@@ -26,22 +26,22 @@
 
       <div class="top">
         <a href="#" class="button-text" id="createbutton" style="height: 92px;" data-i18n="room.new_ticket">
-          <img class="icon" src="./assets/icon/icon thin.png" alt="">
+          <img class="icon" src="./assets/icon/png/icon thin.png" alt="">
           <span class="text">Nouveau tickets</span>
         </a>
 
         <div class="button">
           <a href="#" class="button-text" id="codebutton">
-            <img class="icon" src="./assets/icon/key.png" alt=""
+            <img class="icon" src="./assets/icon/png/key.png" alt=""
               style="height: 32px; width: 32px; object-fit: contain;">
             <span class="text" data-i18n="room.code_placeholder">*****</span>
           </a>
           <a href="#" class="button-simple" id="logout">
-            <img class="icon" src="./assets/icon/logout.png" alt=""
+            <img class="icon" src="./assets/icon/png/logout.png" alt=""
               style="height: 32px; width: 32px; object-fit: contain;">
           </a>
           <a href="#" class="button-simple" id="setting">
-            <img class="icon" src="./assets/icon/Settings.png" alt=""
+            <img class="icon" src="./assets/icon/png/Settings.png" alt=""
               style="height: 32px; width: 32px; object-fit: contain;">
           </a>
         </div>
@@ -135,7 +135,7 @@
                 style="grid-template-columns: repeat(2, 1fr) !important; display: flex; flex-wrap: wrap; gap: 10px;">
                 <div class="cloud-provider-card" id="ticketcloudCard" onclick="handle_cloud_click('ticket')">
                   <div class="provider-icon-wrapper">
-                    <img class="icon" src="./assets/icon/ticketcloud.png" alt="Ticket Cloud">
+                    <img class="icon" src="./assets/icon/png/ticketcloud.png" alt="Ticket Cloud">
                   </div>
                   <div class="provider-info">
                     <span class="provider-name" data-i18n="cloud.private">Private Cloud</span>
@@ -145,7 +145,7 @@
 
                 <div class="cloud-provider-card" id="googleDriveCard" onclick="handle_cloud_click('google')">
                   <div class="provider-icon-wrapper">
-                    <img class="icon" src="./assets/icon/gdrive.png" alt="Google Drive">
+                    <img class="icon" src="./assets/icon/png/gdrive.png" alt="Google Drive">
                   </div>
                   <div class="provider-info">
                     <span class="provider-name" data-i18n="cloud.google">Google Drive</span>
@@ -155,7 +155,7 @@
 
                 <div class="cloud-provider-card" id="nextcloudCard" onclick="handle_cloud_click('nextcloud')">
                   <div class="provider-icon-wrapper">
-                    <img class="icon" src="./assets/icon/nextcloud.png" alt="Nextcloud">
+                    <img class="icon" src="./assets/icon/png/nextcloud.png" alt="Nextcloud">
                   </div>
                   <div class="provider-info">
                     <span class="provider-name" data-i18n="cloud.nextcloud">Nextcloud</span>
@@ -165,7 +165,7 @@
 
                 <div class="cloud-provider-card" id="onedriveCard" onclick="handle_cloud_click('onedrive')">
                   <div class="provider-icon-wrapper">
-                    <img class="icon" src="./assets/icon/onedrive.png" alt="OneDrive">
+                    <img class="icon" src="./assets/icon/png/onedrive.png" alt="OneDrive">
                   </div>
                   <div class="provider-info">
                     <span class="provider-name" data-i18n="cloud.onedrive">OneDrive</span>
@@ -179,14 +179,14 @@
 
               <a class="button-text" id="cancelCreate" href="#"
                 style="width: auto; padding: 0 30px; margin: 0; min-width: 140px;" data-i18n="common.cancel">
-                <img class="icon" src="./assets/icon/cross.png">
+                <img class="icon" src="./assets/icon/png/cross.png">
                 <span class="text">Annuler</span>
               </a>
 
               <a class="button-text" id='create' href='#'
                 style="width: auto; padding: 0 30px; margin: 0; background-color: #9ecaff; min-width: 140px;"
                 data-i18n="overlays.create_ticket.create_btn">
-                <img class="icon" src="./assets/icon/add.png">
+                <img class="icon" src="./assets/icon/png/add.png">
                 <span class="text">Créer</span>
               </a>
 
@@ -221,7 +221,7 @@
                 <a class="button-text" id="copyLink" href="#"
                   style="min-height: 41px; padding: 0 20px; flex: unset; width: 100%; width: auto; margin: 0;"
                   data-i18n="room.copy_link">
-                  <img class="icon" src="./assets/icon/link.png">
+                  <img class="icon" src="./assets/icon/png/link.png">
                   <span class="text" id="copyText" style="font-size: 14px;">Copier le lien du groupe</span>
                 </a>
 
@@ -234,19 +234,19 @@
 
               <a class="button-text" href="#"
                 style="min-height: 41px; padding: 0 40px; display: flex; align-items: center; gap: 8px; margin: 0; box-shadow: 0 4px 0px rgba(0, 0, 0, 0.2); pointer-events: none;">
-                <img class="icon" src="./assets/icon/person.png">
+                <img class="icon" src="./assets/icon/png/person.png">
                 <span class="text" id="user_count">0</span>
               </a>
 
               <a class="button-text" href="#"
                 style="min-height: 41px; padding: 0 40px; display: flex; align-items: center; gap: 8px; margin: 0; box-shadow: 0 4px 0px rgba(0, 0, 0, 0.2); pointer-events: none;">
-                <img class="icon" src="./assets/icon/folder.png">
+                <img class="icon" src="./assets/icon/png/folder.png">
                 <span class="text" id="storage_count">0 Go</span>
               </a>
 
               <a class="button-text" href="#"
                 style="min-height: 41px; padding: 0 40px; display: flex; align-items: center; gap: 8px; margin: 0; box-shadow: 0 4px 0px rgba(0, 0, 0, 0.2); pointer-events: none;">
-                <img class="icon" src="./assets/icon/timer.png">
+                <img class="icon" src="./assets/icon/png/timer.png">
                 <span class="text" id="room_timer">00:00:00</span>
               </a>
 
@@ -292,13 +292,13 @@
                 <div class="quantity-selector" style="opacity: 30%; pointer-events: none;">
 
                   <button class="qty-btn">
-                    <img src="assets/icon/remove.png" alt="Moins">
+                    <img src="assets/icon/png/remove.png" alt="Moins">
                   </button>
 
                   <div class="qty-val">~~</div>
 
                   <button class="qty-btn">
-                    <img src="assets/icon/add.png" alt="Plus">
+                    <img src="assets/icon/png/add.png" alt="Plus">
                   </button>
 
                 </div>
@@ -360,7 +360,7 @@
                   </div>
                 </div>
 
-                <img class="slider-icon" src="./assets/icon/volume_off.png">
+                <img class="slider-icon" src="./assets/icon/png/volume_off.png">
 
               </div>
             </div>
@@ -407,7 +407,7 @@
               <a class="button-text" href="https://github.com/charly-chrtx/ticket-edu" target="_blank"
                 style="min-height: 41px; padding: 0 20px; flex: unset; width: 100%; max-width: 200px; margin: 0;"
                 data-i18n="overlays.settings.view_project">
-                <img class="icon" src="./assets/icon/github.png">
+                <img class="icon" src="./assets/icon/png/github.png">
                 <span class="text" style="font-size: 14px;">Voir le projet</span>
               </a>
             </div>
@@ -419,7 +419,7 @@
               <a class="button-text" id="openGlobalReport" target="_blank"
                 style="min-height: 41px; padding: 0 20px; flex: unset; width: 100%; max-width: 200px; margin: 0;"
                 data-i18n="overlays.settings.report_bug">
-                <img class="icon" src="./assets/icon/report.png">
+                <img class="icon" src="./assets/icon/png/report.png">
                 <span class="text" style="font-size: 14px;">Signaler un problème</span>
               </a>
             </div>
@@ -436,7 +436,7 @@
             <div class="overlay-footer">
               <a class="button-text" id="closeSettings" href="#" style="width: auto; padding: 0 40px; margin: 0;"
                 data-i18n="common.save">
-                <img class="icon" src="./assets/icon/check.png" alt="">
+                <img class="icon" src="./assets/icon/png/check.png" alt="">
                 <span class="text">Sauvegarder</span>
               </a>
 
@@ -460,14 +460,14 @@
 
               <a class="button-text" id="confirmLogout" href="#"
                 style="width: auto; padding: 0 30px; margin: 0; min-width: 140px;" data-i18n="overlays.logout.yes">
-                <img class="icon" src="./assets/icon/logout.png" alt="">
+                <img class="icon" src="./assets/icon/png/logout.png" alt="">
                 <span class="text">Oui, partir</span>
               </a>
 
               <a class="button-text" id="cancelLogout" href="#"
                 style="width: auto; padding: 0 30px; margin: 0; background-color: #ff7070; min-width: 140px;"
                 data-i18n="overlays.logout.no">
-                <img class="icon" src="./assets/icon/cross.png" alt="">
+                <img class="icon" src="./assets/icon/png/cross.png" alt="">
                 <span class="text">Non, rester</span>
               </a>
 
@@ -493,14 +493,14 @@
 
               <a class="button-text" id="closeBlocked" href="#"
                 style="width: auto; padding: 0 30px; margin: 0; min-width: 140px;" data-i18n="common.ok">
-                <img class="icon" src="./assets/icon/check.png" alt="">
+                <img class="icon" src="./assets/icon/png/check.png" alt="">
                 <span class="text">Ok</span>
               </a>
 
               <a class="button-text" id="openAiReport" href="#" onclick="envoyerSignalement()"
                 style="width: auto; padding: 0 30px; margin: 0; min-width: 140px; background-color: #ff7070;"
                 data-i18n="common.report">
-                <img class="icon" src="./assets/icon/report.png" alt="">
+                <img class="icon" src="./assets/icon/png/report.png" alt="">
                 <span class="text">Signaler</span>
               </a>
 
@@ -544,7 +544,7 @@
             <div class="overlay-footer" style="display: flex; justify-content: center; margin-top: 30px;">
               <a class="button-text" id="loginEnter" href="#"
                 style="width: auto; padding: 0 30px; margin: 0; min-width: 140px;" data-i18n="overlays.login.enter">
-                <img class="icon" src="./assets/icon/check.png" alt="">
+                <img class="icon" src="./assets/icon/png/check.png" alt="">
                 <span class="text">Entrer</span>
               </a>
             </div>
@@ -567,14 +567,14 @@
             <div class="overlay-footer" style="display: flex; justify-content: center; gap: 15px; margin-top: 30px;">
               <a class="button-text" id="cancelBugReport" href="#"
                 style="width: auto; padding: 0 30px; margin: 0; min-width: 140px;" data-i18n="common.cancel">
-                <img class="icon" src="./assets/icon/cross.png">
+                <img class="icon" src="./assets/icon/png/cross.png">
                 <span class="text">Annuler</span>
               </a>
 
               <a class="button-text" id="sendBugReport" href="#"
                 style="width: auto; padding: 0 30px; margin: 0; background-color: #9ecaff; min-width: 140px;"
                 data-i18n="common.send">
-                <img class="icon" src="./assets/icon/send.png">
+                <img class="icon" src="./assets/icon/png/send.png">
                 <span class="text">Envoyer</span>
               </a>
 
@@ -604,14 +604,14 @@
               <a class="button-text" id="retryConect" href="#"
                 style="width: auto; padding: 0 30px; margin: 0; min-width: 140px;"
                 data-i18n="overlays.closed_group.retry">
-                <img class="icon" src="./assets/icon/reload.png" alt="">
+                <img class="icon" src="./assets/icon/png/reload.png" alt="">
                 <span class="text">Réessayer</span>
               </a>
 
               <a class="button-text" id="leaveClosed" href="#" onclick="envoyerSignalement()"
                 style="width: auto; padding: 0 30px; margin: 0; min-width: 140px; background-color: #ff7070;"
                 data-i18n="overlays.closed_group.leave">
-                <img class="icon" src="./assets/icon/logout.png" alt="">
+                <img class="icon" src="./assets/icon/png/logout.png" alt="">
                 <span class="text">Quitter</span>
               </a>
 
@@ -701,14 +701,14 @@
 
           <a class="button-text" id="depositCancel" href="#"
             style="width: auto; padding: 0 30px; margin: 0; min-width: 140px;" data-i18n="common.cancel">
-            <img class="icon" src="./assets/icon/cross.png">
+            <img class="icon" src="./assets/icon/png/cross.png">
             <span class="text">Annuler</span>
           </a>
 
           <a class="button-text" id="depositSend" href="#"
             style="width: auto; padding: 0 30px; margin: 0; min-width: 140px; background-color: #A6C5FF;"
             data-i18n="common.send">
-            <img class="icon" src="./assets/icon/send.png">
+            <img class="icon" src="./assets/icon/png/send.png">
             <span class="text">Envoyer</span>
           </a>
 
@@ -730,13 +730,13 @@
         <div style="display: flex; flex-direction: column; gap: 15px; margin: 30px 0;">
 
           <a class="button-text" href="#" onclick="window.localeManager.changeLanguage('fr')">
-            <img class="icon" src="./assets/icon/frenchflag.png" alt="FR"
+            <img class="icon" src="./assets/icon/png/frenchflag.png" alt="FR"
               style="border: 2px #000 solid; border-radius: 20px; filter: none !important;">
             <span class="text">Français</span>
           </a>
 
           <a class="button-text" href="#" onclick="window.localeManager.changeLanguage('en')">
-            <img class="icon" src="./assets/icon/englishflag.png" alt="EN"
+            <img class="icon" src="./assets/icon/png/englishflag.png" alt="EN"
               style="border: 2px #000 solid; border-radius: 20px; filter: none !important;">
             <span class="text">English</span>
           </a>
@@ -745,7 +745,7 @@
 
         <div class="overlay-footer">
           <a class="button-text" id="closeLangOverlay" href="#" style="width: auto; padding: 0 30px;">
-            <img class="icon" src="./assets/icon/cross.png">
+            <img class="icon" src="./assets/icon/png/cross.png">
             <span class="text" data-i18n="common.cancel">Annuler</span>
           </a>
         </div>
@@ -771,14 +771,14 @@
           <a class="button-text" id="download-all" href="#"
             style="width: auto; padding: 0 30px; margin: 0; min-width: 140px;"
             data-i18n="overlays.download_modal.download_all">
-            <img class="icon" src="./assets/icon/download.png">
+            <img class="icon" src="./assets/icon/png/download.png">
             <span class="text">Tout télécharger .zip</span>
           </a>
 
           <a class="button-text" id="showcloud" href="#"
             style="width: auto; padding: 0 30px; margin: 0; min-width: 140px;"
             data-i18n="overlays.download_modal.open_cloud">
-            <img class="icon" src="./assets/icon/gdrive.png">
+            <img class="icon" src="./assets/icon/png/gdrive.png">
             <span class="text">Ouvrir le cloud</span>
           </a>
 
