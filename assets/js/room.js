@@ -36,6 +36,9 @@ let erroroverlay;
 let global_ws = null;
 let report_enabled = false;
 let is_connecting_cloud = false;
+let room_start_time = null;
+let stats_interval = null;
+let connected_count = 0;
 
 // crypto
 let crypto_key = null;
@@ -132,6 +135,31 @@ function create_tag(tag, class_name, content = '', style = {}) {
     if (content) el.innerHTML = content;
     Object.assign(el.style, style);
     return el;
+}
+
+function start_stats_timer() {
+    if (stats_interval) clearInterval(stats_interval);
+
+    // get element by id
+    const timer_el = document.getElementById('room_timer');
+    if (!timer_el || !room_start_time) return;
+
+    const update = () => {
+        // calc time difference
+        const diff = Date.now() - room_start_time;
+        if (diff < 0) return;
+
+        const secs = Math.floor((diff / 1000) % 60);
+        const mins = Math.floor((diff / (1000 * 60)) % 60);
+        const hours = Math.floor((diff / (1000 * 60 * 60)));
+
+        // format 00:00:00
+        const pad = (n) => n.toString().padStart(2, '0');
+        timer_el.textContent = `${pad(hours)}:${pad(mins)}:${pad(secs)}`;
+    };
+
+    update();
+    stats_interval = setInterval(update, 1000);
 }
 
 // handle cloud provider click
@@ -992,10 +1020,25 @@ async function check_permissions() {
     // send userid in query
     const data = await api_call(`/api/rooms/${room_code}?userId=${user_id}`);
 
+    // handle error or redirect
     if (!data || data.error || Array.isArray(data)) {
         window.location.href = "/?error=notfound";
         return false;
     }
+
+    // update room stats timer
+    if (data.createdAt) {
+        room_start_time = new Date(data.createdAt).getTime();
+        start_stats_timer();
+    }
+
+    // update users count badge with id
+    if (typeof data.connectedCount !== 'undefined') connected_count = data.connectedCount;
+    // fallback if api doesn't send count directly
+    else connected_count = data.users ? data.users.length : 1;
+
+    const settings_users = document.getElementById('user_count');
+    if (settings_users) settings_users.textContent = connected_count;
 
     report_enabled = data.reportEnabled || false;
     update_report_ui();
@@ -1291,7 +1334,7 @@ function update_storage_ui() {
     let total_bytes = 0;
     let total_files = 0;
 
-    // calcul des fichiers
+    // calc files size
     announcements_list.forEach(a => {
         if (a.files) {
             total_files += a.files.length;
@@ -1299,9 +1342,19 @@ function update_storage_ui() {
         }
     });
 
-    const { storageText, storageProgressBar, announcementContainer, fileCountText } = ui_elements;
+    // add deposits size
+    deposits_list.forEach(d => {
+        if (d.files) {
+            total_files += d.files.length;
+            d.files.forEach(f => total_bytes += f.size);
+        }
+    });
 
-    if (storageText) storageText.textContent = format_bytes(total_bytes) + ' / ' + format_bytes(max_storage_bytes);
+    const { storageText, storageProgressBar, announcementContainer, fileCountText } = ui_elements;
+    const fmt_bytes = format_bytes(total_bytes);
+
+    // main widget update
+    if (storageText) storageText.textContent = fmt_bytes + ' / ' + format_bytes(max_storage_bytes);
     if (fileCountText) fileCountText.textContent = `${total_files} fichier${total_files > 1 ? 's' : ''} partagé${total_files > 1 ? 's' : ''}`;
 
     let pct = (total_bytes / max_storage_bytes) * 100;
@@ -1318,6 +1371,10 @@ function update_storage_ui() {
             announcementContainer.classList.remove('is-empty');
         }
     }
+
+    // settings badge update with id
+    const settings_storage = document.getElementById('storage_count');
+    if (settings_storage) settings_storage.textContent = fmt_bytes;
 }
 
 function render_announcements() {
