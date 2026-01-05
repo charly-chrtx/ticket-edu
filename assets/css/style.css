@@ -297,7 +297,7 @@ h1 {
     background-color: var(--card-bg);
     border: 2px solid #000000;
     border-radius: 50%;
-    box-shadow: 0px 2px 0px #000000;
+    box-shadow: 0px 3px 0px #000000, 0px 6px 0px rgba(0, 0, 0, 0.20);
     display: flex;
     justify-content: center;
     min-width: 88px;
@@ -311,7 +311,7 @@ h1 {
 
 .button-simple:hover {
     transform: translateY(-3px);
-    box-shadow: 0px 5px 0px #000000;
+    box-shadow: 0px 6px 0px #000000, 0px 12px 0px rgba(0, 0, 0, 0.20);
 }
 
 .button-simple:active {
@@ -327,6 +327,13 @@ h1 {
     transition: filter 0.3s ease;
     pointer-events: none;
     user-select: none;
+    display: inline-block;
+    transition: all 0.3s ease;
+}
+
+.button-simple:active .icon {
+    transform: rotate(360deg) scale(0.8);
+    filter: hue-rotate(45deg);
 }
 
 /* text button */
@@ -335,7 +342,7 @@ h1 {
     background-color: var(--card-bg);
     border: 2px solid #000000;
     border-radius: 100px;
-    box-shadow: 0px 2px 0px #000000;
+    box-shadow: 0px 2px 0px #000000, 0px 6px 0px rgba(0, 0, 0, 0.20);
     display: flex;
     justify-content: center;
     min-height: 60px;
@@ -351,7 +358,7 @@ h1 {
 
 .button-text:hover {
     transform: translateY(-3px);
-    box-shadow: 0px 5px 0px #000000;
+    box-shadow: 0px 6px 0px #000000, 0px 12px 0px rgba(0, 0, 0, 0.20);
 }
 
 .button-text:active {
@@ -506,7 +513,7 @@ textarea:hover:not(:focus) {
     background-color: var(--bg-card);
     border-radius: 100px;
     border: 2px solid black;
-    box-shadow: 0px 2px 0px #000000;
+    box-shadow: 0px 3px 0px #000000, 0px 6px 0px rgba(0, 0, 0, 0.20);
     cursor: pointer;
     transition: all 0.3s ease;
     align-items: center;
@@ -532,7 +539,7 @@ textarea:hover:not(:focus) {
 
 .toggle-slider:hover {
     transform: translateY(-3px);
-    box-shadow: 0px 5px 0px #000000;
+    box-shadow: 0px 6px 0px #000000, 0px 12px 0px rgba(0, 0, 0, 0.20);
 }
 
 /* slider selector */
@@ -544,14 +551,14 @@ textarea:hover:not(:focus) {
     width: 215px;
     height: 41px;
     background: var(--card-bg);
-    box-shadow: 0px 2px 0px #000000;
+    box-shadow: 0px 3px 0px #000000, 0px 6px 0px rgba(0, 0, 0, 0.20);
     transition: all 0.3s ease;
     overflow: hidden;
 }
 
 .slider-selector:hover {
     transform: translateY(-3px);
-    box-shadow: 0px 5px 0px #000000;
+    box-shadow: 0px 6px 0px #000000, 0px 12px 0px rgba(0, 0, 0, 0.20);
 }
 
 .slider-option {
@@ -637,15 +644,17 @@ textarea:hover:not(:focus) {
     padding: 5px;
     border-radius: 100px;
     position: relative;
-    left: auto;
-    box-shadow: 0px 2px 0px #000000;
-    transition: all 0.2s ease;
+    background: white;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    transform: translateY(0px);
+    box-shadow: 0px 3px 0px #000000, 0px 6px 0px rgba(0, 0, 0, 0.20);
 }
 
 .slider-body:hover {
     transform: translateY(-3px);
-    box-shadow: 0px 5px 0px rgb(0, 0, 0);
+    box-shadow: 0px 6px 0px #000000, 0px 12px 0px rgba(0, 0, 0, 0.20); 
 }
+
 .slider-container {
     width: 260px;
     height: 100%;
@@ -1785,18 +1794,18 @@ body.dark-mode #qrcode-container {
     position: relative;
     overflow: hidden;
     transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-    box-shadow: 0px 3px 0px #000000;
+    box-shadow: 0px 3px 0px #000000, 0px 6px 0px rgba(0, 0, 0, 0.20);
 }
 
 
 .cloud-provider-card:hover {
     transform: translateY(-3px);
-    box-shadow: 0px 5px 0px #000000;
+    box-shadow: 0px 6px 0px #000000, 0px 12px 0px rgba(0, 0, 0, 0.20);
 }
 
 .cloud-provider-card:active {
     transform: translateY(0px);
-    box-shadow: 0px 0px 0px #000000;
+    box-shadow: 0px 0px 0px #000000, 0px 6px 0px rgba(0, 0, 0, 0.20);
 }
 
 
