@@ -331,11 +331,6 @@ h1 {
     transition: all 0.3s ease;
 }
 
-.button-simple:active .icon {
-    transform: rotate(360deg) scale(0.8);
-    filter: hue-rotate(45deg);
-}
-
 /* text button */
 .button-text {
     align-items: center;
