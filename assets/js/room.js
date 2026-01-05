@@ -577,7 +577,7 @@ function open_download_modal(deposit) {
         files.forEach(file => {
             const size = (file.size / (1024 * 1024)).toFixed(2);
 
-            //custom name priority
+            // custom name priority
             const original_name = file.originalName || file.name;
             const main_name = file.customName || original_name;
             const sub_info = file.customName ? `${original_name} • ${size} Mo` : `${size} Mo`;
@@ -604,7 +604,36 @@ function open_download_modal(deposit) {
             const btn = create_tag('button', 'announcement-download', '<img src="./assets/icon/png/download.png" style="width:20px;">');
             // fix button style for modal context
             btn.style.flexShrink = '0';
-            btn.onclick = () => handle_file_download(file.id, file.originalName || file.name);
+            
+            // click handler with visual feedback
+            btn.onclick = async (e) => {
+                e.preventDefault();
+
+                // disable ui
+                btn.disabled = true;
+                btn.style.opacity = '0.5';
+
+                try {
+                    // wait for download process
+                    await handle_file_download(file.id, file.originalName || file.name);
+
+                    // success icon
+                    const img = btn.querySelector('img');
+                    if (img) img.src = './assets/icon/png/download_done.png';
+
+                    // revert icon after 5s
+                    setTimeout(() => {
+                        if (img) img.src = './assets/icon/png/download.png';
+                    }, 5000);
+
+                } catch (err) {
+                    console.error("download error", err);
+                } finally {
+                    // re-enable ui
+                    btn.disabled = false;
+                    btn.style.opacity = '1';
+                }
+            };
 
             li.appendChild(content_div);
             li.appendChild(btn);
@@ -1586,11 +1615,13 @@ function render_deposit_ui() {
         const file = deposit_pending_file;
         const size = (file.size / (1024 * 1024)).toFixed(2);
 
-        // reuse 'admin-file-item' classes for consistent look
+        // add progress bar structure like messages
         const item = create_tag('div', 'admin-file-item', `
+            <div class="file-progress-bar" id="prog-bar-depot"></div>
             <div class="admin-file-info">
                 <span class="admin-file-name">${file.name}</span>
                 <span class="admin-file-size">${size} Mo</span>
+                <span class="file-progress-pct" id="prog-txt-depot"></span>
             </div>
             <button class="admin-file-delete">×</button>
         `);
@@ -1599,18 +1630,20 @@ function render_deposit_ui() {
         item.querySelector('.admin-file-delete').onclick = (e) => {
             e.preventDefault();
             e.stopPropagation();
+            
+            // stop animation if running
+            stop_dots();
+            
             deposit_pending_file = null;
-            render_deposit_ui(); // re-render empty
-            document.getElementById('depositFileInput').value = ''; // clear input
+            render_deposit_ui(); 
+            document.getElementById('depositFileInput').value = '';
         };
 
         list.appendChild(item);
 
-        // hide placeholder if file exists (optional, depends on css)
         const ph = document.querySelector('#depositDropArea .file-placeholder');
         if (ph) ph.style.display = 'none';
     } else {
-        // show placeholder
         const ph = document.querySelector('#depositDropArea .file-placeholder');
         if (ph) ph.style.display = 'block';
     }
@@ -1695,37 +1728,27 @@ async function upload_deposit() {
     const customNameEl = document.getElementById('depositCustomName');
     const customName = customNameEl?.value.trim() || '';
 
-    // ia/local filter check
+    // local filter check
     if (!ai_enabled) {
         if (banned_terms.some(term => new RegExp(`\\b${term.toLowerCase()}\\b`, 'i').test(customName))) return notif('Nom bloqué par le filtre local.');
     }
 
-    // show loading state
-    const warning = document.getElementById('depositWarning');
-    if (warning) warning.style.display = 'block';
     const sendBtn = document.getElementById('depositSend');
     if (sendBtn) sendBtn.classList.add('button-disabled');
 
-    // prepare filename logic
+    // filename logic
     let outNameBase = '';
-
     if (customName) {
-        // use custom name only
         outNameBase = normalize_name_segment(customName);
     } else {
-        // use depositname.originalfilename
         const segmentA = normalize_name_segment(current_deposit_target.name || 'depot');
-
-        // get original name without extension
         const parts = deposit_pending_file.name.split('.');
         const originalBase = parts.length > 1 ? parts.slice(0, -1).join('.') : parts[0];
-
         outNameBase = `${segmentA}.${normalize_name_segment(originalBase)}`;
     }
 
     try {
         const enc_blob = await encrypt_file(deposit_pending_file);
-        // get clean extension
         const parts = deposit_pending_file.name.split('.');
         const ext = parts.length > 1 ? parts.pop().replace(/[^a-zA-Z0-9]/g, '') : '';
         const filename = ext ? `${outNameBase}.${ext}` : outNameBase;
@@ -1736,27 +1759,57 @@ async function upload_deposit() {
         form.append('roomCode', room_code);
         form.append('customName', customName || '');
 
-        const res = await fetch(`${api_url}/api/deposits/${current_deposit_target.id}/upload`, { method: 'POST', body: form, credentials: 'include' });
+        // use xhr for progress tracking instead of fetch
+        await new Promise((resolve, reject) => {
+            const xhr = new XMLHttpRequest();
+            xhr.open('POST', `${api_url}/api/deposits/${current_deposit_target.id}/upload`, true);
+            xhr.withCredentials = true;
 
-        if (res.ok) {
-            // reset ui
-            deposit_pending_file = null;
-            if (customNameEl) customNameEl.value = '';
-            render_deposit_ui(); // clear list
-            toggle_overlay('depositOverlay', false);
+            xhr.upload.onprogress = (e) => {
+                if (!e.lengthComputable) return;
+                const pct = Math.round((e.loaded / e.total) * 100);
+                
+                const bar = document.getElementById('prog-bar-depot');
+                const txt = document.getElementById('prog-txt-depot');
 
-            // force update immediately
-            await sync_deposits();
+                if (bar) bar.style.width = `${pct}%`;
+                if (txt) {
+                    if (pct === 100) {
+                        // reuse start_dots logic with 'depot' suffix
+                        start_dots('depot');
+                    } else {
+                        txt.textContent = `${pct}%`;
+                    }
+                }
+            };
 
-            notif("Fichier envoyé avec succès !");
-        } else {
-            const data = await res.json().catch(() => ({}));
-            throw new Error(data.error || 'Erreur serveur lors de l\'envoi');
-        }
+            xhr.onload = () => {
+                const response = JSON.parse(xhr.responseText || '{}');
+                if (xhr.status >= 200 && xhr.status < 300) {
+                    resolve();
+                } else {
+                    reject(new Error(response.error || 'Erreur serveur'));
+                }
+            };
+
+            xhr.onerror = () => reject(new Error("Network error"));
+            xhr.onabort = () => reject(new Error("Aborted"));
+            
+            xhr.send(form);
+        });
+
+        // success
+        deposit_pending_file = null;
+        if (customNameEl) customNameEl.value = '';
+        render_deposit_ui();
+        toggle_overlay('depositOverlay', false);
+        await sync_deposits();
+        notif("Fichier envoyé avec succès !");
+
     } catch (e) {
         console.error(e);
         if (e.message && e.message.includes('already')) alert('Vous avez déjà déposé un fichier pour ce rendu.');
-        if (e.message && e.message.includes("blocked")) {
+        else if (e.message && e.message.includes("blocked")) {
             last_blocked_info = {
                 input: `Nom fichier custom: ${customName || deposit_pending_file.name}`,
                 reason: e.message
@@ -1766,8 +1819,7 @@ async function upload_deposit() {
         }
         else alert('Erreur upload: ' + (e.message || "Erreur inconnue"));
     } finally {
-        // reset loading state
-        if (warning) warning.style.display = 'none';
+        stop_dots();
         if (sendBtn) sendBtn.classList.remove('button-disabled');
     }
 }
