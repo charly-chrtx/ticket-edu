@@ -1868,7 +1868,6 @@ body.dark-mode #qrcode-container {
 }
 
 .cloud-provider-card.connected .provider-status {
-    color: #2d8a2d;
     opacity: 1;
     font-weight: 600;
 }
