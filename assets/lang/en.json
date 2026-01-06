@@ -126,8 +126,8 @@
       "enter": "Enter"
     },
     "multi_profile": {
-      "title": "Multiple profiles",
-      "message": "Several profiles have the same name. Please choose."
+      "title": "Be precise",
+      "message": "Please chose a profile in the list below:"
     },
     "bug_report": {
       "title": "Report a problem",

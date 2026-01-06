@@ -126,8 +126,8 @@
       "enter": "Entrer"
     },
     "multi_profile": {
-      "title": "Profils multiples",
-      "message": "Plusieurs profils ont le même nom. Veuillez choisir."
+      "title": "Précision requise",
+      "message": "Veuillez sélectionner votre profil dans la liste ci-desosus."
     },
     "bug_report": {
       "title": "Signaler un problème",

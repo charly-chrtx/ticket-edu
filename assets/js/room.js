@@ -1222,7 +1222,7 @@ async function handle_login_submit() {
         const res = await api_call(`/api/rooms/${room_code}/check-name`, 'POST', { nameQuery: val });
 
         if (res.status === 'none') {
-            alert("Nom introuvable dans la liste.");
+            notif("Nom introuvable dans la liste.", "error");
         } else if (res.status === 'found') {
             complete_login(res.name);
         } else if (res.status === 'multiple') {
@@ -2136,7 +2136,6 @@ function setup_websocket() {
 
 // settings admin
 
-// 1. au chargement : on essaie de récupérer le nom sauvegardé, sinon défaut
 var current_csv_name = localStorage.getItem('my_csv_name') || "Fichier CSV";
 
 function setup_csv_settings() {
