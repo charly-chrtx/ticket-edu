@@ -411,7 +411,7 @@ input[type="password"] {
     border: 2px solid black;
     border-radius: 50px;
     box-sizing: border-box;
-    box-shadow: 0 3px 0px rgba(0, 0, 0, 0.2);
+    box-shadow: 0px 3px 0px #000000, 0px 6px 0px rgba(0, 0, 0, 0.20);
     transition: outline 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
 }
 
@@ -422,12 +422,11 @@ input[type="text"]::placeholder {
 
 input[type="text"]:hover:not(:focus) {
     transform: translateY(-3px);
-    box-shadow: 0px 5px 0px rgb(0, 0, 0, 0.2);
+    box-shadow: 0px 6px 0px #000000, 0px 12px 0px rgba(0, 0, 0, 0.20);
 }
 
 input[type="text"]:focus {
-    outline: 3px solid black;
-    outline-offset: -2px;
+    outline: 3px solid #9ecaff;
     animation: bounce-color 0.4s ease-out forwards;
 }
 
@@ -442,21 +441,20 @@ textarea {
     border: 2px solid black;
     border-radius: 30px;
     box-sizing: border-box;
-    box-shadow: 0 3px 0px rgba(0, 0, 0, 0.2);
+    box-shadow: 0px 3px 0px #000000, 0px 6px 0px rgba(0, 0, 0, 0.20);
     resize: none;
     font-family: "Inconsolata", monospace;
     transition: outline 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 textarea:focus {
-    outline: 3px solid black;
-    outline-offset: -2px;
+    outline: 3px solid #9ecaff;
     animation: bounce-color 0.4s ease-out forwards;
 }
 
 textarea:hover:not(:focus) {
     transform: translateY(-3px);
-    box-shadow: 0px 5px 0px rgb(0, 0, 0, 0.2);
+    box-shadow: 0px 6px 0px #000000, 0px 12px 0px rgba(0, 0, 0, 0.20);
 }
 
 @keyframes csvslide {
@@ -639,7 +637,7 @@ textarea:hover:not(:focus) {
     padding: 5px;
     border-radius: 100px;
     position: relative;
-    background: white;
+    background: var(--bg-card);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
     transform: translateY(0px);
     box-shadow: 0px 3px 0px #000000, 0px 6px 0px rgba(0, 0, 0, 0.20);
@@ -691,7 +689,6 @@ textarea:hover:not(:focus) {
     aspect-ratio: 1/1;
     position: relative;
     right: -7px;
-    filter: var(--icon-filter);
 }
 
 .slider-icon.dark-mode {
@@ -712,19 +709,18 @@ textarea:hover:not(:focus) {
     border-radius: 80px;
     cursor: pointer;
     transition: outline 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
-    box-shadow: 0 3px 0px rgba(0, 0, 0, 0.2);
+    box-shadow: 0px 3px 0px #000000, 0px 6px 0px rgba(0, 0, 0, 0.20);
     border: 2px solid black;
 }
 
 .color:hover:not(.selected) {
     transform: translateY(-3px);
-    box-shadow: 0px 5px 0px rgb(0, 0, 0, 0.2);
+    box-shadow: 0px 6px 0px #000000, 0px 12px 0px rgba(0, 0, 0, 0.20);
 }
 
 .color.selected {
-    box-shadow: inset 0 0 0 3px rgba(0, 0, 0, 1);
-    animation: bounce-color 0.4s ease-out;
-    transform: scale(1);
+    border: 3px solid #9ecaff;
+    animation: bounce-color 0.4s ease-out forwards;
 }
 
 .checkbox-container {
@@ -1800,7 +1796,7 @@ body.dark-mode #qrcode-container {
 
 .cloud-provider-card:active {
     transform: translateY(0px);
-    box-shadow: 0px 0px 0px #000000, 0px 6px 0px rgba(0, 0, 0, 0.20);
+    border: 3px solid #9ecaff;
 }
 
 
@@ -1856,13 +1852,12 @@ body.dark-mode #qrcode-container {
 
 
 .cloud-provider-card.connected {
-    background-color: #e6fcf5;
     border-color: black;
-    box-shadow: inset 0 0 0 2px black;
+    border: 5px solid #000000;
+    outline: 4px solid #9ecaff;
 }
 
 .cloud-provider-card.connected .status-indicator {
-    background-color: #AEFFA6;
     transform: scale(1.2);
     box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
 }
@@ -1881,11 +1876,6 @@ body.dark-mode #qrcode-container {
 .cloud-provider-card.loading .status-indicator {
     background-color: #FFF5A6;
     animation: bounce-reverse 1s infinite;
-}
-
-
-.cloud-provider-card.error {
-    background-color: #fff0f0;
 }
 
 .cloud-provider-card.error .provider-status {

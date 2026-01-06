@@ -6,11 +6,10 @@
   "common": {
     "cancel": "Annuler",
     "confirm": "Confirmer",
-    "save": "Enregistrer",
+    "save": "Fermer",
     "send": "Envoyer",
     "delete": "Supprimer",
     "download": "Télécharger",
-    "ok": "Ok",
     "close": "Fermer",
     "back": "Retour",
     "loading": "Chargement...",
@@ -117,13 +116,17 @@
     "blocked": {
       "title": "Ticket bloqué",
       "subtitle": "Pourquoi votre ticket a été bloqué ?",
-      "reason": "- Votre contenu est jugé inapproprié.\n\nSi votre ticket ne contient aucun contenu inapproprié, veuillez le signaler."
+      "reason1": "- Votre contenu contient des insultes.",
+      "reason2": "- Votre contenu est à caractère sexuelle.",
+      "reason3": "- Votre contenu est violent ou choquant.",
+      "solution": "Si votre ticket contient aucun contenue inapproprié alors veuillez le signaler"
     },
     "login": {
       "title": "Identification",
       "message": "Ce groupe nécessite une identification.",
       "placeholder": "Votre Prénom",
-      "enter": "Entrer"
+      "enter": "Entrer",
+      "exit": "Sortir"
     },
     "multi_profile": {
       "title": "Précision requise",

@@ -133,7 +133,7 @@
 
               <div class="cloudservices"
                 style="grid-template-columns: repeat(2, 1fr) !important; display: flex; flex-wrap: wrap; gap: 10px;">
-                <div class="cloud-provider-card" id="ticketcloudCard" onclick="handle_cloud_click('ticket')">
+                <div class="cloud-provider-card" id="ticketcloudCard" onclick="handle_cloud_click('ticket')" style="border-radius: 30px 10px 10px 30px;">
                   <div class="provider-icon-wrapper">
                     <img class="icon" src="./assets/icon/png/ticketcloud.png" alt="Ticket Cloud">
                   </div>
@@ -143,7 +143,7 @@
                   </div>
                 </div>
 
-                <div class="cloud-provider-card" id="googleDriveCard" onclick="handle_cloud_click('google')">
+                <div class="cloud-provider-card" id="googleDriveCard" onclick="handle_cloud_click('google')" style="border-radius: 10px;">
                   <div class="provider-icon-wrapper">
                     <img class="icon" src="./assets/icon/png/gdrive.png" alt="Google Drive">
                   </div>
@@ -153,7 +153,7 @@
                   </div>
                 </div>
 
-                <div class="cloud-provider-card" id="nextcloudCard" onclick="handle_cloud_click('nextcloud')">
+                <div class="cloud-provider-card" id="nextcloudCard" onclick="handle_cloud_click('nextcloud')" style="border-radius: 10px 30px 30px 10px;">
                   <div class="provider-icon-wrapper">
                     <img class="icon" src="./assets/icon/png/nextcloud.png" alt="Nextcloud">
                   </div>
@@ -436,8 +436,8 @@
             <div class="overlay-footer">
               <a class="button-text" id="closeSettings" href="#" style="width: auto; padding: 0 40px; margin: 0;"
                 data-i18n="common.save">
-                <img class="icon" src="./assets/icon/png/check.png" alt="">
-                <span class="text">Sauvegarder</span>
+                <img class="icon" src="./assets/icon/png/remove.png" alt="">
+                <span class="text">Fermer</span>
               </a>
 
             </div>
@@ -459,13 +459,13 @@
             <div class="overlay-footer" style="display: flex; justify-content: center; gap: 15px; margin-top: 30px;">
 
               <a class="button-text" id="confirmLogout" href="#"
-                style="width: auto; padding: 0 30px; margin: 0; min-width: 140px;" data-i18n="overlays.logout.yes">
+                style="width: auto; padding: 0 30px; margin: 0; min-width: 155px;" data-i18n="overlays.logout.yes">
                 <img class="icon" src="./assets/icon/png/logout.png" alt="">
                 <span class="text">Oui, partir</span>
               </a>
 
               <a class="button-text" id="cancelLogout" href="#"
-                style="width: auto; padding: 0 30px; margin: 0; background-color: #ff7070; min-width: 140px;"
+                style="width: auto; padding: 0 30px; margin: 0; background-color: #ff7070; min-width: 155px;"
                 data-i18n="overlays.logout.no">
                 <img class="icon" src="./assets/icon/png/cross.png" alt="">
                 <span class="text">Non, rester</span>
@@ -477,22 +477,31 @@
       </div>
 
       <div class="menu-overlay" id="reportTicketOverlay" style="display: none;">
-        <div class="menu-box">
+        <div class="menu-box" style="max-width: 550px;">
           <div class="input" style="padding-bottom: 0;">
 
             <h1 data-i18n="overlays.blocked.title">Ticket bloqué</h1>
 
             <h2 style="text-align: left; margin-top: 30px; font-size: 1.2rem;" data-i18n="overlays.blocked.subtitle">
               Pourquoi votre ticket à été bloqué?</h2>
-            <p style="margin: 30px 0; opacity: 0.7; text-align: left;" data-i18n="overlays.blocked.reason">
-              - Votre contenue est jugé inapproprié.<br><br>
-              Si votre ticket contient aucun contenue inapproprié alors veuillez le signaler.
+            <p style="margin: 0 0 5px 0; opacity: 0.7; text-align: left;" data-i18n="overlays.blocked.reason1">
+              - Votre contenu contient des insultes.
+            </p>
+            <p style="margin: 0 0 5px 0; opacity: 0.7; text-align: left;" data-i18n="overlays.blocked.reason2">
+              - Votre contenu est à caractère sexuel.
+            </p>
+            <p style="margin: 0 0 5px 0; opacity: 0.7; text-align: left;" data-i18n="overlays.blocked.reason3">
+              - Votre contenu est violent ou choquant.
+            </p>
+
+            <p style="margin: 20px 0 0 0; opacity: 0.7; text-align: left;" data-i18n="overlays.blocked.solution">
+              Si votre ticket ne contient aucun contenu inapproprié, veuillez le signaler.
             </p>
 
             <div class="overlay-footer" style="display: flex; justify-content: center; gap: 15px; margin-top: 30px;">
 
               <a class="button-text" id="closeBlocked" href="#"
-                style="width: auto; padding: 0 30px; margin: 0; min-width: 140px;" data-i18n="common.ok">
+                style="width: auto; padding: 0 30px; margin: 0; min-width: 140px;">
                 <img class="icon" src="./assets/icon/png/check.png" alt="">
                 <span class="text">Ok</span>
               </a>
@@ -510,7 +519,7 @@
       </div>
 
       <div class="menu-overlay" id="issueNameOverlay" style="display: none;">
-        <div class="menu-box">
+        <div class="menu-box" style="max-width: 550px;">
           <div class="input" style="padding-bottom: 0;">
 
             <h1 data-i18n="overlays.multi_profile.title">Précision requise</h1>
@@ -523,13 +532,18 @@
             </div>
 
             <div class="overlay-footer" style="display: flex; justify-content: center; gap: 15px; margin-top: 30px;">
+              <a class="button-text" id="Logout" href="#"
+                style="width: auto; padding: 0 30px; margin: 0; min-width: 140px;" data-i18n="overlays.login.exit">
+                <img class="icon" src="./assets/icon/png/logout.png" alt="">
+                <span class="text">Sortir</span>
+              </a>
             </div>
           </div>
         </div>
       </div>
 
       <div class="menu-overlay" id="loginOverlay" style="display: none;">
-        <div class="menu-box">
+        <div class="menu-box" style="max-width: 550px;">
           <div class="input" style="padding-bottom: 0;">
             <h1 data-i18n="overlays.login.title">Identification</h1>
 
@@ -542,11 +556,19 @@
             </div>
 
             <div class="overlay-footer" style="display: flex; justify-content: center; margin-top: 30px;">
+
+              <a class="button-text" id="Logout" href="#"
+                style="width: auto; padding: 0 30px; margin: 0; min-width: 140px;" data-i18n="overlays.login.exit">
+                <img class="icon" src="./assets/icon/png/logout.png" alt="">
+                <span class="text">Sortir</span>
+              </a>
+              
               <a class="button-text" id="loginEnter" href="#"
-                style="width: auto; padding: 0 30px; margin: 0; min-width: 140px;" data-i18n="overlays.login.enter">
+                style="width: auto; padding: 0 30px; margin: 0; min-width: 140px; background-color: #9ecaff;" data-i18n="overlays.login.enter">
                 <img class="icon" src="./assets/icon/png/check.png" alt="">
                 <span class="text">Entrer</span>
               </a>
+
             </div>
           </div>
         </div>
@@ -726,13 +748,13 @@
 
         <div style="display: flex; flex-direction: column; gap: 15px; margin: 30px 0;">
 
-          <a class="button-text" href="#" onclick="window.localeManager.changeLanguage('fr')" style="border-radius: 40px 40px 10px 10px !important;">
+          <a class="button-text" href="#" onclick="window.localeManager.changeLanguage('fr')" style="border-radius: 30px 30px 10px 10px !important;">
             <img class="icon" src="./assets/icon/png/frenchflag.png" alt="FR"
               style="border: 2px #000 solid; border-radius: 20px; filter: none !important;">
             <span class="text">Français</span>
           </a>
 
-          <a class="button-text" href="#" onclick="window.localeManager.changeLanguage('en')" style="border-radius: 10px 10px 40px 40px !important;">
+          <a class="button-text" href="#" onclick="window.localeManager.changeLanguage('en')" style="border-radius: 10px 10px 30px 30px !important;">
             <img class="icon" src="./assets/icon/png/englishflag.png" alt="EN"
               style="border: 2px #000 solid; border-radius: 20px; filter: none !important;">
             <span class="text">English</span>
