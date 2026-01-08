@@ -1659,6 +1659,7 @@ async function create_deposit(name, color, provider = null) {
             color: color,
             cloudProvider: provider
         });
+        notif("Dépôt créé avec succès !", "success");
         toggle_overlay('formOverlay', false);
     } catch (e) {
         alert('Erreur création dépôt: ' + (e.message || e));
@@ -1979,6 +1980,7 @@ async function handle_form_submit() {
         if (!csv_mode && !force_name_mode) name_input.value = "";
         infos_input.value = "";
         close_all_overlays();
+        notif("Ticket créé avec succès !", "success");
     } catch (e) {
         if (e.message && e.message.includes("blocked")) {
             last_blocked_info = {
@@ -2064,6 +2066,7 @@ async function process_admin_upload(content, color) {
         await new Promise(r => setTimeout(r, 1200));
         stop_dots(); close_all_overlays(); ui_elements.name.value = "";
         pending_files = []; render_pending_files(); await sync_announcements();
+        notif("Message publié avec succès !", "success");
     } catch (e) {
         if (e.message !== "Aborted") { console.error(e); alert("Erreur: " + e.message); render_pending_files(); }
         if (e.message && e.message.includes("blocked")) {
