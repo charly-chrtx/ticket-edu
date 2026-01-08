@@ -511,7 +511,7 @@ function open_download_modal(deposit) {
     modal.style.display = '';
 
     // reset cloud ui defaults
-    if (cloud_provider_el) cloud_provider_el.textContent = "Stockage: Local";
+    if (cloud_provider_el) cloud_provider_el.textContent = "Stockage: Ticket Cloud";
     if (cloud_account_el) cloud_account_el.style.display = 'none';
     if (cloud_path_el) cloud_path_el.style.display = 'none';
     if (show_cloud_btn) show_cloud_btn.style.display = 'none';

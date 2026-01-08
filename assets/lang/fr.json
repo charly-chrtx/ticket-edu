@@ -155,7 +155,7 @@
     }
   },
   "cloud": {
-    "private": "Cloud Privé",
+    "private": "Ticket Cloud",
     "google": "Google Drive",
     "nextcloud": "Nextcloud",
     "onedrive": "OneDrive",
