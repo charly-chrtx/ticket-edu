@@ -1277,7 +1277,7 @@ app.post('/api/files', upload.single('file'), (req, res) => {
 app.get('/api/files/download/:fileId', (req, res) => {
   const fileId = req.params.fileId;
 
-  // get file and provider info
+  // get file and provider
   const query = `
     SELECT f.*, d.cloudProvider 
     FROM files f 
@@ -1288,56 +1288,58 @@ app.get('/api/files/download/:fileId', (req, res) => {
     if (err) return res.status(500).send('database error');
     if (!file) return res.status(404).send('file not found');
 
-    // check consistency (allow local with null cloudId)
-    const isLocal = file.cloudProvider === 'local';
-    if ((!file.cloudId && !isLocal) || !file.cloudProvider) {
-      return res.status(400).send('not a cloud file');
-    }
+    // check mode
+    const isCloud = file.cloudProvider && file.cloudProvider !== 'local';
+
+    res.setHeader('Content-Disposition', `attachment; filename="${file.originalName}"`);
+    res.setHeader('Content-Type', file.mimeType || 'application/octet-stream');
 
     try {
+      // local handling
+      if (!isCloud) {
+        let folder = UPLOAD_DIR;
+        if (file.depositId) folder = PATH_DEP;
+        else if (file.announcementId) folder = PATH_ANN;
+
+        const filePath = path.join(folder, file.encryptedName);
+        
+        if (!fs.existsSync(filePath)) {
+          return res.status(404).send('local file missing');
+        }
+
+        const stream = fs.createReadStream(filePath);
+        return stream.pipe(res);
+      }
+
+      // cloud handling
       let tokenToUse = null;
 
-      // bypass auth for local provider
-      if (isLocal) {
-        tokenToUse = 'local_token';
-      } else {
-        // try deposit token for external clouds
-        if (file.depositId) {
-          const depSession = cloudManager.getDepositToken(file.depositId);
-          if (depSession && depSession.provider === file.cloudProvider) {
-            tokenToUse = depSession.token;
-          }
-        }
-
-        // try room or user token fallback
-        if (!tokenToUse) {
-          const roomSession = cloudManager.getRoomToken(file.roomCode);
-          const userSession = cloudManager.getSession(req.cookies.sessionID);
-
-          if (roomSession && roomSession.provider === file.cloudProvider) {
-            tokenToUse = roomSession.token;
-          } else if (userSession && userSession.provider === file.cloudProvider) {
-            tokenToUse = userSession.token;
-          }
+      // try deposit token
+      if (file.depositId) {
+        const depSession = cloudManager.getDepositToken(file.depositId);
+        if (depSession && depSession.provider === file.cloudProvider) {
+          tokenToUse = depSession.token;
         }
       }
 
+      // fallback tokens
       if (!tokenToUse) {
-        return res.status(403).send('cloud auth missing');
+        const roomSession = cloudManager.getRoomToken(file.roomCode);
+        const userSession = cloudManager.getSession(req.cookies.sessionID);
+
+        if (roomSession && roomSession.provider === file.cloudProvider) {
+          tokenToUse = roomSession.token;
+        } else if (userSession && userSession.provider === file.cloudProvider) {
+          tokenToUse = userSession.token;
+        }
       }
+
+      if (!tokenToUse) return res.status(403).send('cloud auth missing');
 
       const provider = cloudManager.getProvider(file.cloudProvider);
       if (!provider) return res.status(500).send('provider not found');
 
-      // headers
-      res.setHeader('Content-Disposition', `attachment; filename="${file.originalName}"`);
-      res.setHeader('Content-Type', file.mimeType || 'application/octet-stream');
-
-      // determine correct id to fetch (encryptedName for local, cloudId for others)
-      const targetId = isLocal ? file.encryptedName : file.cloudId;
-
-      // stream
-      const stream = await provider.getDownloadStream(targetId, tokenToUse);
+      const stream = await provider.getDownloadStream(file.cloudId, tokenToUse);
       stream.pipe(res);
 
     } catch (e) {
