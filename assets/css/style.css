@@ -1686,6 +1686,26 @@ body .theme-toggle-container {
     }
 }
 
+@media (max-width: 600px) {
+    .cloudservices {
+        flex-direction: column;
+    }
+    
+    .cloud-provider-card {
+        height: 60px; 
+        flex-direction: row; 
+        padding: 0 15px;
+        justify-content: flex-start;
+        gap: 15px;
+    }
+    
+    .provider-info {
+        align-items: flex-start;
+        margin-top: 0;
+        text-align: left;
+    }
+}
+
 body.dark-mode .qr-card::before {
     filter: invert(85%);
 }

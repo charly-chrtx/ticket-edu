@@ -10,10 +10,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
   <style>
-    /* ==========================================================================
-       MOBILE SPECIFIC STYLES
-       ========================================================================== */
-
+    /* basic mobile overrides */
     * {
       -webkit-tap-highlight-color: transparent;
     }
@@ -40,6 +37,7 @@
       padding-bottom: 200px;
     }
 
+    /* top bar */
     .top {
       display: flex;
       flex-direction: row;
@@ -47,7 +45,6 @@
       align-items: center;
       gap: 10px;
       width: 100%;
-      opacity: 1;
       position: sticky;
       top: 0;
       z-index: 100;
@@ -91,7 +88,7 @@
       width: 24px;
     }
 
-    /* TICKETS LIST - Full width */
+    /* lists */
     #right {
       opacity: 1;
       order: 2;
@@ -114,7 +111,7 @@
       display: none;
     }
 
-    /* Ticket cards - mobile optimized */
+    /* ticket cards */
     .during {
       min-height: 70px;
       margin: 5px;
@@ -166,38 +163,6 @@
       display: none;
     }
 
-    /* Action buttons on ticket */
-    .during .actions {
-      display: flex;
-      gap: 8px;
-      align-items: center;
-    }
-
-    .during .action-btn {
-      width: 45px;
-      height: 45px;
-      min-width: 45px;
-      border-radius: 50%;
-      border: 2px solid black;
-      background: var(--card-bg);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-
-    .during .action-btn:active {
-      transform: translateY(2px);
-      box-shadow: 0px 0px 0px rgba(0, 0, 0, 0.5);
-    }
-
-    .during .action-btn img {
-      width: 20px;
-      height: 20px;
-      object-fit: contain;
-    }
-
     .during .delete {
       width: 50px;
       height: 50px;
@@ -210,13 +175,7 @@
       filter: none;
     }
 
-    .announcement-container.open .announcement-item {
-      min-height: 30px;
-      padding: 10px 15px;
-      overflow: visible;
-      transition: opacity 0.3s ease 0.15s;
-    }
-
+    /* announcements */
     .announcement-container {
       position: fixed;
       bottom: 100px;
@@ -254,7 +213,7 @@
       opacity: 0.6;
     }
 
-    /* BOTTOM NAVIGATION */
+    /* nav bar */
     .bottom-nav {
       position: fixed;
       bottom: 0;
@@ -274,10 +233,6 @@
     .loaded .bottom-nav {
       animation: slide-in 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
       animation-delay: 400ms;
-    }
-
-    .dark-mode img {
-      filter: invert(1);
     }
 
     @keyframes slide-in {
@@ -332,7 +287,6 @@
       transition: filter 0.3s ease;
     }
 
-
     .nav-tab.active {
       background: #A6C5FF;
       border: 2px solid #000000;
@@ -347,7 +301,6 @@
       filter: none;
     }
 
-    /* Create button - circular bottom right */
     .create-fab {
       width: 60px;
       aspect-ratio: 1/1;
@@ -360,10 +313,7 @@
       cursor: pointer;
       box-shadow: 0px 3px 0px rgba(0, 0, 0, 1);
       transition: all 0.3s ease;
-      font-size: 24px;
-      font-weight: 300;
       color: var(--text-color);
-      line-height: 1;
       padding-bottom: 2px;
     }
 
@@ -382,7 +332,7 @@
       box-shadow: 0px 1px 0px rgba(0, 0, 0, 0.3);
     }
 
-
+    /* history tab */
     #subdiv {
       display: none;
       flex-direction: column;
@@ -430,29 +380,17 @@
       color: #000000;
     }
 
-    .history #desc {
-      display: none;
-    }
-
+    .history #desc,
     .history .time {
       display: none;
     }
 
-    /* Add bottom padding to main content */
-    .left-container {
-      padding-bottom: 200px;
-    }
-
-    /* OVERLAYS - Mobile optimized */
+    /* overlay mobile specific */
     .menu-box {
       max-width: calc(100vw - 80px);
       max-height: calc(80vh - 80px);
       padding: 25px 20px 20px 20px;
       border-radius: 2rem;
-    }
-
-    .input {
-      width: 100%;
     }
 
     .overlay-footer {
@@ -477,69 +415,7 @@
       box-sizing: border-box;
     }
 
-    /* File upload mobile */
-    .file-drop-area {
-      padding: 12px 15px;
-      border-radius: 25px;
-    }
-
-    .admin-file-item {
-      border-radius: 35px;
-      padding: 8px 15px;
-      height: 45px;
-    }
-
-    /* Color picker mobile */
-    .colorbox {
-      gap: 15px;
-    }
-
-    .color {
-      width: 40px;
-      height: 40px;
-    }
-
-    /* Settings adjustments */
-    #adminSettingsSection>div,
-    .input>div {
-      flex-wrap: wrap;
-    }
-
-    h1 {
-      font-size: 1.5rem;
-    }
-
-    input[type="text"] {
-      height: 55px;
-      font-size: 15px;
-    }
-
-    .menu-box p {
-      font-size: 0.9rem;
-      line-height: 1.5;
-    }
-
-    .admin-selector {
-      width: 100%;
-      display: flex;
-      justify-content: center;
-      margin-bottom: 20px;
-    }
-
-    .admin-selector .slider-selector {
-      transform: scale(1);
-      width: auto;
-      padding: 5px;
-    }
-
-    .admin-selector .label-text {
-      padding: 0 20px;
-      min-width: 80px;
-    }
-
-    /* ==========================================================================
-       SETTINGS COMPACT STYLE & SLIM BUTTONS
-       ========================================================================== */
+    /* compact settings */
     .setting-row {
       display: flex;
       justify-content: space-between;
@@ -597,37 +473,7 @@
       padding: 0 10px !important;
     }
 
-    body.dark-mode .lang-badge {
-      border-color: #fff;
-    }
-
-    .slider-selector,
-    .quantity-selector {
-      transform: scale(0.9);
-      transform-origin: right center;
-      margin: 0;
-      flex: 0 0 auto;
-    }
-
-    .slider-selector {
-      display: flex;
-      gap: 5px;
-    }
-
-    .slider-option {
-      margin: 0 2px;
-    }
-
-    #settingsOverlay h2 {
-      margin-top: 25px !important;
-      margin-bottom: 5px !important;
-      font-size: 1rem !important;
-      opacity: 0.8;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-    }
-
-    /* cloud services specific */
+    /* cloud providers */
     .cloudservices {
       display: flex;
       flex-direction: column;
@@ -637,116 +483,50 @@
     }
 
     .cloud-provider-card {
-      display: flex;
-      align-items: center;
+      height: 60px;
       padding: 10px;
-      border: 1px solid #000;
-      border-radius: 15px;
-      background: var(--card-bg);
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .cloud-provider-card:active {
-      transform: scale(0.98);
     }
 
     .provider-icon-wrapper {
       width: 40px;
       height: 40px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-right: 10px;
     }
 
     .provider-icon-wrapper img {
       width: 25px;
       height: 25px;
-      object-fit: contain;
-    }
-
-    .provider-info {
-      display: flex;
-      flex-direction: column;
     }
 
     .provider-name {
-      font-weight: 600;
-      font-size: 14px;
+      font-size: 1rem;
     }
 
-    .provider-status {
-      font-size: 11px;
-      opacity: 0.6;
-    }
-    
-    /* stats badge specific */
-    .stats-container {
-        display: flex;
-        justify-content: space-between;
-        gap: 8px;
-        margin-top: 20px;
-        width: 100%;
-    }
-    
-    .stats-badge {
-        flex: 1;
-        min-height: 40px;
-        border-radius: 20px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 6px;
-        background: var(--card-bg);
-        border: 2px solid #000;
-        box-shadow: 0px 2px 0px rgba(0,0,0,0.15);
-        padding: 0 5px;
-    }
-    
-    .stats-badge img {
-        width: 16px;
-        height: 16px;
-        object-fit: contain;
-    }
-    
-    .stats-badge span {
-        font-size: 12px;
-        font-weight: 600;
-        white-space: nowrap;
-    }
-
-    /* volume slider */
-    .volume-control {
+    /* deposit info in download modal */
+    .depositinfos {
+      margin-bottom: 20px;
+      font-size: 0.9em;
+      opacity: 0.8;
       display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin: 10px 0;
-      width: 100%;
+      flex-direction: column;
+      gap: 5px;
+      text-align: left;
+      background: rgba(0, 0, 0, 0.05);
+      padding: 10px;
+      border-radius: 10px;
     }
-    
-    .volume-control .slider-body {
-        flex: 1;
-        margin-left: 15px;
-    }
-
   </style>
 </head>
 
 <body class="loaded">
-
   <audio id="startinMusic" src="./assets/sound/starting.mp3"></audio>
 
   <div class="main">
-
     <div class="left-container">
-
       <div class="top">
         <a href="#" class="button-text" id="codebutton">
           <img class="icon" src="./assets/icon/png/key.png" alt="">
           <span class="text" data-i18n="room.code_placeholder">*****</span>
         </a>
-
         <div class="button">
           <a href="#" class="button-simple" id="setting">
             <img class="icon" src="./assets/icon/png/Settings.png" alt="">
@@ -756,12 +536,8 @@
           </a>
         </div>
       </div>
-
-      <div id="right">
-      </div>
-
-      <div id="subdiv">
-      </div>
+      <div id="right"></div>
+      <div id="subdiv"></div>
     </div>
 
     <div id="announcementContainer" class="announcement-container is-empty">
@@ -774,11 +550,8 @@
           </div>
         </div>
       </div>
-
-      <div id="announcementArea" class="announcement-list hidden">
-      </div>
+      <div id="announcementArea" class="announcement-list hidden"></div>
     </div>
-
   </div>
 
   <div class="bottom-nav">
@@ -817,7 +590,8 @@
         <h1 data-i18n="overlays.create_ticket.title">Nouveau ticket</h1>
 
         <div style="margin: 15px 0;">
-          <input type="text" id="name" name="name" placeholder="Nom" style="width: 100%;" data-i18n="overlays.create_ticket.name_placeholder" />
+          <input type="text" id="name" name="name" placeholder="Nom" style="width: 100%;"
+            data-i18n="overlays.create_ticket.name_placeholder" />
         </div>
 
         <div class="file-upload-container" id="fileUploadContainer" style="margin: 15px 0;">
@@ -833,11 +607,12 @@
         </div>
 
         <div style="margin: 15px 0;">
-          <input type="text" id="infos" name="infos" placeholder="Description (optionnelle)" style="width: 100%;" data-i18n="overlays.create_ticket.desc_placeholder" />
+          <input type="text" id="infos" name="infos" placeholder="Description (optionnelle)" style="width: 100%;"
+            data-i18n="overlays.create_ticket.desc_placeholder" />
         </div>
 
-        <h2 style="text-align: left; margin-top: 30px; font-size: 1.2rem;" data-i18n="overlays.create_ticket.colors">Couleurs</h2>
-
+        <h2 style="text-align: left; margin-top: 30px; font-size: 1.2rem;" data-i18n="overlays.create_ticket.colors">
+          Couleurs</h2>
         <div class="colorbox" style="margin: 15px 0;">
           <a class='color selected' id="default" style="background-color: #cdcdcd;"></a>
           <a class='color' style="background-color: #FFF5A6"></a>
@@ -849,41 +624,44 @@
         </div>
 
         <div id="cloudSection" style="display: none;">
-            <div class="checkbox-container" id="SaveToCloud" style="padding-top: 30px;">
-              <div class="checkbox" onclick="this.classList.toggle('checkbox-checked')"></div>
-              <span style="margin-left: 15px;" data-i18n="overlays.create_ticket.save_cloud">Sauvegarder via cloud</span>
-            </div>
+          <hr style="border: 0; border-top: 1px solid #e0e0e0; margin: 30px 0;">
+          <h2 style="text-align: left; margin-top: 30px; font-size: 1.2rem;"
+            data-i18n="overlays.create_ticket.save_cloud">Sauvegarde Cloud</h2>
 
-            <div class="cloudservices">
-              <div class="cloud-provider-card" id="ticketcloudCard" onclick="handle_cloud_click('ticket')">
-                <div class="provider-icon-wrapper"><img src="./assets/icon/png/ticketcloud.png"></div>
-                <div class="provider-info"><span class="provider-name" data-i18n="cloud.private">Private Cloud</span></div>
-              </div>
-              <div class="cloud-provider-card" id="googleDriveCard" onclick="handle_cloud_click('google')">
-                <div class="provider-icon-wrapper"><img src="./assets/icon/png/gdrive.png"></div>
-                <div class="provider-info"><span class="provider-name" data-i18n="cloud.google">Google Drive</span><span class="provider-status" data-i18n="cloud.not_connected">Non connecté</span></div>
-              </div>
-              <div class="cloud-provider-card" id="nextcloudCard" onclick="handle_cloud_click('nextcloud')">
-                <div class="provider-icon-wrapper"><img src="./assets/icon/png/nextcloud.png"></div>
-                <div class="provider-info"><span class="provider-name" data-i18n="cloud.nextcloud">Nextcloud</span><span class="provider-status" data-i18n="cloud.not_connected">Non connecté</span></div>
-              </div>
-              <div class="cloud-provider-card" id="onedriveCard" onclick="handle_cloud_click('onedrive')">
-                <div class="provider-icon-wrapper"><img src="./assets/icon/png/onedrive.png"></div>
-                <div class="provider-info"><span class="provider-name" data-i18n="cloud.onedrive">OneDrive</span><span class="provider-status" data-i18n="cloud.not_connected">Non connecté</span></div>
-              </div>
+          <div class="cloudservices">
+            <div class="cloud-provider-card" id="ticketcloudCard" onclick="handle_cloud_click('ticket')">
+              <div class="provider-icon-wrapper"><img src="./assets/icon/png/ticketcloud.png"></div>
+              <div class="provider-info"><span class="provider-name" data-i18n="cloud.private">Private Cloud</span><span
+                  class="provider-status" data-i18n="cloud.not_connected">Non connecté</span></div>
             </div>
+            <div class="cloud-provider-card" id="googleDriveCard" onclick="handle_cloud_click('google')">
+              <div class="provider-icon-wrapper"><img src="./assets/icon/png/gdrive.png"></div>
+              <div class="provider-info"><span class="provider-name" data-i18n="cloud.google">Google Drive</span><span
+                  class="provider-status" data-i18n="cloud.not_connected">Non connecté</span></div>
+            </div>
+            <div class="cloud-provider-card" id="nextcloudCard" onclick="handle_cloud_click('nextcloud')">
+              <div class="provider-icon-wrapper"><img src="./assets/icon/png/nextcloud.png"></div>
+              <div class="provider-info"><span class="provider-name" data-i18n="cloud.nextcloud">Nextcloud</span><span
+                  class="provider-status" data-i18n="cloud.not_connected">Non connecté</span></div>
+            </div>
+            <div class="cloud-provider-card" id="onedriveCard" onclick="handle_cloud_click('onedrive')">
+              <div class="provider-icon-wrapper"><img src="./assets/icon/png/onedrive.png"></div>
+              <div class="provider-info"><span class="provider-name" data-i18n="cloud.onedrive">OneDrive</span><span
+                  class="provider-status" data-i18n="cloud.not_connected">Non connecté</span></div>
+            </div>
+          </div>
         </div>
 
         <div class="overlay-footer" style="display: flex; justify-content: center; gap: 10px; margin-top: 30px;">
-          <a class="button-text" id='create' href='#' style="width: 100%; padding: 0 20px; margin: 0;">
+          <a class="button-text" id="cancelCreate" href="#"
+            style="width: 100%; padding: 0 20px; margin: 0; background-color: #ff7070;" data-i18n="common.cancel">
+            <img class="icon" src="./assets/icon/png/cross.png">
+            <span class="text">Annuler</span>
+          </a>
+          <a class="button-text" id='create' href='#'
+            style="width: 100%; padding: 0 20px; margin: 0; background-color: #9ecaff;">
             <img class="icon" src="./assets/icon/png/add.png">
             <span class="text" data-i18n="overlays.create_ticket.create_btn">Créer</span>
-          </a>
-
-          <a class="button-text" id='deleteAnnonce' href='#'
-            style="width: 100%; padding: 0 20px; margin: 0; background-color: #ff7070; display: none;">
-            <img class="icon" src="./assets/icon/png/delete.png">
-            <span class="text">Supprimer</span>
           </a>
         </div>
       </div>
@@ -895,40 +673,25 @@
       <div class="input" style="padding-bottom: 0;">
         <h1 style="margin-bottom: 10px;" data-i18n="overlays.settings.title">Paramètres</h1>
 
-        <div class="qr-card"
-          style="height: auto; width: 100%; opacity: 1; animation: none; padding: 20px 15px; gap: 15px; justify-content: center;">
-
+        <div class="qr-card">
           <div id="qrcode-container" style="transition: all 0.2s;"></div>
-
           <div style="display: flex; flex-direction: column; gap: 25px; text-align: center;">
-
-            <div id="codebutton" style="font-size: 1.1rem; font-weight: 600; line-height: 1.4;" data-i18n="room.scan_join">
+            <div id="codebutton" style="font-size: 1.1rem; font-weight: 600; line-height: 1.4;"
+              data-i18n="room.scan_join">
               Scannez pour nous rejoindre.
             </div>
-
-            <div id="copyText" style="font-size: 1.8rem; font-weight: 600; line-height: 1.4;">
-              *****
-            </div>
-
+            <div id="copyText" style="font-size: 1.8rem; font-weight: 600; line-height: 1.4;">*****</div>
           </div>
         </div>
 
         <div class="stats-container">
-            <div class="stats-badge">
-                <img src="./assets/icon/png/person.png">
-                <span id="user_count">0</span>
-            </div>
-            <div class="stats-badge">
-                <img src="./assets/icon/png/folder.png">
-                <span id="storage_count">0 Go</span>
-            </div>
-            <div class="stats-badge">
-                <img src="./assets/icon/png/timer.png">
-                <span id="room_timer">00:00:00</span>
-            </div>
+          <div class="stats-badge"><img src="./assets/icon/png/person.png"><span id="user_count">0</span></div>
+          <div class="stats-badge"><img src="./assets/icon/png/folder.png"><span id="storage_count">0 Go</span></div>
+          <div class="stats-badge"><img src="./assets/icon/png/timer.png"><span id="room_timer">00:00:00</span></div>
         </div>
 
         <div id="adminSettingsSection" style="display: none;">
+          <hr style="border: 0; border-top: 1px solid #e0e0e0; margin: 30px 0;">
           <h2 style="text-align: left;" data-i18n="room.admin_section">Admin</h2>
 
           <div class="setting-row">
@@ -951,15 +714,15 @@
             <span data-i18n="overlays.settings.max_users">Max utilisateurs</span>
             <div class="quantity-selector" style="opacity: 30%; pointer-events: none;">
               <button class="qty-btn">－</button>
-              <div class="qty-val">~~</div>
-              <button class="qty-btn">＋</button>
+              <div class="qty-val">~~</div><button class="qty-btn">＋</button>
             </div>
           </div>
 
           <div style="display: flex; justify-content: space-between; align-items: center; margin: 15px 0;">
-            <span data-i18n="overlays.settings.req_name">Nom requis pour entrer</span>
+            <span data-i18n="overlays.settings.req_name">Nom requis</span>
             <label>
-              <input type="checkbox" class="toggle-checkbox" id="forceNameToggle" onchange="document.getElementById('csvWrapper').classList.toggle('open', this.checked)">
+              <input type="checkbox" class="toggle-checkbox" id="forceNameToggle"
+                onchange="document.getElementById('csvWrapper').classList.toggle('open', this.checked)">
               <span class="toggle-slider"></span>
             </label>
           </div>
@@ -981,63 +744,52 @@
               <span class="toggle-slider"></span>
             </label>
           </div>
+          <p id="aiStatus" style="font-size: 0.8rem; margin: 0;"></p>
         </div>
 
+        <hr style="border: 0; border-top: 1px solid #e0e0e0; margin: 30px 0;">
         <h2 style="text-align: left; margin-top: 30px; font-size: 1.2rem;">Son</h2>
         <div class="volume-control">
-            <span>Volume</span>
-            <div class="slider-body">
-                <input type="range" min="0" max="100" value="50" class="native-input" id="rangeInput">
-                <div class="slider-container">
-                    <div class="slider-fill" id="sliderFill"><div class="slider-handle"></div></div>
-                </div>
+          <span>Volume</span>
+          <div class="slider-body">
+            <input type="range" min="0" max="100" value="50" class="native-input" id="rangeInput">
+            <div class="slider-container">
+              <div class="slider-fill" id="sliderFill">
+                <div class="slider-handle"></div>
+              </div>
             </div>
+          </div>
         </div>
 
-        <h2 style="text-align: left; margin-top: 30px; font-size: 1.2rem;" data-i18n="room.appearance_section">Apparence</h2>
+        <hr style="border: 0; border-top: 1px solid #e0e0e0; margin: 30px 0;">
+        <h2 style="text-align: left; margin-top: 30px; font-size: 1.2rem;" data-i18n="room.appearance_section">Apparence
+        </h2>
         <div style="display: flex; justify-content: space-between; align-items: center; margin: 15px 0; gap: 10px;">
           <span style="text-align: left;" data-i18n="overlays.settings.dark_mode">Mode sombre (beta)</span>
-
           <div class="slider-selector" style="width: 200px;">
-            <label class="slider-option">
-              <input type="radio" name="ThemeOption" value="light" checked>
-              <span class="label-text" data-val="light" style="color: var(--text-color)">Light</span>
-            </label>
-            <label class="slider-option">
-              <input type="radio" name="ThemeOption" value="auto">
-              <span class="label-text" data-val="auto" style="color: var(--text-color)">Auto</span>
-            </label>
-            <label class="slider-option">
-              <input type="radio" name="ThemeOption" value="dark">
-              <span class="label-text" data-val="dark" style="color: var(--text-color)">Dark</span>
-            </label>
+            <label class="slider-option"><input type="radio" name="ThemeOption" value="light" checked><span
+                class="label-text" data-val="light" style="color: var(--text-color)">Light</span></label>
+            <label class="slider-option"><input type="radio" name="ThemeOption" value="auto"><span class="label-text"
+                data-val="auto" style="color: var(--text-color)">Auto</span></label>
+            <label class="slider-option"><input type="radio" name="ThemeOption" value="dark"><span class="label-text"
+                data-val="dark" style="color: var(--text-color)">Dark</span></label>
           </div>
         </div>
 
         <div class="setting-row">
           <span data-i18n="overlays.settings.language">Langue</span>
-          <a class="button-text lang-badge" id="langToggle" href="#" onclick="document.getElementById('languageOverlay').style.display = 'flex'">
+          <a class="button-text lang-badge" id="langToggle" href="#">
             <span class="text">FR</span>
           </a>
         </div>
 
+        <hr style="border: 0; border-top: 1px solid #e0e0e0; margin: 30px 0;">
         <h2 style="text-align: left;">Partage</h2>
-
         <div class="setting-row">
           <span data-i18n="room.copy_link">Inviter dans la room</span>
           <a class="button-text" id="copyLink" href="#">
             <img class="icon" src="./assets/icon/png/icon thin.png">
             <span class="text" id="copyText">Copier</span>
-          </a>
-        </div>
-
-        <h2 style="text-align: left;">Infos</h2>
-
-        <div class="setting-row">
-          <span data-i18n="overlays.settings.project_opensource">Code source</span>
-          <a class="button-text" href="https://github.com/charly-chrtx/ticket-edu" target="_blank">
-            <img class="icon" src="./assets/icon/png/icon thin.png">
-            <span class="text">GitHub</span>
           </a>
         </div>
 
@@ -1049,7 +801,8 @@
           </a>
         </div>
 
-        <p style="font-size: 0.7rem; opacity: 0.5; text-align: center; margin-top: 30px; line-height: 1.4;" data-i18n="overlays.settings.rgpd">
+        <p style="font-size: 0.7rem; opacity: 0.5; text-align: center; margin-top: 30px; line-height: 1.4;"
+          data-i18n="overlays.settings.rgpd">
           ( RGPD ) Données chiffrées et supprimées<br>définitivement à la fin de la session.
         </p>
 
@@ -1063,34 +816,60 @@
     </div>
   </div>
 
+  <div class="menu-overlay hidden" id="download-modal">
+    <div class="menu-box">
+      <div class="input" style="padding-bottom: 0; align-items: center;">
+        <h1 data-i18n="overlays.download_modal.title">Fichiers du dépôt</h1>
+
+        <div class="depositinfos">
+          <span id="cloudstoragesolution" data-i18n="overlays.download_modal.cloud_storage">Stockage Cloud:</span>
+          <span id="cloudaccount" data-i18n="overlays.download_modal.account">Compte:</span>
+          <span id="cloudpath" data-i18n="overlays.download_modal.path">Chemin:</span>
+        </div>
+
+        <ul id="file-list" class="file-list" style="margin-top: 20px; max-height: 250px; overflow-y: auto; padding: 0;">
+        </ul>
+
+        <div class="overlay-footer" style="display: flex; justify-content: center; gap: 15px; margin-top: 30px;">
+          <a class="button-text" href="#" id="close-modal" style="width: 100%; padding: 0 30px; margin: 0;">
+            <img class="icon" src="./assets/icon/png/cross.png">
+            <span class="text" data-i18n="common.close">Fermer</span>
+          </a>
+          <a class="button-text" id="download-all" href="#"
+            style="width: 100%; padding: 0 30px; margin: 0; background-color: #A6C5FF;"
+            data-i18n="overlays.download_modal.download_all">
+            <img class="icon" src="./assets/icon/png/download.png">
+            <span class="text">Zip</span>
+          </a>
+          <a class="button-text" id="showcloud" href="#" style="width: 100%; padding: 0 30px; margin: 0;"
+            data-i18n="overlays.download_modal.open_cloud">
+            <img class="icon" src="./assets/icon/png/gdrive.png">
+            <span class="text">Ouvrir</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div class="menu-overlay" id="languageOverlay" style="display: none;">
     <div class="menu-box" style="max-width: 400px; margin: 0px 20px;">
       <div class="input" style="padding-bottom: 0;">
-
         <h1 data-i18n="overlays.settings.language">Langue</h1>
-
-        <p style="margin: 20px 0; opacity: 0.7; text-align: center;">
-          Sélectionnez votre langue
-        </p>
-
+        <p style="margin: 20px 0; opacity: 0.7; text-align: center;">Sélectionnez votre langue</p>
         <div style="display: flex; flex-direction: column; gap: 15px; margin: 30px 0;">
-
           <a class="button-text" href="#" onclick="window.localeManager.changeLanguage('fr')">
             <img class="icon" src="./assets/icon/png/frenchflag.png" alt="FR"
               style="border: 2px #000 solid; border-radius: 20px; filter: none !important;">
             <span class="text">Français</span>
           </a>
-
           <a class="button-text" href="#" onclick="window.localeManager.changeLanguage('en')">
             <img class="icon" src="./assets/icon/png/englishflag.png" alt="EN"
               style="border: 2px #000 solid; border-radius: 20px; filter: none !important;">
             <span class="text">English</span>
           </a>
-
         </div>
-
         <div class="overlay-footer">
-          <a class="button-text" id="closeLangOverlay" href="#" style="width: auto; padding: 0 30px;" onclick="document.getElementById('languageOverlay').style.display='none'">
+          <a class="button-text" id="closeLangOverlay" href="#" style="width: auto; padding: 0 30px;">
             <img class="icon" src="./assets/icon/png/cross.png">
             <span class="text" data-i18n="common.cancel">Annuler</span>
           </a>
@@ -1103,9 +882,8 @@
     <div class="menu-box" style="max-width: 550px; margin: 0px 20px;">
       <div class="input" style="padding-bottom: 0;">
         <h1 data-i18n="overlays.logout.title">Déconnexion ?</h1>
-        <p style="margin: 30px 0; opacity: 0.7; text-align: center;" data-i18n="overlays.logout.message">
-          Tu devras rentrer le code de la room pour revenir.
-        </p>
+        <p style="margin: 30px 0; opacity: 0.7; text-align: center;" data-i18n="overlays.logout.message">Tu devras
+          rentrer le code de la room pour revenir.</p>
         <div class="overlay-footer" style="display: flex; justify-content: center; gap: 15px; margin-top: 30px;">
           <a class="button-text" id="confirmLogout" href="#" style="width: 100%; padding: 0 30px; margin: 0;">
             <img class="icon" src="./assets/icon/png/logout.png" alt="">
@@ -1124,29 +902,23 @@
   <div class="menu-overlay" id="reportTicketOverlay" style="display: none;">
     <div class="menu-box" style="margin: 0px 20px;">
       <div class="input" style="padding-bottom: 0;">
-
         <h1 data-i18n="overlays.blocked.title">Ticket bloqué</h1>
-
-        <h2 style="text-align: left; margin-top: 30px; font-size: 1.2rem;" data-i18n="overlays.blocked.subtitle">Pourquoi votre ticket à été bloqué?</h2>
-        <p style="margin: 30px 0; opacity: 0.7; text-align: left;" data-i18n="overlays.blocked.reason">
-          - Votre contenue est jugé inapproprié.<br><br>
-          Si votre ticket contient aucun contenue inapproprié alors veuillez le signaler
-        </p>
-
+        <h2 style="text-align: left; margin-top: 30px; font-size: 1.2rem;" data-i18n="overlays.blocked.subtitle">
+          Pourquoi votre ticket a été bloqué?</h2>
+        <p style="margin: 30px 0; opacity: 0.7; text-align: left;" data-i18n="overlays.blocked.reason">- Votre contenu
+          est jugé inapproprié.</p>
         <div class="overlay-footer" style="display: flex; justify-content: center; gap: 15px; margin-top: 30px;">
-
           <a class="button-text" id="openAiReport" href="#"
-            style="width: 100%; padding: 0 30px; margin: 0; background-color: #ff7070; min-width: 140px; opacity: 30%; pointer-events: none;">
+            style="width: 100%; padding: 0 30px; margin: 0; background-color: #ff7070;">
             <img class="icon" src="./assets/icon/png/report.png" alt="">
             <span class="text" data-i18n="common.report">Signaler</span>
           </a>
-
-          <a class="button-text" id="closeBlocked" href="#" onclick="closeReportTicketOverlay()"
-            style="width: 100%; padding: 0 30px; margin: 0; min-width: 140px;">
+          <a class="button-text" id="closeBlocked" href="#"
+            onclick="document.getElementById('reportTicketOverlay').style.display = 'none'"
+            style="width: 100%; padding: 0 30px; margin: 0;">
             <img class="icon" src="./assets/icon/png/check.png" alt="">
             <span class="text" data-i18n="common.ok">Ok</span>
           </a>
-
         </div>
       </div>
     </div>
@@ -1155,18 +927,11 @@
   <div class="menu-overlay" id="issueNameOverlay" style="display: none;">
     <div class="menu-box" style="margin: 0px 20px;">
       <div class="input" style="padding-bottom: 0;">
-
         <h1 data-i18n="overlays.multi_profile.title">Profils multiples</h1>
-
-        <p style="margin: 30px 0; opacity: 0.7; text-align: left;" data-i18n="overlays.multi_profile.message">
-          Plusieurs profils ont le même prénom. Veuillez choisir.
-        </p>
-
-        <div id="nameChoicesContainer" style="display: flex; flex-direction: column; gap: 10px; margin: 20px 0;">
-        </div>
-
-        <div class="overlay-footer" style="display: flex; justify-content: center; gap: 15px; margin-top: 30px;">
-        </div>
+        <p style="margin: 30px 0; opacity: 0.7; text-align: left;" data-i18n="overlays.multi_profile.message">Plusieurs
+          profils ont le même prénom. Veuillez choisir.</p>
+        <div id="nameChoicesContainer" style="display: flex; flex-direction: column; gap: 10px; margin: 20px 0;"></div>
+        <div class="overlay-footer" style="display: flex; justify-content: center; gap: 15px; margin-top: 30px;"></div>
       </div>
     </div>
   </div>
@@ -1175,13 +940,12 @@
     <div class="menu-box">
       <div class="input" style="padding-bottom: 0;">
         <h1 data-i18n="overlays.login.title">Identification</h1>
-
-        <p style="margin: 20px 0; opacity: 0.7;" data-i18n="overlays.login.message">Cette salle nécessite une identification.</p>
-
+        <p style="margin: 20px 0; opacity: 0.7;" data-i18n="overlays.login.message">Cette salle nécessite une
+          identification.</p>
         <div style="margin: 15px 0;">
-          <input type="text" id="loginName" placeholder="Votre Prénom" style="width: 100%;" data-i18n="overlays.login.placeholder" />
+          <input type="text" id="loginName" placeholder="Votre Prénom" style="width: 100%;"
+            data-i18n="overlays.login.placeholder" />
         </div>
-
         <div class="overlay-footer" style="display: flex; justify-content: center; margin-top: 30px;">
           <a class="button-text" id="loginEnter" href="#"
             style="width: auto; padding: 0 30px; margin: 0; min-width: 140px;">
@@ -1192,24 +956,21 @@
       </div>
     </div>
   </div>
+
   <div class="menu-overlay" id="bugReportOverlay" style="display: none;">
     <div class="menu-box" style="margin: 0px 20px;">
       <div class="input" style="padding-bottom: 0;">
         <h1 data-i18n="overlays.bug_report.title">Signaler un problème</h1>
-
-        <p style="margin: 15px 0; opacity: 0.7;" data-i18n="overlays.bug_report.message">
-          Les logs de la console seront envoyés automatiquement.
-        </p>
-
-        <textarea id="bugDescription" placeholder="Décrivez le problème (optionnel)..." data-i18n="overlays.bug_report.placeholder"
+        <p style="margin: 15px 0; opacity: 0.7;" data-i18n="overlays.bug_report.message">Les logs seront envoyés
+          automatiquement.</p>
+        <textarea id="bugDescription" placeholder="Décrivez le problème (optionnel)..."
+          data-i18n="overlays.bug_report.placeholder"
           style="width: 100%; min-height: 100px; padding: 15px; border-radius: 15px; border: 2px solid #000; font-family: inherit; margin-bottom: 15px; resize: none;"></textarea>
-
         <div class="overlay-footer" style="display: flex; justify-content: center; gap: 15px; margin-top: 30px;">
           <a class="button-text" id="sendBugReport" href="#" style="width: 100%; padding: 0 30px; margin: 0;">
             <img class="icon" src="./assets/icon/png/check.png">
             <span class="text" data-i18n="common.send">Envoyer</span>
           </a>
-
           <a class="button-text" id="cancelBugReport" href="#"
             style="width: 100%; padding: 0 30px; margin: 0; background-color: #ff7070;">
             <img class="icon" src="./assets/icon/png/cross.png">
@@ -1223,31 +984,19 @@
   <div class="menu-overlay" id="noFoundOverlay" style="display: none;">
     <div class="menu-box">
       <div class="input" style="padding-bottom: 0;">
-
-        <h1 data-i18n="overlays.closed_group.title">Groupe femré</h1>
-
-        <img class="banner" src="./assets/banner/nofound.png" alt="Bannière Groupe Fermé" data-i18n="[alt]overlays.closed_group.banner_alt" style="width: 100%; border-radius: 15px; margin-top: 15px;">
-
-        <h2 style="text-align: left; margin-top: 30px; font-size: 1.2rem;" data-i18n="overlays.closed_group.subtitle">Pourquoi votre groupe est fermé?</h2>
-        <p style="margin: 30px 0; opacity: 0.7; text-align: left;" data-i18n="overlays.closed_group.reasons">
-          - Verifier votre connexion<br>
-          - Verifier avec le proprietaire du groupe pour lui demander si il a fermé le groupe
-        </p>
-
+        <h1 data-i18n="overlays.closed_group.title">Groupe fermé</h1>
+        <img class="banner" src="./assets/banner/nofound.png" alt="Bannière Groupe Fermé"
+          style="width: 100%; border-radius: 15px; margin-top: 15px;">
         <div class="overlay-footer" style="display: flex; justify-content: center; gap: 15px; margin-top: 30px;">
-
-          <a class="button-text" id="retryConect" href="#"
-            style="width: auto; padding: 0 30px; margin: 0; min-width: 140px;">
+          <a class="button-text" id="retryConect" href="#" style="width: auto; padding: 0 30px; margin: 0;">
             <img class="icon" src="./assets/icon/png/reload.png" alt="">
             <span class="text" data-i18n="overlays.closed_group.retry">Réessayer</span>
           </a>
-
           <a class="button-text" id="leaveClosed" href="#"
-            style="width: auto; padding: 0 30px; margin: 0; min-width: 140px; background-color: #ff7070;">
+            style="width: auto; padding: 0 30px; margin: 0; background-color: #ff7070;">
             <img class="icon" src="./assets/icon/png/logout.png" alt="">
             <span class="text" data-i18n="overlays.closed_group.leave">Quitter</span>
           </a>
-
         </div>
       </div>
     </div>
@@ -1257,25 +1006,24 @@
     <div class="menu-box" style="margin: 0px 20px;">
       <div class="input" style="padding-bottom: 0;">
         <h1 data-i18n="overlays.deposit.title">Dépôt</h1>
-        <p id="depositInstructions" style="opacity:0.8; margin-bottom: 20px;" data-i18n="overlays.deposit.instruction">Un seul fichier
-          est autorisé.</p>
-
+        <p id="depositInstructions" style="opacity:0.8; margin-bottom: 20px;" data-i18n="overlays.deposit.instruction">
+          Un seul fichier est autorisé.</p>
         <div style="margin: 15px 0;">
           <input type="text" id="depositCustomName" name="depositCustomName"
-            placeholder="Nom du fichier (sans extension)" style="width: 100%;" data-i18n="overlays.deposit.file_name_placeholder" />
+            placeholder="Nom du fichier (sans extension)" style="width: 100%;"
+            data-i18n="overlays.deposit.file_name_placeholder" />
         </div>
-
         <div class="file-upload-container" style="margin: 15px 0;">
           <input type="file" id="depositFileInput" style="display: none;">
           <div class="file-drop-area" id="depositDropArea">
             <div class="drop-area-content">
-              <span class="file-placeholder" data-i18n="overlays.deposit.drop_text">+ Glisser ou cliquer pour ajouter un fichier</span>
+              <span class="file-placeholder" data-i18n="overlays.deposit.drop_text">+ Glisser ou cliquer</span>
               <div id="depositFilesList" class="admin-files-list"></div>
-              <div id="depositWarning" class="upload-warning" style="display:none;" data-i18n="overlays.create_ticket.exporting">Exportation...</div>
+              <div id="depositWarning" class="upload-warning" style="display:none;"
+                data-i18n="overlays.create_ticket.exporting">Exportation...</div>
             </div>
           </div>
         </div>
-
         <div class="overlay-footer" style="display: flex; justify-content: center; gap: 15px; margin-top: 30px;">
           <a class="button-text" id="depositSend" href="#" style="width: 100%; padding: 0 30px; margin: 0;">
             <img class="icon" src="./assets/icon/png/check.png">
@@ -1291,33 +1039,7 @@
     </div>
   </div>
 
-  <div id="download-modal" class="modal-overlay hidden">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h3 data-i18n="overlays.download_modal.title">Fichiers du dépôt</h3>
-        <button id="close-modal" class="btn-icon">
-          <img src="assets/icon/cross.png" alt="close">
-        </button>
-      </div>
-      <div class="modal-body">
-        <div class="depositinfos">
-            <span id="cloudstoragesolution" data-i18n="overlays.download_modal.cloud_storage">Stockage Cloud:</span>
-            <span id="cloudaccount" data-i18n="overlays.download_modal.account">Compte:</span>
-            <span id="cloudpath" data-i18n="overlays.download_modal.path">Chemin:</span>
-        </div>
-        <ul id="file-list" class="file-list">
-        </ul>
-      </div>
-      <div class="modal-footer">
-        <button class="btn-secondary" id="download-all" data-i18n="overlays.download_modal.download_all">Tout télécharger (.zip)</button>
-        <button class="btn-secondary" id="showcloud" data-i18n="overlays.download_modal.open_cloud">Ouvrir le cloud</button>
-      </div>
-    </div>
-  </div>
-
-
   <script>
-    // Color selection
     document.getElementById("default").classList.add('selected');
     document.querySelectorAll('.colorbox .color').forEach(a => {
       a.addEventListener('click', e => {
@@ -1326,7 +1048,6 @@
       });
     });
 
-    // Tab navigation
     const tabEnCours = document.getElementById('tabEnCours');
     const tabHistorique = document.getElementById('tabHistorique');
     const rightDiv = document.getElementById('right');
@@ -1348,7 +1069,6 @@
       subdiv.classList.add('active');
     });
 
-    // Modal handlers
     document.getElementById('createbutton').addEventListener('click', (e) => {
       e.preventDefault();
       document.getElementById('formOverlay').style.display = 'flex';
@@ -1364,37 +1084,17 @@
       document.getElementById('logoutOverlay').style.display = 'flex';
     });
 
-    document.getElementById('closeSettings').addEventListener('click', (e) => {
-      e.preventDefault();
-      document.getElementById('settingsOverlay').style.display = 'none';
-    });
-
-    document.getElementById('cancelLogout').addEventListener('click', (e) => {
-      e.preventDefault();
-      document.getElementById('logoutOverlay').style.display = 'none';
-    });
-
-    function closeReportTicketOverlay() {
-      const overlay = document.getElementById('reportTicketOverlay');
-      if (overlay) {
-        overlay.style.display = 'none';
-      }
-    }
-
-    // Close overlays on background click
+    // Close overlays
     document.querySelectorAll('.menu-overlay').forEach(overlay => {
-      overlay.addEventListener('click', (e) => {
-        if (e.target === overlay) {
-          overlay.style.display = 'none';
-        }
-      });
+      if (overlay.id !== 'loginOverlay') {
+        overlay.addEventListener('click', (e) => {
+          if (e.target === overlay) overlay.style.display = 'none';
+        });
+      }
     });
 
-    // File upload display toggle
-    const fileUploadContainer = document.getElementById('fileUploadContainer');
-    if (fileUploadContainer) {
-      fileUploadContainer.style.display = 'flex';
-    }
+    // Helper function for cloud click (used in onclick attributes)
+    // room.js defines handle_cloud_click
   </script>
   <script type="text/javascript" src="https://unpkg.com/qr-code-styling@1.5.0/lib/qr-code-styling.js"></script>
   <script src="./assets/js/localization.js"></script>
