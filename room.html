@@ -133,7 +133,8 @@
 
               <div class="cloudservices"
                 style="grid-template-columns: repeat(2, 1fr) !important; display: flex; flex-wrap: wrap; gap: 10px;">
-                <div class="cloud-provider-card" id="ticketcloudCard" onclick="handle_cloud_click('ticket')" style="border-radius: 30px 10px 10px 30px;">
+                <div class="cloud-provider-card" id="ticketcloudCard" onclick="handle_cloud_click('ticket')"
+                  style="border-radius: 30px 10px 10px 30px;">
                   <div class="provider-icon-wrapper">
                     <img class="icon" src="./assets/icon/png/ticketcloud.png" alt="Ticket Cloud">
                   </div>
@@ -143,7 +144,8 @@
                   </div>
                 </div>
 
-                <div class="cloud-provider-card" id="googleDriveCard" onclick="handle_cloud_click('google')" style="border-radius: 10px;">
+                <div class="cloud-provider-card" id="googleDriveCard" onclick="handle_cloud_click('google')"
+                  style="border-radius: 10px;">
                   <div class="provider-icon-wrapper">
                     <img class="icon" src="./assets/icon/png/gdrive.png" alt="Google Drive">
                   </div>
@@ -153,7 +155,8 @@
                   </div>
                 </div>
 
-                <div class="cloud-provider-card" id="nextcloudCard" onclick="handle_cloud_click('nextcloud')" style="border-radius: 10px 30px 30px 10px;">
+                <div class="cloud-provider-card" id="nextcloudCard" onclick="handle_cloud_click('nextcloud')"
+                  style="border-radius: 10px 30px 30px 10px;">
                   <div class="provider-icon-wrapper">
                     <img class="icon" src="./assets/icon/png/nextcloud.png" alt="Nextcloud">
                   </div>
@@ -562,9 +565,10 @@
                 <img class="icon" src="./assets/icon/png/logout.png" alt="">
                 <span class="text">Sortir</span>
               </a>
-              
+
               <a class="button-text" id="loginEnter" href="#"
-                style="width: auto; padding: 0 30px; margin: 0; min-width: 140px; background-color: #9ecaff;" data-i18n="overlays.login.enter">
+                style="width: auto; padding: 0 30px; margin: 0; min-width: 140px; background-color: #9ecaff;"
+                data-i18n="overlays.login.enter">
                 <img class="icon" src="./assets/icon/png/check.png" alt="">
                 <span class="text">Entrer</span>
               </a>
@@ -748,13 +752,15 @@
 
         <div style="display: flex; flex-direction: column; gap: 15px; margin: 30px 0;">
 
-          <a class="button-text" href="#" onclick="window.localeManager.changeLanguage('fr')" style="border-radius: 30px 30px 10px 10px !important;">
+          <a class="button-text" href="#" onclick="window.localeManager.changeLanguage('fr')"
+            style="border-radius: 30px 30px 10px 10px !important;">
             <img class="icon" src="./assets/icon/png/frenchflag.png" alt="FR"
               style="border: 2px #000 solid; border-radius: 20px; filter: none !important;">
             <span class="text">Français</span>
           </a>
 
-          <a class="button-text" href="#" onclick="window.localeManager.changeLanguage('en')" style="border-radius: 10px 10px 30px 30px !important;">
+          <a class="button-text" href="#" onclick="window.localeManager.changeLanguage('en')"
+            style="border-radius: 10px 10px 30px 30px !important;">
             <img class="icon" src="./assets/icon/png/englishflag.png" alt="EN"
               style="border: 2px #000 solid; border-radius: 20px; filter: none !important;">
             <span class="text">English</span>
@@ -787,7 +793,7 @@
 
         <div class="overlay-footer" style="display: flex; justify-content: center; gap: 15px; margin-top: 30px;">
 
-          <a class="button-text" href="#" data-close id="closeBlocked"
+          <a class="button-text" href="#" id="close-modal"
             style="width: auto; padding: 0 30px; margin: 0; min-width: 190px;" data-i18n="common.close">
             <img class="icon" src="./assets/icon/png/cross.png">
             <span class="text">Fermer</span>

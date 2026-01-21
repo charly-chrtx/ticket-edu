@@ -162,11 +162,23 @@ function start_stats_timer() {
     stats_interval = setInterval(update, 1000);
 }
 
+// handle click on cloud provider card
+function handle_cloud_click(provider) {
+    if (is_connecting_cloud) return;
+    
+    // visual feedback immediately
+    set_cloud_card_state(provider, 'loading');
+    
+    // trigger handshake
+    handle_cloud_handshake(provider);
+}
+
 // handle cloud provider click
+// handshake
 async function handle_cloud_handshake(provider) {
     if (is_connecting_cloud) return;
 
-    // save state for mobile refresh
+    // save state for mobile refresh (oauth redirect)
     sessionStorage.setItem('pending_cloud_connection', 'true');
 
     is_connecting_cloud = true;
@@ -190,6 +202,7 @@ async function handle_cloud_handshake(provider) {
             is_connecting_cloud = false;
             document.body.style.cursor = 'default';
             set_cloud_card_state(provider, 'idle');
+            sessionStorage.removeItem('pending_cloud_connection'); // cancel state
             return;
         }
         auth_data = { url: nc_url };
@@ -213,14 +226,14 @@ async function handle_cloud_handshake(provider) {
         if (!res) throw new notif("Réponse vide du serveur", "error");
 
         if (res.connected || res.status === 'connected') {
+            sessionStorage.removeItem('pending_cloud_connection'); // done
             await update_cloud_ui();
             is_connecting_cloud = false;
             document.body.style.cursor = 'default';
         }
         else if (res.redirectUrl) {
-            window.open(res.redirectUrl, '_blank', 'width=500,height=600');
-            is_connecting_cloud = false;
-            document.body.style.cursor = 'default';
+            // redirect for mobile compatibility
+            window.location.href = res.redirectUrl;
         }
         else if (res.action === 'poll_required') {
             const loginUrl = res.loginUrl;
@@ -239,14 +252,14 @@ async function handle_cloud_handshake(provider) {
 
                     if (pollRes.status === 'success') {
                         clearInterval(interval);
-
                         if (loginWindow) loginWindow.close();
-
+                        sessionStorage.removeItem('pending_cloud_connection'); // done
                         await update_cloud_ui();
                         is_connecting_cloud = false;
                         document.body.style.cursor = 'default';
                     }
                     else if (pollRes.status === 'pending') {
+                        // waiting
                     }
                     else {
                         clearInterval(interval);
@@ -257,10 +270,10 @@ async function handle_cloud_handshake(provider) {
                     is_connecting_cloud = false;
                     document.body.style.cursor = 'default';
                     set_cloud_card_state(provider, "error");
+                    sessionStorage.removeItem('pending_cloud_connection'); // error
                     console.error("Poll error:", e);
                 }
             }, 2000);
-
         }
         else if (res.error) {
             throw new Error(res.error);
@@ -270,6 +283,7 @@ async function handle_cloud_handshake(provider) {
         is_connecting_cloud = false;
         document.body.style.cursor = 'default';
         set_cloud_card_state(provider, "error");
+        sessionStorage.removeItem('pending_cloud_connection'); // error
         notif("Erreur connexion: " + e.message);
     }
 }
@@ -1247,21 +1261,25 @@ function set_admin_mode(status) {
         pending_files = [];
         render_pending_files();
 
-        // restore state after cloud login
         if (sessionStorage.getItem('pending_cloud_connection') === 'true') {
+            // remove flag
             sessionStorage.removeItem('pending_cloud_connection');
+            
+            // open overlay
             toggle_overlay('formOverlay', true);
 
             // force switch to deposit mode
             const radio = document.querySelector('input[name="AdminType"][value="depot"]');
             if (radio) {
                 radio.checked = true;
+                // trigger change event to update UI title and hide file upload
                 radio.dispatchEvent(new Event('change'));
             }
 
-            // update ui with delay
+            // delay update to ensure ui is ready
             setTimeout(() => update_cloud_ui(), 500);
         }
+
     } else {
         if (btn_text) btn_text.textContent = "Nouveau ticket";
         if (name) {
