@@ -163,34 +163,115 @@ function start_stats_timer() {
 }
 
 // handle cloud provider click
-function handle_cloud_click(provider) {
-    let apiProvider = provider;
+async function handle_cloud_handshake(provider) {
+    if (is_connecting_cloud) return;
 
-    // map ticket ui to local api
-    if (provider === 'ticket') apiProvider = 'local';
+    // save state for mobile refresh
+    sessionStorage.setItem('pending_cloud_connection', 'true');
 
-    const connectedCard = document.querySelector('.cloud-provider-card.connected');
-
-    // check for existing connection
-    if (connectedCard) {
-        let currentConnectedId = connectedCard.id;
-        let clickedId = provider === 'google' ? 'googleDriveCard' : (provider === 'ticket' ? 'ticketcloudCard' : `${provider}Card`);
-
-        // if clicking same card, disconnect
-        if (currentConnectedId === clickedId) {
-            disconnect_cloud();
-            return;
-        }
-
-        // if switching provider
-        if (!confirm("Un service Cloud est déjà connecté. Cette action va le déconnecter pour basculer vers le nouveau. Voulez-vous continuer ?")) {
-            return;
-        }
+    is_connecting_cloud = true;
+    if (provider !== 'nextcloud') {
+        document.body.style.cursor = 'wait';
     }
 
-    // start handshake
-    set_cloud_card_state(apiProvider, 'loading');
-    handle_cloud_handshake(apiProvider);
+    if (!crypto_key) {
+        is_connecting_cloud = false;
+        document.body.style.cursor = 'default';
+        set_cloud_card_state(provider, "error", "Clé manquante");
+        return alert("Clé de chiffrement introuvable.");
+    }
+
+    let auth_data = {};
+
+    if (provider === 'nextcloud') {
+        const nc_url = await prompt_nextcloud_creds();
+
+        if (!nc_url) {
+            is_connecting_cloud = false;
+            document.body.style.cursor = 'default';
+            set_cloud_card_state(provider, 'idle');
+            return;
+        }
+        auth_data = { url: nc_url };
+    }
+
+    try {
+        // export key
+        const raw_key = await window.crypto.subtle.exportKey("raw", crypto_key);
+        const key_arr = Array.from(new Uint8Array(raw_key));
+
+        set_cloud_card_state(provider, 'loading');
+
+        const res = await api_call('/api/cloud/handshake', 'POST', {
+            roomCode: room_code,
+            provider: provider,
+            cryptoKey: key_arr,
+            authData: auth_data,
+            basePath: 'Ticket-Edu'
+        });
+
+        if (!res) throw new notif("Réponse vide du serveur", "error");
+
+        if (res.connected || res.status === 'connected') {
+            await update_cloud_ui();
+            is_connecting_cloud = false;
+            document.body.style.cursor = 'default';
+        }
+        else if (res.redirectUrl) {
+            window.open(res.redirectUrl, '_blank', 'width=500,height=600');
+            is_connecting_cloud = false;
+            document.body.style.cursor = 'default';
+        }
+        else if (res.action === 'poll_required') {
+            const loginUrl = res.loginUrl;
+            const pollData = res.poll;
+
+            const loginWindow = window.open(loginUrl, '_blank', 'width=500,height=600');
+
+            const interval = setInterval(async () => {
+                try {
+                    const pollRes = await api_call('/api/cloud/nextcloud/poll', 'POST', {
+                        token: pollData.token,
+                        endpoint: pollData.endpoint,
+                        serverUrl: auth_data.url,
+                        roomCode: room_code
+                    });
+
+                    if (pollRes.status === 'success') {
+                        clearInterval(interval);
+
+                        if (loginWindow) loginWindow.close();
+
+                        await update_cloud_ui();
+                        is_connecting_cloud = false;
+                        document.body.style.cursor = 'default';
+                    }
+                    else if (pollRes.status === 'pending') {
+                    }
+                    else {
+                        clearInterval(interval);
+                        throw new Error("Authentification refusée ou échouée");
+                    }
+                } catch (e) {
+                    clearInterval(interval);
+                    is_connecting_cloud = false;
+                    document.body.style.cursor = 'default';
+                    set_cloud_card_state(provider, "error");
+                    console.error("Poll error:", e);
+                }
+            }, 2000);
+
+        }
+        else if (res.error) {
+            throw new Error(res.error);
+        }
+
+    } catch (e) {
+        is_connecting_cloud = false;
+        document.body.style.cursor = 'default';
+        set_cloud_card_state(provider, "error");
+        notif("Erreur connexion: " + e.message);
+    }
 }
 
 // update card visual state
@@ -1165,6 +1246,22 @@ function set_admin_mode(status) {
 
         pending_files = [];
         render_pending_files();
+
+        // restore state after cloud login
+        if (sessionStorage.getItem('pending_cloud_connection') === 'true') {
+            sessionStorage.removeItem('pending_cloud_connection');
+            toggle_overlay('formOverlay', true);
+
+            // force switch to deposit mode
+            const radio = document.querySelector('input[name="AdminType"][value="depot"]');
+            if (radio) {
+                radio.checked = true;
+                radio.dispatchEvent(new Event('change'));
+            }
+
+            // update ui with delay
+            setTimeout(() => update_cloud_ui(), 500);
+        }
     } else {
         if (btn_text) btn_text.textContent = "Nouveau ticket";
         if (name) {
