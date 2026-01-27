@@ -1,6 +1,6 @@
 <div align="center">
 
-# ![Ticket](https://ticket-edu.com)
+# [Ticket-edu.com](https://ticket-edu.com)
 ### Le système de support collaboratif moderne, sécurisé et sans friction
 
 ![Version](https://img.shields.io/badge/Version-v0.9.1-blue?style=for-the-badge&logo=appveyor)
