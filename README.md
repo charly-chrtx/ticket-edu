@@ -1,7 +1,7 @@
 <div align="center">
 
-# TICKET
-### *Le système de support collaboratif moderne, sécurisé et sans friction*
+# ![Ticket](https://ticket-edu.com)
+### Le système de support collaboratif moderne, sécurisé et sans friction
 
 ![Version](https://img.shields.io/badge/Version-v0.9.1-blue?style=for-the-badge&logo=appveyor)
 ![Security](https://img.shields.io/badge/Security-E2EE-green?style=for-the-badge&logo=lock)
@@ -9,64 +9,67 @@
 
 <br/>
 
-![Interface Principal](assets/misc/0.png)
+![Interface principale](assets/misc/0.png)
 
 </div>
 
 ---
 
-## 🌟 L'essence du projet
+## L’essence du projet
 
-> **Ticket** est un outil de gestion pour le support technique en éliminant toute barrière d'entrée. Oubliez les inscriptions fastidieuses, les mots de passe oubliés et les interfaces surchargées.
+> **Ticket** est un outil de gestion du support technique pensé pour aller à l’essentiel.  
+Pas d’inscription, pas de mots de passe à retenir, pas d’interface inutilement complexe.
 
-Avec Ticket, créez instantanément un **espace de support privé** et partagez-le avec votre équipe en quelques secondes. Chaque groupe dispose d'un **code unique** généré automatiquement, permettant un accès contrôlé sans compromettre la simplicité.
+Avec Ticket, vous créez en quelques secondes un **espace de support privé**, prêt à être partagé avec votre équipe.  
+Chaque espace fonctionne avec un **code unique généré automatiquement**, garantissant un accès contrôlé sans sacrifier la simplicité.
 
-* 🚫 **Pas d'inscription**
-* ⚡ **Instantané**
-* 👑 **Contrôle total pour le Owner**
+- Aucun compte requis  
+- Mise en place instantanée  
+- Contrôle total pour le owner
 
 ---
 
-## ✨ Une expérience utilisateur repensée
+## Une expérience utilisateur repensée
 
 <div align="center">
 
-### Design au service de l'humain
+### Un design au service de l’usage
 
 </div>
 
-Notre interface n'est pas qu'une simple vitrine, c'est une expérience soigneusement orchestrée.
+L’interface n’est pas là pour impressionner, mais pour être efficace.  
+Chaque choix visuel vise à rendre l’expérience fluide, claire et agréable, même sur de longues sessions.
 
 | Pilier | Description |
 | :--- | :--- |
-| **🎨 Direction Artistique** | Une identité visuelle forte qui rend chaque interaction mémorable. |
-| **💫 Animations** | Des mouvements intelligents qui guident l'utilisateur. |
-| **👁️ Iconographie** | Des pictogrammes *Material Design* universels. |
-| **🌗 Mode Sombre** | Intégral et automatique pour le confort visuel. |
+| Direction artistique | Une identité visuelle cohérente et lisible |
+| Animations | Des transitions discrètes qui guident l’utilisateur |
+| Iconographie | Pictogrammes Material Design, simples et universels |
+| Mode sombre | Natif et automatique pour un meilleur confort visuel |
 
 <div align="center">
-  <img src="assets/misc/4.png" alt="Dark Mode" width="80%">
-  <p><i>Mode sombre natif pour un confort optimal</i></p>
+  <img src="assets/misc/4.png" alt="Mode sombre" width="80%">
+  <p><i>Mode sombre natif, activé automatiquement</i></p>
 </div>
 
-Ticket s'adapte à differents formats et supports pour vous suivre partout
+Ticket s’adapte à tous les formats pour rester utilisable partout, sans compromis.
 
 <div align="center">
 <table>
   <tr>
     <td align="center" width="50%">
-      <strong>Support ordinateur</strong>
+      <strong>Version ordinateur</strong>
     </td>
     <td align="center" width="50%">
-      <strong>Support smartphone</strong>
+      <strong>Version mobile</strong>
     </td>
   </tr>
   <tr>
     <td align="center">
-      <img src="assets/misc/5.png" alt="Dark Mode Interface" width="100%">
+      <img src="assets/misc/5.png" alt="Interface desktop" width="100%">
     </td>
     <td align="center">
-      <img src="assets/misc/6.png" alt="Mobile and Desktop View" width="100%">
+      <img src="assets/misc/6.png" alt="Interface mobile" width="100%">
     </td>
   </tr>
 </table>
@@ -74,52 +77,54 @@ Ticket s'adapte à differents formats et supports pour vous suivre partout
 
 ---
 
-## 🔐 Sécurité et vie privée : Nos engagements
+## Sécurité et respect de la vie privée
 
 <div align="center">
 
-### 🛡️ Conformité RGPD & Chiffrement
+### Des engagements clairs, sans compromis
 
 </div>
 
-Votre vie privée n'est pas négociable. Ticket intègre les plus hauts standards de sécurité par défaut.
+La confidentialité n’est pas une option. Ticket applique des standards de sécurité élevés dès la conception.
 
-| Engagement | Détails Techniques |
+| Engagement | Détails techniques |
 | :--- | :--- |
-| **⏱️ Rétention minimale** | Suppression automatique (Auto-Wipe) après **3 heures** d'inactivité. |
-| **🔒 Chiffrement E2EE** | Clé unique par groupe. Chiffrement Client ↔ Serveur ↔ Client. |
-| **🇪🇺 Hébergement UE** | Stockage temporaire exclusivement sur serveurs européens. |
-| **🚫 Zéro exploitation** | Aucune revente, aucune analyse commerciale, jamais. |
+| Rétention minimale | Suppression automatique après **3 heures** d’inactivité |
+| Chiffrement E2EE | Clé unique par groupe, échanges chiffrés de bout en bout |
+| Hébergement européen | Données stockées temporairement sur des serveurs UE |
+| Aucune exploitation | Aucune revente, aucune analyse commerciale |
 
 ---
 
-## 🚀 Fonctionnalités : Puissance et Simplicité
+## Fonctionnalités
 
-### 🧠 L'intelligence dans les détails
+### Une logique simple, des détails bien pensés
 
-* **Filtrage IA des tickets**
-* **Tickets colorés** : Attribuez des couleurs pour une identification instantanée.
+- **Filtrage intelligent des tickets**  
+- **Tickets colorés** pour une identification rapide et visuelle
 
-### 🛡️ Modération par IA (Ollama)</b></summary>
+### Modération assistée par IA (Ollama)
 
-* **Filtrage automatique** : Détection via *Granite3-guardian 2b*.
-  **Blacklist** : Le Owner définit les termes interdits.
-* **Précision** : Taux de détection éprouvé jusqu'à **91.03%**.
+- **Filtrage automatique** basé sur *Granite3-Guardian 2B*  
+- **Blacklist personnalisable** définie par le owner  
+- **Fiabilité éprouvée** avec un taux de détection jusqu’à **91,03 %**
 
-### 📁 Partage & Administration</b></summary>
+### Partage et administration
 
-* **1.5 Go de stockage** : Documents, images, logs.
-* **Transfert sécurisé** : Chiffrement durant le transit.
-* **Contrôle total** : Limitation de tickets, bannissement, liens d'invitation.
+- **1,5 Go de stockage intégré** pour documents, images et logs
+- **Intégration OAUTH avec Google Drive et Nextcloud**, pour recevoir les fichiers des dépots en toute sécurité  
+- **Transferts sécurisés**, chiffrés pendant le transit  
+- **Contrôle avancé** : limitation des tickets, bannissement, gestion des liens d’invitation
 
 <br>
 ---
 
-## 🔧 Architecture Technique
+## Architecture technique
 
-### 🏗️ Stack Technologique
+### Stack technologique
 
-Notre infrastructure repose sur la robustesse et la modernité.
+L’infrastructure repose sur des technologies éprouvées, simples à maintenir et performantes.
+
 <br/>
 
 <div align="center">
@@ -158,9 +163,9 @@ Notre infrastructure repose sur la robustesse et la modernité.
 
 <br/>
 
-### 🔄 Flux de données
+### Flux de données
 
 <div align="center">
-  <img src="assets/misc/15.png" alt="Responsive Design" width="80%">
+  <img src="assets/misc/15.png" alt="Flux de données" width="80%">
   <br>
 </div>
